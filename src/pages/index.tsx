@@ -1,10 +1,6 @@
-import { Prisma } from "@prisma/client";
-import { GetServerSideProps, type NextPage } from "next";
+import {  type NextPage } from "next";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import Link from "next/link";
-import { Props } from "next/script";
-import { useEffect, useState } from "react";
 
 import { api, RouterOutputs } from "~/utils/api";
 import MapDrawerContainer from "./MapDrawerContainer";
@@ -23,7 +19,9 @@ const MapWithNoSSR = dynamic(() => import('./MapView'), {
 const Home: NextPage<PageProps> = () => {
  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
   
-    const places2 = api.place.getAll.useQuery()
+    const places2 = api.place.getAll.useQuery(undefined, {
+      staleTime: Infinity
+    })
   
 
 /*

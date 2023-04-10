@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { exampleRouter } from "~/server/api/routers/example";
-import { latLngRouter } from "./routers/process-next-lat-lng";
+import { latLngRouter } from "./routers/init";
 import { placeRouter } from "./routers/place";
 
 /**
