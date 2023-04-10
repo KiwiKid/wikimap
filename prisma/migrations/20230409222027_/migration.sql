@@ -1,0 +1,16 @@
+-- CreateTable
+CREATE TABLE "LatLngToProcess" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "lat" INTEGER NOT NULL,
+    "lng" INTEGER NOT NULL,
+    "status" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Example" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
