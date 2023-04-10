@@ -2,11 +2,11 @@ import { z } from "zod";
 import WikiJS from 'wikijs'
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { PrismaClient } from "@prisma/client";
+import { LatLngToProcess, PrismaClient } from "@prisma/client";
 import { Page } from "wikijs";
 import { Coordinates } from "wikijs";
-import { RADIUS } from "~/pages/debug/init";
-import { getPointsSquare } from "~/pages/debug/init";
+import { RADIUS } from "~/pages/debug/seeds";
+import { getPointsSquare } from "~/pages/debug/seeds";
 import { RouterOutputs } from "~/utils/api";
 /*
 interface WikiContent {
@@ -97,7 +97,9 @@ export const latLngRouter = createTRPCRouter({
           result,
       };
     }),
-    getAll: publicProcedure.query(({ ctx }) => ctx.prisma.latLngToProcess.findMany({
+    getAll: publicProcedure
+    .input(z.object({ page: z.number().default(0), length: z.number().default(50)}))
+    .query(({ ctx }) => ctx.prisma.latLngToProcess.findMany({
       take: 1000,
       select: {
         id: true,
@@ -107,9 +109,9 @@ export const latLngRouter = createTRPCRouter({
       }
     })),
     initSeedLatLng: publicProcedure
-//      .input(z.object({ id: z.string() }))
-      .query(async ({ctx}) => {
-        const allPoints = getPointsSquare()
+      .input(z.object({ page: z.number().default(0), length: z.number().default(50) }))
+      .query(async ({ctx, input}) => {
+        const allPoints = getPointsSquare(input.page, input.length);
 
         const res = await Promise.allSettled(
           allPoints.map((point: [number, number]) =>
@@ -123,16 +125,14 @@ export const latLngRouter = createTRPCRouter({
           )
         );
 
-        const success = res
-          .filter((r) => r.status === 'fulfilled')
-          .map((r) => (r as PromiseFulfilledResult<unknown>).value);
-
         const failures = res.filter((r) => r.status === 'rejected');
+        if(failures.length > 0){
+          console.error('Some lat/lng failed to seed', { failures });
+        }
+        
 
-        console.error('Some lat/lng failed to seed', { failures });
-
-        return {
-          success,
-        };
+        return res
+          .filter((r) => r.status === 'fulfilled')
+          .map((r) => (r as PromiseFulfilledResult<LatLngToProcess>).value);
       })
 })

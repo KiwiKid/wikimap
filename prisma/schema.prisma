@@ -18,6 +18,7 @@ model LatLngToProcess {
     status      String 
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+    @@unique([lat, lng], name: "OnlyUniquePoints")
 }
 
 model Place {
@@ -26,6 +27,8 @@ model Place {
     wikiUrl         String
     lat             Float
     lng             Float
+    @@unique([lat, lng], name: "OnlyUniquePlaces")
+
 }
 
 model Example {
