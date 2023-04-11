@@ -5,8 +5,7 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { LatLngToProcess, PrismaClient } from "@prisma/client";
 import { Page } from "wikijs";
 import { Coordinates } from "wikijs";
-import { RADIUS } from "~/pages/debug/seeds";
-import { getPointsSquare } from "~/pages/debug/seeds";
+import { getPointsSquare, RADIUS } from "~/pages/debug/init-latlng";
 import { RouterOutputs } from "~/utils/api";
 /*
 interface WikiContent {
@@ -27,9 +26,9 @@ interface InitResult {
 }
 
 export const latLngRouter = createTRPCRouter({
-  processNext: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+  process: publicProcedure
+    .input(z.object({ id: z.string().optional() }))
+    .mutation(async ({ input }) => {
       const prisma = new PrismaClient()
         const recordToProcess = await prisma.latLngToProcess.findFirstOrThrow({
           where: {
@@ -77,12 +76,6 @@ export const latLngRouter = createTRPCRouter({
                     generatedTitle: 'Woah',
                     wikiUrl: fp.url
                   }
-                }).then((res) => {
-                  console.log('place updated')
-                  return {
-                    status: 'success',
-                    res: res
-                  }
                 }).catch(() => {
                   console.error('failed to update place')
                 })
@@ -91,22 +84,21 @@ export const latLngRouter = createTRPCRouter({
                 console.error(err)
               })
           )))
-
-
       return {
           result,
       };
     }),
     getAll: publicProcedure
     .input(z.object({ page: z.number().default(0), length: z.number().default(50)}))
-    .query(({ ctx }) => ctx.prisma.latLngToProcess.findMany({
-      take: 1000,
+    .query(({ ctx, input }) => ctx.prisma.latLngToProcess.findMany({
+      take: input.length,
+      skip: (input.length * input.page),
       select: {
         id: true,
         status: true,
         lat: true,
         lng: true
-      }
+      },
     })),
     initSeedLatLng: publicProcedure
       .input(z.object({ page: z.number().default(0), length: z.number().default(50) }))

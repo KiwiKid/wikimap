@@ -2,7 +2,7 @@ import { type NextPage } from "next"
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { RouterOutputs, api } from "~/utils/api";
+import { type RouterOutputs, api } from "~/utils/api";
 
 export const RADIUS = 1000;
 export function getPointsSquare(page?:number, length?:number, p1?: [number, number], p2?: [number, number], sideLength?: number): [number, number][] {
@@ -44,13 +44,13 @@ export function getPointsSquare(page?:number, length?:number, p1?: [number, numb
 }
 
 
-const InitSeedLatLng:NextPage = () => {
+const InitLatLng:NextPage = () => {
 
     // Get the query parameter from the URL
     const router = useRouter();
     console.log(router.query)
     const { page, length } = router.query;
-    const [initResult, setInitResult] = useState<RouterOutputs["latLng"]["initSeedLatLng"]>()
+    const [initResult, setInitResult] = useState(null)
 
     const pageNum = parseInt(typeof page == 'string' ? page : '0')
     const lengthNum = parseInt(typeof length == 'string' ? length :'50')
@@ -63,7 +63,7 @@ const InitSeedLatLng:NextPage = () => {
     }, [pageNum, lengthNum])
 
     // Run a batch of seeds
-    const { refetch, isFetched, data, isError, error } = api.latLng.initSeedLatLng.useQuery({ page: pageNum, length: lengthNum}, {
+    const { refetch  } = api.latLng.initSeedLatLng.useQuery({ page: pageNum, length: lengthNum}, {
         staleTime: Infinity,
         refetchOnWindowFocus: false,
         enabled: false
@@ -130,4 +130,4 @@ const InitSeedLatLng:NextPage = () => {
     </div>
 }
 
-export default InitSeedLatLng
+export default InitLatLng
