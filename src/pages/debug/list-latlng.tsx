@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import NavBar from "~/components/NavBar";
 import { api } from "~/utils/api";
 
 const ListLatLng:NextPage = () => {
@@ -17,6 +17,14 @@ const ListLatLng:NextPage = () => {
     // Run a batch of seeds
     const { isFetched, data, isError, error } = api.latLng.getAll.useQuery({ page:pageNum, length: lengthNum })
     
+
+    const mutation = api.latLng.process.useMutation();
+
+    const onProcess = (event:React.MouseEvent<HTMLButtonElement>) => {
+        const value = (event.currentTarget as HTMLButtonElement).value;
+        mutation.mutate({ id: value})
+    }
+
     if(!isFetched){
         return <div>loading..</div>
     }
@@ -26,8 +34,42 @@ const ListLatLng:NextPage = () => {
     }
     
     return <div>
+        <NavBar/>
         <div>{page} ({length})</div>
-        {data?.map((d) => <div key={d.id}>{d.id}{d.lat}{d.lng}{d.status}</div>)}
+        {data?.map((d) => 
+                <div key={d.id}>
+                    <div className="flex flex-wrap -mx-2">
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.id}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.lat}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.lng}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.status}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                            <button onClick={onProcess} value={d.id}>Get Places</button>
+                        </div>
+                    </div>
+                   {/* <div className="flex flex-wrap">
+                        {match ? (
+                        match.map((m) => (
+                            <div key={m.id} className="w-full p-2">
+                            {`${m.wikiUrl} ${m.generatedTitle ?? ''}`}
+                            </div>
+                        ))
+                        ) : d.status != 'no-matches' ? (
+                        <button value={d.id} onClick={handleClick} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Run-It
+                        </button>
+                        ) : 'Done'}
+                        </div>*/}
+                </div>
+            )}
     </div>
 }
 

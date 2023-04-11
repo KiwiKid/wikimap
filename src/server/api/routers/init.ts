@@ -74,7 +74,8 @@ export const latLngRouter = createTRPCRouter({
                     lat: fp.latLng.lat,
                     lng: fp.latLng.lon,
                     generatedTitle: 'Woah',
-                    wikiUrl: fp.url
+                    wikiUrl: fp.url,
+                    status: 'pending'
                   }
                 }).catch(() => {
                   console.error('failed to update place')

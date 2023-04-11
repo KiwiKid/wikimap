@@ -18,13 +18,16 @@ export const placeRouter = createTRPCRouter({
             }
         })
       }),*/
-      getAll: publicProcedure.query(({ ctx }) => ctx.prisma.place.findMany({
+      getAll: publicProcedure
+      .input(z.object({ page: z.number().min(0), length: z.number().min(0).max(50) }))
+      .query(({ ctx }) => ctx.prisma.place.findMany({
           take: 1000,
           select: {
             id: true,
             generatedTitle: true,
             lat: true,
-            lng: true
+            lng: true,
+            status: true
           }
         }))
       });

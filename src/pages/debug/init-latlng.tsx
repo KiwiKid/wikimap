@@ -1,8 +1,12 @@
+import { LatLngToProcess } from "@prisma/client";
 import { type NextPage } from "next"
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import NavBar from "~/components/NavBar";
 import { type RouterOutputs, api } from "~/utils/api";
+export const defaultTopLeft:[number,number] = [-34.389994, 166.388708]
+export const defaultBottomRight:[number,number] = [-34.389994, 166.388708]
 
 export const RADIUS = 1000;
 export function getPointsSquare(page?:number, length?:number, p1?: [number, number], p2?: [number, number], sideLength?: number): [number, number][] {
@@ -49,13 +53,23 @@ const InitLatLng:NextPage = () => {
     // Get the query parameter from the URL
     const router = useRouter();
     console.log(router.query)
-    const { page, length } = router.query;
-    const [initResult, setInitResult] = useState(null)
+    const { page, length, p1x, p1y, p2x, p2y} = router.query;
+    const [initResult, setInitResult] = useState<LatLngToProcess[]|null>(null)
 
     const pageNum = parseInt(typeof page == 'string' ? page : '0')
     const lengthNum = parseInt(typeof length == 'string' ? length :'50')
 
-    const [points, setPoints] = useState(getPointsSquare(pageNum, lengthNum))
+    const p1xNum = typeof p1x == 'string' ? parseInt(p1x) : defaultTopLeft[0]
+    const p1yNum = typeof p1y == 'string' ? parseInt(p1y) : defaultTopLeft[1]
+    const p2xNum = typeof p2x == 'string' ? parseInt(p2x) : defaultBottomRight[0]
+    const p2yNum = typeof p2y == 'string' ? parseInt(p2y) : defaultTopLeft[1]
+
+    let lookupSquare:[[number,number], [number,number]] = [defaultTopLeft, defaultBottomRight]
+    if(p1xNum && p1yNum && p2xNum && p2yNum){
+        lookupSquare = [[p1xNum, p1yNum], [p2xNum, p2xNum]]
+    }
+
+    const [points, setPoints] = useState(getPointsSquare(pageNum, lengthNum, lookupSquare[0], lookupSquare[0]))
 
     console.log({pageNum, lengthNum})
     useEffect(() => {
@@ -76,7 +90,7 @@ const InitLatLng:NextPage = () => {
         void (async () => {
             console.log('handleClick:refetch')
             const { data, isError, error} = await refetch();
-            if(!isError && typeof data != 'undefined'){
+            if(!isError && typeof data != 'undefined' && !!data){
                 console.log('handleClick:refetch:setInitResult(')
                 setInitResult(data)
             }else{
@@ -88,11 +102,12 @@ const InitLatLng:NextPage = () => {
 
 
     return <div>
-        {pageNum >= 0 && <Link href={`/debug/seeds?page=${pageNum-1}&length=${lengthNum}`}>
+       <NavBar/>
+        {pageNum >= 0 && <Link href={`/debug/init-latlng?page=${pageNum-1}&length=${lengthNum}`}>
             ««« Previous
         </Link>}
-        <button className="btn btn-blue" onClick={() => handleClick()}>Save in db</button>
-        <Link href={`/debug/seeds?page=${pageNum+1}&length=${lengthNum}`}>
+        <button className="btn btn-blue" onClick={(evt) => handleClick()}>Save in db</button>
+        <Link href={`/debug/init-latlng?page=${pageNum+1}&length=${lengthNum}`}>
             Next »»»
         </Link>
         <table>

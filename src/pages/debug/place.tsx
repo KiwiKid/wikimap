@@ -1,7 +1,9 @@
 import { Place } from "@prisma/client";
 import { type NextPage } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import NavBar from "~/components/NavBar";
 import { api } from "~/utils/api";
 
 const InitSeedLatLng:NextPage = () => {
@@ -18,14 +20,12 @@ const InitSeedLatLng:NextPage = () => {
 
 
     // Run a batch of seeds
-    const { isFetched, data, isError, error } = api.latLng.getAll.useQuery({ page:pageNum, length: lengthNum })
-    const mutation = api.latLng.process.useMutation()
+    const { isFetched, data, isError, error } = api.place.getAll.useQuery({ page: pageNum, length: lengthNum })
 
     const handleClick = (evt:React.MouseEvent<HTMLButtonElement>) => {
         console.log('handleClick:refetch')
         const elm = evt.target as HTMLButtonElement;
 
-         mutation.mutate({ id: elm.value})
         if(!isError && typeof data != 'undefined' && !data){
             console.log('handleClick:refetch:setInitResult(')
             setProcessResults(processResults?.concat(data))
@@ -39,13 +39,57 @@ const InitSeedLatLng:NextPage = () => {
     }
 
     if(isError){
-        return <div>{error.message} {JSON.stringify(error)}</div>
+        return <div><NavBar/>{error.message} {JSON.stringify(error)}</div>
     }
     
-    return (data?.map((d) => {
+    return (data ? <div>
+                {pageNum > 0 && <Link href={`/debug/place?page=${pageNum-1}&length=${lengthNum}`}>
+            ««« Previous
+        </Link>}
+        <button className="btn btn-blue" onClick={(evt) => handleClick(evt)}>Save in db</button>
+        <Link href={`/debug/place?page=${pageNum+1}&length=${lengthNum}`}>
+            Next »»»
+        </Link>
+        <NavBar/>
+        {data?.map((d) => {
+            const match = processResults?.filter((pr) => pr.id === d.id);
+
+            return (
+                <div key={d.id}>
+                    <div className="flex flex-wrap -mx-2">
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.id}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.lat}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.lng}
+                        </div>
+                        <div className="w-full sm:w-1/4 px-2">
+                        {d.generatedTitle}
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap">
+                        {match ? (
+                        match.map((m) => (
+                            <div key={m.id} className="w-full p-2">
+                            {`${m.wikiUrl} ${m.generatedTitle ?? ''}`}
+                            </div>
+                        ))
+                        ) : d.status != 'no-matches' ? (
+                        <button value={d.id} onClick={handleClick} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Run-It
+                        </button>
+                        ) : 'Done'}
+                    </div>
+                </div>
+            );
+            })}
+    {/*data?.map((d) => {
         const match = processResults?.filter((pr) => pr.id === d.id);
         return (
-          <div key={d.id}>
+          <tr key={d.id}>
             <div>
               {d.id}
               {d.lat}
@@ -65,7 +109,7 @@ const InitSeedLatLng:NextPage = () => {
             </div>
           </div>
         );
-      }))
+      })*/}</div> : <div>no data</div>)
 }
 
 
