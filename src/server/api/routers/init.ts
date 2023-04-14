@@ -89,12 +89,6 @@ export const latLngRouter = createTRPCRouter({
                     references: fp.references,
                   }
                 })
-              }).catch(() => {
-                  debugger
-                  console.error('failed to update place')
-                })
-              .catch((err) => {
-                console.error(err)
               })
           )))
       return {
