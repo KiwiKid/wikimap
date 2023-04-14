@@ -79,9 +79,11 @@ export const latLngRouter = createTRPCRouter({
                   data: {
                     lat: fp.latLng.lat,
                     lng: fp.latLng.lon,
-                    wikiUrl: fp.url,
+                    wiki_url: fp.url,
                     status: 'pending',
-                    mainImage: fp.mainImage,
+                    info: JSON.stringify(fp.info),
+                    content: fp.content,
+                    main_image: fp.mainImage,
                     images: Array.from(fp.images),
                     categories: fp.categories,
                     references: fp.references,
@@ -140,7 +142,11 @@ export const latLngRouter = createTRPCRouter({
           gt: input.topLeftLng
         }
       }
-    })),  
+    }).catch((err) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      console.error('ERROR Getting LatLng', {err})
+    })
+    ),  
     initSeedLatLng: publicProcedure
       .input(z.object({ page: z.number().default(0), length: z.number().default(50) }))
       .query(async ({ctx, input}) => {

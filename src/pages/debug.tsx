@@ -4,7 +4,10 @@ import { api } from "~/utils/api";
 
 const Debug:NextPage = () => {
 
-    const data = api.latLng.getAll.useQuery(undefined, {
+    const data = api.latLng.getAll.useQuery({
+        page: 1,
+        length: 50
+    }, {
         staleTime: Infinity
     })
 

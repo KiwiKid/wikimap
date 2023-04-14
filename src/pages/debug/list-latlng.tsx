@@ -59,7 +59,7 @@ const ListLatLng:NextPage = () => {
                         {match ? (
                         match.map((m) => (
                             <div key={m.id} className="w-full p-2">
-                            {`${m.wikiUrl} ${m.generatedTitle ?? ''}`}
+                            {`${m.wiki_url} ${m.generatedTitle ?? ''}`}
                             </div>
                         ))
                         ) : d.status != 'no-matches' ? (

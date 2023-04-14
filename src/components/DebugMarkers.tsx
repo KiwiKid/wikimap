@@ -86,7 +86,7 @@ export default function DebugMarkers() {
       && existingMarkers?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingMarkers.data.map((m) => <Marker key={`${m.id}`} position={[m.lat, m.lng]} icon={customIcon}>
-          <Popup >{m.status} {m.lat}, {m.lng} {existingMarkers.data.length}
+          <Popup >{m.status} {m.lat}, {m.lng} {existingMarkers?.data?.length}
           <button onClick={() => onProcess(m.id)}>process</button>
           </Popup>
         </Marker>) 
@@ -95,7 +95,7 @@ export default function DebugMarkers() {
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingPlaces.data.map((m) => <Marker key={`${m.id}`} position={[m.lat, m.lng]} icon={locIcon}>
-          <Popup>{m.wikiUrl}</Popup>
+          <Popup>{m.wiki_url}</Popup>
         </Marker>) 
       : null}
     </>

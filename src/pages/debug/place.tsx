@@ -67,14 +67,13 @@ const InitSeedLatLng:NextPage = () => {
                         {d.lng}
                         </div>
                         <div className="w-full sm:w-1/4 px-2">
-                        {d.generatedTitle}
                         </div>
                     </div>
                     <div className="flex flex-wrap">
                         {match ? (
                         match.map((m) => (
                             <div key={m.id} className="w-full p-2">
-                            {`${m.wikiUrl} ${m.generatedTitle ?? ''}`}
+                            {m.wiki_url}
                             </div>
                         ))
                         ) : d.status != 'no-matches' ? (
@@ -99,7 +98,7 @@ const InitSeedLatLng:NextPage = () => {
             <div>
               {match ? (
                 match.map((m) => (
-                  <div key={m.id}>{`${m.wikiUrl} ${m.generatedTitle ?? ''}`}</div>
+                  <div key={m.id}>{`${m.wiki_url} ${m.generatedTitle ?? ''}`}</div>
                 ))
               ) : (
                 <button value={d.id} onClick={handleClick}>

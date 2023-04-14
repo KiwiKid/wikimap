@@ -28,9 +28,8 @@ model Place {
     wiki_url        String
     lat             Float
     lng             Float
-    info            String
+    info            Json
     content         String
-    raw             String
     main_image      String
     images          String[]
     categories      String[]

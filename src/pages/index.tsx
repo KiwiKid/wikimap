@@ -4,8 +4,6 @@ import Head from "next/head";
 
 import { api, RouterOutputs } from "~/utils/api";
 import MapDrawerContainer from "./MapDrawerContainer";
-import { Place } from "@prisma/client";
-import { MapViewProps } from "./MapView";
 
 interface PageProps {
   places:RouterOutputs['place']['getAll'] | null

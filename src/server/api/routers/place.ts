@@ -24,11 +24,16 @@ export const placeRouter = createTRPCRouter({
           take: 1000,
           select: {
             id: true,
-            generatedTitle: true,
             lat: true,
             lng: true,
             status: true,
-            wikiUrl: true
+            wiki_url: true,
+            categories: true,
+            content: true,
+            images: true,
+            info: true,
+            main_image: true,
+            references: true
           }
         })),
     getInside: publicProcedure
@@ -36,7 +41,7 @@ export const placeRouter = createTRPCRouter({
     .query(({ ctx, input}) => ctx.prisma.place.findMany({
       select: {
         id: true,
-        wikiUrl: true,
+        wiki_url: true,
         lat: true,
         lng: true,
         status:true
@@ -51,5 +56,8 @@ export const placeRouter = createTRPCRouter({
           gt: input.topLeftLng
         }
       }
+    }).catch((err) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      console.error('ERROR Getting place.findMany', {err})
     })), 
   })

@@ -34,7 +34,7 @@ export default function MapView({places}:MapViewProps) {
       />
       {places.map((point) => (
         <Marker key={point.id} position={[point.lat, point.lng]}>
-          <Popup>{point.generatedTitle}</Popup>
+          <Popup>{point.wiki_url}</Popup>
         </Marker>
       ))}
       <ChangeView coords={center} />
