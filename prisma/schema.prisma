@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
@@ -25,22 +25,16 @@ model Place {
     id              String @id @default(cuid())
     /// 'pending'
     status          String
-    wiki_url         String
+    wiki_url        String
     lat             Float
     lng             Float
     info            String
     content         String
     raw             String
-    main_image       String
-    images          String
+    main_image      String
+    images          String[]
     categories      String[]
-    references      String
+    references      String[]
     @@unique([lat, lng], name: "OnlyUniquePlaces")
 
-}
-
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
 }

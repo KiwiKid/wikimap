@@ -36,7 +36,7 @@ export const latLngRouter = createTRPCRouter({
             id: input.id
           },
           orderBy: {
-            createdAt: 'asc'
+            created_at: 'asc'
           }
         })
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -66,7 +66,6 @@ export const latLngRouter = createTRPCRouter({
                   summary: await page.summary(),
                   info: await page.fullInfo(),
                   content: await page.content(),
-                  raw: await page.rawContent(),
                   mainImage: await page.mainImage(),
                   images: await page.images(),
                   categories: await page.categories(),
@@ -81,8 +80,11 @@ export const latLngRouter = createTRPCRouter({
                     lat: fp.latLng.lat,
                     lng: fp.latLng.lon,
                     wikiUrl: fp.url,
-                    status: 'pending'
-                    summary: 
+                    status: 'pending',
+                    mainImage: fp.mainImage,
+                    images: Array.from(fp.images),
+                    categories: fp.categories,
+                    references: fp.references,
                   }
                 })
               }).catch(() => {
@@ -123,7 +125,7 @@ export const latLngRouter = createTRPCRouter({
     .query(({ ctx, input}) => ctx.prisma.latLngToProcess.findMany({
       select: {
         id: true,
-        createdAt: true,
+        created_at: true,
         lat: true,
         lng: true,
         status:true
