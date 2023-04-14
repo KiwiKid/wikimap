@@ -3,14 +3,14 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 
 import { api, RouterOutputs } from "~/utils/api";
-import MapDrawerContainer from "./MapDrawerContainer";
+import MapDrawerContainer from "../components/MapDrawerContainer";
 
 interface PageProps {
   places:RouterOutputs['place']['getAll'] | null
   // Define the component's props here
 }
 
-const MapWithNoSSR = dynamic(() => import('./MapView'), {
+const MapWithNoSSR = dynamic(() => import('../components/MapView'), {
   ssr: false,
   loading: () => <div>Loading....</div>,
 });
