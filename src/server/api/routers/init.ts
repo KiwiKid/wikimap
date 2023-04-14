@@ -139,14 +139,7 @@ export const latLngRouter = createTRPCRouter({
           gt: input.topLeftLng
         }
       }
-    }).catch((err) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      console.error('ERROR Getting LatLng', {err})
-      return {
-        error: JSON.stringify(err)
-      }
-    })
-    ),  
+    })),  
     initSeedLatLng: publicProcedure
       .input(z.object({ page: z.number().default(0), length: z.number().default(50) }))
       .query(async ({ctx, input}) => {
