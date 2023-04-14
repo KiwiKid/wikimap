@@ -90,7 +90,12 @@ export const latLngRouter = createTRPCRouter({
                   }
                 })
               })
-          )))
+          ))).catch((err) => {
+            console.error(err)
+            return {
+              error: 'Failed to lat from wiki'+JSON.stringify(err)
+            }
+          })
       return {
           result,
       };
