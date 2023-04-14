@@ -74,7 +74,7 @@ export const latLngRouter = createTRPCRouter({
                 }
               })
               .then((fp) => {
-                console.log(fp)
+                console.log(`Creating ${fp.url}`)
                 return prisma.place.create({
                   data: {
                     lat: fp.latLng.lat,
@@ -84,9 +84,17 @@ export const latLngRouter = createTRPCRouter({
                     info: JSON.stringify(fp.info),
                     content: fp.content,
                     main_image: fp.mainImage,
-                    images: Array.from(fp.images),
+                    images: fp.images,
                     categories: fp.categories,
                     references: fp.references,
+                  }
+                }).then((res) => {
+                  console.log('Places created')
+                  return res;
+                }).catch((err) => {
+                  console.error(err)
+                  return {
+                    error: 'Failed to update in db'+JSON.stringify(err)
                   }
                 })
               })
