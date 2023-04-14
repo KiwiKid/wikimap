@@ -29,7 +29,7 @@ model Place {
     lat             Float
     lng             Float
     info            Json
-    content         String
+    content         Json
     main_image      String
     images          String[]
     categories      String[]

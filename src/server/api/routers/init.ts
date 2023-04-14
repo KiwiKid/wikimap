@@ -74,9 +74,7 @@ export const latLngRouter = createTRPCRouter({
                 }
               })
               .then((fp) => {
-                console.log(`Creating ${fp.url}`)
-                return prisma.place.create({
-                  data: {
+                const newItem = {
                     lat: fp.latLng.lat,
                     lng: fp.latLng.lon,
                     wiki_url: fp.url,
@@ -88,22 +86,14 @@ export const latLngRouter = createTRPCRouter({
                     categories: fp.categories,
                     references: fp.references,
                   }
-                }).then((res) => {
-                  console.log('Places created')
+                console.log(`Creating ${newItem.lat} ${newItem.lat}`)
+
+                return prisma.place.create({data: newItem}).then((res) => {
+                  console.log(`Place created: ${newItem.wiki_url}`)
                   return res;
-                }).catch((err) => {
-                  console.error(err)
-                  return {
-                    error: 'Failed to update in db'+JSON.stringify(err)
-                  }
                 })
               })
-          ))).catch((err) => {
-            console.error(err)
-            return {
-              error: 'Failed to lat from wiki'+JSON.stringify(err)
-            }
-          })
+          )))
       return {
           result,
       };
@@ -152,6 +142,9 @@ export const latLngRouter = createTRPCRouter({
     }).catch((err) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       console.error('ERROR Getting LatLng', {err})
+      return {
+        error: JSON.stringify(err)
+      }
     })
     ),  
     initSeedLatLng: publicProcedure
