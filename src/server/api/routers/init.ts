@@ -66,21 +66,29 @@ export const latLngRouter = createTRPCRouter({
                   summary: await page.summary(),
                   info: await page.fullInfo(),
                   content: await page.content(),
-                  latLng: await page.coordinates()
+                  raw: await page.rawContent(),
+                  mainImage: await page.mainImage(),
+                  images: await page.images(),
+                  categories: await page.categories(),
+                  references: await page.references(),
+                  latLng: await page.coordinates(),
                 }
               })
-              .then((fp) => prisma.place.create({
+              .then((fp) => {
+                console.log(fp)
+                return prisma.place.create({
                   data: {
                     lat: fp.latLng.lat,
                     lng: fp.latLng.lon,
-                    generatedTitle: 'Woah',
                     wikiUrl: fp.url,
                     status: 'pending'
+                    summary: 
                   }
-                }).catch(() => {
+                })
+              }).catch(() => {
+                  debugger
                   console.error('failed to update place')
                 })
-              )
               .catch((err) => {
                 console.error(err)
               })
@@ -89,11 +97,20 @@ export const latLngRouter = createTRPCRouter({
           result,
       };
     }),
+    getSummary: publicProcedure
+      .query(({ ctx}) => ctx.prisma.latLngToProcess.count({
+        select: {
+          id: true,
+          status: true,
+          lat: true,
+          lng: true,
+        },
+    })),
     getAll: publicProcedure
     .input(z.object({ page: z.number().default(0), length: z.number().default(50)}))
     .query(({ ctx, input }) => ctx.prisma.latLngToProcess.findMany({
       take: input.length,
-      skip: (input.length * input.page),
+      skip: (input.length * Math.min(input.page, 1)),
       select: {
         id: true,
         status: true,
@@ -101,6 +118,27 @@ export const latLngRouter = createTRPCRouter({
         lng: true
       },
     })),
+    getInside: publicProcedure
+    .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+    .query(({ ctx, input}) => ctx.prisma.latLngToProcess.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        lat: true,
+        lng: true,
+        status:true
+      },
+      where: {
+        lat: {
+          lt: input.topLeftLat,
+          gt: input.bottomRightLat,
+        },
+        lng: {
+          lt: input.bottomRightLng,
+          gt: input.topLeftLng
+        }
+      }
+    })),  
     initSeedLatLng: publicProcedure
       .input(z.object({ page: z.number().default(0), length: z.number().default(50) }))
       .query(async ({ctx, input}) => {
@@ -127,5 +165,14 @@ export const latLngRouter = createTRPCRouter({
         return res
           .filter((r) => r.status === 'fulfilled')
           .map((r) => (r as PromiseFulfilledResult<LatLngToProcess>).value);
-      })
+      }),
+      createLatLng: publicProcedure
+        .input(z.object({ lat: z.number(), lng: z.number()}))
+        .mutation(async ({ctx, input}) => ctx.prisma.latLngToProcess.create({
+          data: {
+            lat: input.lat,
+            lng: input.lng,
+            status: 'pending',
+          },
+        }))
 })

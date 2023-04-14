@@ -4,6 +4,8 @@ import Head from "next/head";
 
 import { api, RouterOutputs } from "~/utils/api";
 import MapDrawerContainer from "./MapDrawerContainer";
+import { Place } from "@prisma/client";
+import { MapViewProps } from "./MapView";
 
 interface PageProps {
   places:RouterOutputs['place']['getAll'] | null
@@ -12,17 +14,21 @@ interface PageProps {
 
 const MapWithNoSSR = dynamic(() => import('./MapView'), {
   ssr: false,
-  loading: () => <div>Loading....</div>
+  loading: () => <div>Loading....</div>,
 });
-
 
 const Home: NextPage<PageProps> = () => {
  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
   
-    const places2 = api.place.getAll.useQuery(undefined, {
+    const places = api.place.getAll.useQuery({
+      length: 50,
+      page: 0
+    }, {
       staleTime: Infinity
     })
-  
+
+
+
 
 /*
   useEffect(() => {
@@ -32,6 +38,10 @@ const Home: NextPage<PageProps> = () => {
     fetchPlaces()
   }, [])
   */
+
+  if(places.error || places.data == undefined){
+    return <div>{JSON.stringify(places.error)}</div>
+  }
  
   return (
     <>
@@ -41,8 +51,8 @@ const Home: NextPage<PageProps> = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-          <MapWithNoSSR />
-          <MapDrawerContainer places={places2?.data ?? null}/>
+          <MapWithNoSSR places={places.data ?? null}/>
+          <MapDrawerContainer places={places?.data ?? null}/>
       </main>
     </>
   );

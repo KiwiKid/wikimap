@@ -27,8 +27,29 @@ export const placeRouter = createTRPCRouter({
             generatedTitle: true,
             lat: true,
             lng: true,
-            status: true
+            status: true,
+            wikiUrl: true
           }
-        }))
-      });
-  
+        })),
+    getInside: publicProcedure
+    .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+    .query(({ ctx, input}) => ctx.prisma.place.findMany({
+      select: {
+        id: true,
+        wikiUrl: true,
+        lat: true,
+        lng: true,
+        status:true
+      },
+      where: {
+        lat: {
+          lt: input.topLeftLat,
+          gt: input.bottomRightLat,
+        },
+        lng: {
+          lt: input.bottomRightLng,
+          gt: input.topLeftLng
+        }
+      }
+    })), 
+  })

@@ -16,19 +16,25 @@ model LatLngToProcess {
     lng         Float
     /// 'pending' 'processed'
     status      String 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    created_at   DateTime @default(now())
+    updated_at   DateTime @updatedAt
     @@unique([lat, lng], name: "OnlyUniquePoints")
 }
 
 model Place {
     id              String @id @default(cuid())
-    generatedTitle  String?
     /// 'pending'
     status          String
-    wikiUrl         String
+    wiki_url         String
     lat             Float
     lng             Float
+    info            String
+    content         String
+    raw             String
+    main_image       String
+    images          String
+    categories      String[]
+    references      String
     @@unique([lat, lng], name: "OnlyUniquePlaces")
 
 }

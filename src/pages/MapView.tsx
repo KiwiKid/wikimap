@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { type Map } from 'leaflet'
 import { type LatLngExpression } from 'leaflet';
+import { Place } from '@prisma/client';
 
 interface GeoData {
     lat: number;
@@ -15,7 +16,11 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
   return null;
 }
 
-export default function MapView() {
+export interface MapViewProps {
+  places:Place[]
+}
+
+export default function MapView({places}:MapViewProps) {
     const [geoData, setGeoData] = useState<GeoData>({ lat: 64.536634, lng: 16.779852 });
 
     const center: LatLngExpression = [geoData.lat, geoData.lng];
@@ -27,6 +32,11 @@ export default function MapView() {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {places.map((point) => (
+        <Marker key={point.id} position={[point.lat, point.lng]}>
+          <Popup>{point.generatedTitle}</Popup>
+        </Marker>
+      ))}
       <ChangeView coords={center} />
     </MapContainer>
   );
