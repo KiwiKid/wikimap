@@ -19,15 +19,12 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 export interface MapViewProps {
   places:Place[]
 }
+const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 
 export default function MapView({places}:MapViewProps) {
-    const [geoData, setGeoData] = useState<GeoData>({ lat: 64.536634, lng: 16.779852 });
-
-    const center: LatLngExpression = [geoData.lat, geoData.lng];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 
   return (
-    <MapContainer center={center} zoom={12} style={{ height: '100vh', width: '100%' }}>
+    <MapContainer center={WELLINGTON_CENTER} zoom={12} style={{ height: '100vh', width: '100%' }}>
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -37,7 +34,6 @@ export default function MapView({places}:MapViewProps) {
           <Popup>{point.wiki_url}</Popup>
         </Marker>
       ))}
-      <ChangeView coords={center} />
     </MapContainer>
   );
 }

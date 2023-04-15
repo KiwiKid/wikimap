@@ -5,9 +5,11 @@ import mapWikiPage from "~/utils/mapWikiPage";
 import { Configuration, OpenAIApi } from "openai";
 import { prisma } from "~/server/db";
 
+// const placeType = ['oldLegend']
+
 export const placeTypeRouter = createTRPCRouter({
     request: publicProcedure
-      .input(z.object({ wiki_id: z.string(), type: z.enum(['oldLegend']) }))
+      .input(z.object({ wiki_id: z.string(), type: z.string() }))
       .mutation(({ ctx, input }) => ctx.prisma.place.findFirstOrThrow({
           select: {
             wiki_id: true,
@@ -78,11 +80,60 @@ export const placeTypeRouter = createTRPCRouter({
           type: input.type,
         }})
       })
-      )
+      ),
+      getInside: publicProcedure
+      .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+      .query(async ({ ctx, input}) => {
+        
+        const places = await ctx.prisma.place.findMany({
+          select: {
+            id: true,
+            wiki_url: true,
+            lat: true,
+            lng: true,
+            status:true,
+            summary: true,
+            info:true,
+            main_image_url: true,
+            wiki_id: true
+          },
+          where: {
+            lat: {
+              lt: input.topLeftLat,
+              gt: input.bottomRightLat,
+            },
+            lng: {
+              lt: input.bottomRightLng,
+              gt: input.topLeftLng
+            }
+          }
+        });
+
+        const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
+                    select: {
+                      id: true,
+                      wiki_id: true,
+                      title: true,
+                      type: true
+                    },
+                    where: {
+                      wiki_id: wiki_id
+                    }
+                  })
+
+            return Promise.all(places.map(async (p) => {
+                const placeTypes = await getPlaceTypes(p.wiki_id);
+                return {
+                  place: p,
+                  placeTypes
+                }
+              }))
+            })
+            
+  })
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     
    /* .then((page:Page) => {
         console.log(page)
         return page
     })*/
-  })

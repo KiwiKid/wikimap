@@ -2,35 +2,15 @@ import { z } from "zod";
 import WikiJS from 'wikijs'
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { LatLngToProcess, Place, PrismaClient } from "@prisma/client";
-import { Page } from "wikijs";
-import { Coordinates } from "wikijs";
+import { type LatLngToProcess, type Place, } from "@prisma/client";
 import { getPointsSquare, RADIUS } from "~/pages/debug/init-latlng";
-import { RouterOutputs } from "~/utils/api";
-import mapWikiPage, { MappedPage } from "~/utils/mapWikiPage";
-/*
-interface WikiContent {
-  title: string;
-  content: string;
-}*/
-
-interface PageData {
-  summary:string
-  info:unknown
-  content:unknown
-  latLng:Coordinates
-    // content:WikiContent
-}
-
-interface InitResult {
-  status: 'success'|'failure'
-}
+import mapWikiPage, { type MappedPage } from "~/utils/mapWikiPage";
+import { prisma } from "~/server/db";
 
 export const latLngRouter = createTRPCRouter({
   process: publicProcedure
     .input(z.object({ id: z.string().optional() }))
     .mutation(async ({ input }) => {
-      const prisma = new PrismaClient()
         const recordToProcess = await prisma.latLngToProcess.findFirstOrThrow({
           where: {
             status: 'pending',
@@ -40,10 +20,8 @@ export const latLngRouter = createTRPCRouter({
             created_at: 'asc'
           }
         })
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         return await WikiJS().geoSearch(recordToProcess.lat, recordToProcess.lng, RADIUS)
           .then(async (res: string[]) => {
-              // TODO: do we need to filter to just regions here?
               if(res?.length == 0){
                 await prisma.latLngToProcess.update({
                   where: {
@@ -60,9 +38,10 @@ export const latLngRouter = createTRPCRouter({
                 return res;
               }
           })
-          .then((pageName:string[]) => Promise.allSettled(pageName.map((pn) => WikiJS().page(pn)
+          .then(async (pageName:string[]) => {
+            const newPlaces = await Promise.allSettled(pageName.map((pn) => WikiJS().page(pn)
               .then(mapWikiPage)
-              .then((fp:MappedPage) => {
+              .then(async (fp:MappedPage) => {
 
                 const newItem = {
                     lat: fp.lat,
@@ -74,15 +53,23 @@ export const latLngRouter = createTRPCRouter({
                     summary: fp.summary,
                     main_image_url: fp.mainImage,
                   }
-                console.log(`Creating ${newItem?.lat} ${newItem?.lat}`)
+                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
 
-                return prisma.place.create({data: newItem}).then((res) => {
-                  console.log(`Place created: ${fp.id}`)
-                  return res;
+                return await prisma.place.create({data: newItem}).catch((err) => {
+                  console.error('failed to create place (could already exist?' + JSON.stringify(err))
                 })
-              })
-          )))
-    }),
+              })))
+
+              const failures = newPlaces.filter((r) => r.status === 'rejected');
+              if(failures.length > 0){
+                console.error('Some places failed to create', { failures });
+              }
+
+              return newPlaces
+                .filter((r) => r.status === 'fulfilled')
+                .map((r) => (r as PromiseFulfilledResult<Place>).value);
+            })
+      }),
     getSummary: publicProcedure
       .query(({ ctx}) => ctx.prisma.latLngToProcess.count({
         select: {

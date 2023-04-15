@@ -5,6 +5,7 @@ import { Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
 import locIconFile from 'src/styles/loc.png'
+import { PlaceType } from '@prisma/client';
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
@@ -23,9 +24,21 @@ export default function DebugMarkers() {
 
   const [isLoading, setIsLoading] = useState(true)
 
+  const processLatLng = api.latLng.process.useMutation({
+    onSuccess: (newPlaces) => {
+      newPlaces.forEach((np) => {
+        getPlaceType.mutate({ "wiki_id": np.wiki_id, "type": 'oldLegend'})
+      })
+    },
+    onError: (data) => console.error('Failed to latLng.process'+data.message),
+    
+  });
+
   const createLatLng = api.latLng.createLatLng.useMutation({
-    onSuccess: async () =>  {
-      await existingMarkers.refetch()
+    onSuccess: (data) =>  {
+      // await existingMarkers.refetch()
+      processLatLng.mutate({ id: data.id})
+
       setIsLoading(false)
     },
     onError: (data) => console.log('Woah, failed'+data.message),
@@ -33,11 +46,6 @@ export default function DebugMarkers() {
       setIsLoading(true)
     }
   });
-
-  interface Result {
-    title:string,
-    wiki_id:string
-  }
   
     const map = useMapEvents({
         click: (e) => {
@@ -64,34 +72,29 @@ export default function DebugMarkers() {
       cacheTime: Infinity
     })
 
-    const existingPlaces = api.place.getInside.useQuery({
+    const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng
     },{
-      cacheTime: Infinity
+      cacheTime: Infinity,
+      refetchInterval: 100000
     })
 
-    const [generations, setGenerations] = useState<Result[]>([]);
+    const [generations, setGenerations] = useState<PlaceType[]|null>();
 
-    const process = api.latLng.process.useMutation({
-      onSuccess: async () => {
-        await existingPlaces.refetch()
-      },
-      onError: (data) => console.error('Failed to latLng.process'+data.message)
-    });
 
     const getPlaceType = api.placeType.request.useMutation({
       onSuccess: (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        setGenerations(generations?.concat({ title: data.title, wiki_id: data.wiki_id}));
+        setGenerations(generations?.concat(data));
       },
       onError: (data) => console.error('Failed to placeType.request'+data.message)
     });
 
     const onProcess = (pointId:string) => {
-        process.mutate({ id: pointId})
+        processLatLng.mutate({ id: pointId})
     }
 
     const onGenerate = (wiki_id: string) => {
@@ -119,13 +122,15 @@ export default function DebugMarkers() {
        {existingPlaces?.data 
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      ? existingPlaces.data.map((m) => <Marker key={`${m.id}`} position={[m.lat, m.lng]} icon={locIcon}>
-          <Popup>{JSON.stringify(m)}
+      ? existingPlaces.data.map((m) => <Marker key={`${m.place.id}`} position={[m.place.lat, m.place.lng]} icon={locIcon}>
+          <Popup>
+            {m.place.summary}
           <button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
-            onClick={() => onGenerate(m.wiki_id)}>generate</button>
-            {generations.filter((g) => g.wiki_id == m.wiki_id).map((g) => <div key={g.title}>{g.title}</div>)}
-            <a href={m.main_image_url}/>
+            onClick={() => onGenerate(m.place.wiki_id)}>generate</button>
+            
+            <img src={`${m.place.main_image_url}`} alt={m.place.wiki_url}/>
+            {m.placeTypes.map((g) => <div key={g.title}>{g.title}</div>)}
           </Popup>
         </Marker>) 
       : null}

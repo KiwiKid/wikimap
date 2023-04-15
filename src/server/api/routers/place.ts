@@ -58,8 +58,5 @@ export const placeRouter = createTRPCRouter({
           gt: input.topLeftLng
         }
       }
-    }).catch((err) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      console.error('ERROR Getting place.findMany', {err})
-    })), 
+    }))
   })
