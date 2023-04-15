@@ -7,6 +7,7 @@
   - Added the required column `summary` to the `Place` table without a default value. This is not possible if the table is not empty.
 
 */
+TRUNCATE TABLE "Place";
 -- AlterTable
 ALTER TABLE "Place" ADD COLUMN     "content" JSONB NOT NULL,
 ADD COLUMN     "info" JSONB NOT NULL,
