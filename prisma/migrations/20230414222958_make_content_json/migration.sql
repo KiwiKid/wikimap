@@ -8,4 +8,4 @@
 TRUNCATE TABLE "Place";
 -- AlterTable
 ALTER TABLE "Place" DROP COLUMN "content",
-ADD COLUMN IF NOT     "content" JSONB NOT NULL;
+ADD COLUMN  "content" JSONB NOT NULL;
