@@ -15,26 +15,27 @@ CREATE TABLE "Place" (
     "id" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "wiki_url" TEXT NOT NULL,
+    "wiki_id" TEXT NOT NULL,
     "lat" DOUBLE PRECISION NOT NULL,
     "lng" DOUBLE PRECISION NOT NULL,
-    "info" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "raw" TEXT NOT NULL,
-    "main_image" TEXT NOT NULL,
-    "images" TEXT NOT NULL,
-    "categories" TEXT[],
-    "references" TEXT NOT NULL,
+    "summary" TEXT NOT NULL,
+    "info" JSONB NOT NULL,
+    "main_image_url" TEXT NOT NULL,
 
     CONSTRAINT "Place_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Example" (
+CREATE TABLE "PlaceType" (
     "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "wiki_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Example_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PlaceType_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

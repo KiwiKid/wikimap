@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Place" ALTER COLUMN "wiki_id" SET DATA TYPE TEXT;
