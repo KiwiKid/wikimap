@@ -129,7 +129,7 @@ export default function DebugMarkers() {
             onClick={() => onGenerate(m.place.wiki_id)}>generate</button>
             
             <img src={`${m.place.main_image_url}`} alt={m.place.wiki_url}/>
-            {m.placeTypes.map((g) => <div key={g.title}><h1>{g.title}</h1>{g.content}</div>)}
+            {m.placeTypes.map((g) => <div key={g.title}><h1 className="text-2xl font-bold">{g.title}</h1>{g.content}</div>)}
           </Popup>
         </Marker>) 
       : null}
