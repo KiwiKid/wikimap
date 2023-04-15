@@ -47,7 +47,7 @@ export const placeTypeRouter = createTRPCRouter({
           const openai = new OpenAIApi(configuration);
           try {
 
-            const prompt = `Create short related Lord of the Rings style backstory related to the following place information, use the format
+            const prompt = `Create short related Lord of the Rings style backstory related to the following place information, dont include any Christian nationalism or crusades, use the format
             TITLE:
             CONTENT:
 

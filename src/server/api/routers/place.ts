@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
-
 export const placeRouter = createTRPCRouter({
     /*search: publicProcedure
       .input(z.object({ lat: z.number(), lng: z.number() }))
