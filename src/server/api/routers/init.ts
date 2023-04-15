@@ -6,6 +6,7 @@ import { type LatLngToProcess, type Place, } from "@prisma/client";
 import { getPointsSquare, RADIUS } from "~/pages/debug/init-latlng";
 import mapWikiPage, { type MappedPage } from "~/utils/mapWikiPage";
 import { prisma } from "~/server/db";
+import { type PrismaClientValidationError } from "@prisma/client/runtime";
 
 export const latLngRouter = createTRPCRouter({
   process: publicProcedure
@@ -51,12 +52,15 @@ export const latLngRouter = createTRPCRouter({
                     status: 'pending',
                     info: JSON.stringify(fp.info),
                     summary: fp.summary,
-                    main_image_url: fp.mainImage,
+                    main_image_url: fp.mainImage || '',
                   }
                 console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
 
-                return await prisma.place.create({data: newItem}).catch((err) => {
-                  console.error('failed to create place (could already exist?' + JSON.stringify(err))
+                return await prisma.place.create({data: newItem}).catch((err:PrismaClientValidationError) => {
+                  console.error('failed to create place (could already exist?', {
+                    err: err?.message,
+                    stack: err?.stack
+                  })
                 })
               })))
 

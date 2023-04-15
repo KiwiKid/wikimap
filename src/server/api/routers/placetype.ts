@@ -5,7 +5,22 @@ import mapWikiPage from "~/utils/mapWikiPage";
 import { Configuration, OpenAIApi } from "openai";
 import { prisma } from "~/server/db";
 
-// const placeType = ['oldLegend']
+interface AIResponse {
+  title:string
+  content:string
+}
+
+function parseAIResponse(input: string): AIResponse {
+  const startIndex = (input.indexOf("TITLE:") || input.indexOf('Title:')) + 7;
+  const endIndex = (input.indexOf("CONTENT:")|| input.indexOf('Content:')) - 1;
+  const title = input.substring(startIndex, endIndex).trim();
+
+  const contentIndex = input.indexOf("CONTENT:") + 9;
+  const content = input.substring(contentIndex).trim();
+
+  return { title, content };
+}
+
 
 export const placeTypeRouter = createTRPCRouter({
     request: publicProcedure
@@ -32,7 +47,10 @@ export const placeTypeRouter = createTRPCRouter({
           const openai = new OpenAIApi(configuration);
           try {
 
-            const prompt = `Return a title for the following place in a old english style:
+            const prompt = `Create short related Lord of the Rings style backstory related to the following place information, use the format
+            TITLE:
+            CONTENT:
+
             ${fp.url} 
             ${fp.summary}`
             
@@ -54,29 +72,37 @@ export const placeTypeRouter = createTRPCRouter({
 
               const firstChoice = completion.data.choices[0]
 
-              if(!firstChoice){
+              if(!firstChoice || !firstChoice.text){
+                console.error('Failed to get choices')
                 return {
                   result: 'Error, no choices',
-                  wiki_id: fp.wiki_id
+                  wiki_id: fp.wiki_id,
+                  raw: completion
                 }
               }
+
+
+              const { title, content } = parseAIResponse(firstChoice?.text)
         
               return {
-                result: firstChoice?.text,
-                wiki_id: fp.wiki_id
+                title: title,
+                content: content,
+                wiki_id: fp.wiki_id,
+                raw: completion
               }
 
           } catch(err) {
             return {
               result: JSON.stringify(err),
-              wiki_id: fp.wiki_id
+              wiki_id: fp.wiki_id,
             }
           }
         })
       ).then((openAIRes) => {
         return prisma.placeType.create({data: {
           wiki_id: openAIRes.wiki_id.toString(),
-          title: openAIRes.result || 'NA',
+          title: openAIRes.title || 'NA',
+          content: openAIRes?.content || 'no content?',
           type: input.type,
         }})
       })
@@ -114,7 +140,8 @@ export const placeTypeRouter = createTRPCRouter({
                       id: true,
                       wiki_id: true,
                       title: true,
-                      type: true
+                      content: true,
+                      type: true,
                     },
                     where: {
                       wiki_id: wiki_id

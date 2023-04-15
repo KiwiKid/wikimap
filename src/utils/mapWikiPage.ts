@@ -14,6 +14,11 @@ export interface MappedPage {
   lng:number
 }
 
+interface wikiContent {
+  title:string
+  content:string
+}
+
 const mapWikiPage = async (page:Page):Promise<MappedPage> => {
   console.log('start mapWikiPage')
   const coords = await page.coordinates()
@@ -27,7 +32,8 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
       url: page.url(),
       id: id,
       wiki_id: page.raw.pageid,
-      summary: await page.summary(),
+      summary: (await page.content() as unknown as wikiContent[])
+            .map((wc) => `${wc.title.toUpperCase()}:${wc.content}`).join('').substring(0, 1000),
       info: await page.fullInfo(),
       mainImage: await page.mainImage(),
       images: await page.images(),

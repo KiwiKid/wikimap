@@ -38,6 +38,7 @@ model Place {
 model PlaceType {
     id              String @id @default(cuid())
     title           String
+    content         String
     type            String
     wiki_id         String
     created_at      DateTime @default(now())
