@@ -2,6 +2,7 @@ import { type Page } from "wikijs";
 
 export interface MappedPage {
   id:string
+  wiki_id:number
   url:string
   summary:string
   info:object
@@ -14,6 +15,7 @@ export interface MappedPage {
 }
 
 const mapWikiPage = async (page:Page):Promise<MappedPage> => {
+  console.log('start mapWikiPage')
   const coords = await page.coordinates()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const urlParts:string[] = page.url().split('/')
@@ -24,6 +26,7 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
     return {
       url: page.url(),
       id: id,
+      wiki_id: page.raw.pageid,
       summary: await page.summary(),
       info: await page.fullInfo(),
       mainImage: await page.mainImage(),

@@ -33,6 +33,11 @@ export default function DebugMarkers() {
       setIsLoading(true)
     }
   });
+
+  interface Result {
+    title:string,
+    wiki_id:string
+  }
   
     const map = useMapEvents({
         click: (e) => {
@@ -68,7 +73,7 @@ export default function DebugMarkers() {
       cacheTime: Infinity
     })
 
-
+    const [generations, setGenerations] = useState<Result[]>([]);
 
     const process = api.latLng.process.useMutation({
       onSuccess: async () => {
@@ -79,7 +84,8 @@ export default function DebugMarkers() {
 
     const getPlaceType = api.placeType.request.useMutation({
       onSuccess: (data) => {
-        console.log(data)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        setGenerations(generations?.concat({ title: data.title, wiki_id: data.wiki_id}));
       },
       onError: (data) => console.error('Failed to placeType.request'+data.message)
     });
@@ -89,7 +95,7 @@ export default function DebugMarkers() {
     }
 
     const onGenerate = (wiki_id: string) => {
-      const res = getPlaceType.mutate({ wiki_id: wiki_id, type: 'oldLegend'})
+      const res = getPlaceType.mutate({ "wiki_id": wiki_id, "type": 'oldLegend'})
 
       console.log(res);
     }
@@ -114,10 +120,12 @@ export default function DebugMarkers() {
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingPlaces.data.map((m) => <Marker key={`${m.id}`} position={[m.lat, m.lng]} icon={locIcon}>
-          <Popup>{m.wiki_url} {m.wiki_url} {m.id} {m.wiki_id}
+          <Popup>{JSON.stringify(m)}
           <button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
-            onClick={() => onGenerate(m.id)}>generate</button>
+            onClick={() => onGenerate(m.wiki_id)}>generate</button>
+            {generations.filter((g) => g.wiki_id == m.wiki_id).map((g) => <div key={g.title}>{g.title}</div>)}
+            <a href={m.main_image_url}/>
           </Popup>
         </Marker>) 
       : null}

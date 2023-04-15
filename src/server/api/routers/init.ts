@@ -67,7 +67,7 @@ export const latLngRouter = createTRPCRouter({
                 const newItem = {
                     lat: fp.lat,
                     lng: fp.lng,
-                    wiki_id: fp.id,
+                    wiki_id: fp.wiki_id.toString(),
                     wiki_url: fp.url,
                     status: 'pending',
                     info: JSON.stringify(fp.info),

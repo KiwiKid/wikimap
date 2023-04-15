@@ -33,5 +33,13 @@ model Place {
     info            Json
     main_image_url  String
     @@unique([lat, lng], name: "OnlyUniquePlaces")
+}
 
+model PlaceType {
+    id              String @id @default(cuid())
+    title           String
+    type            String
+    wiki_id         String
+    created_at      DateTime @default(now())
+    updated_at      DateTime @updatedAt
 }
