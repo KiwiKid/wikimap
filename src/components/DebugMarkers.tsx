@@ -126,11 +126,11 @@ export default function DebugMarkers() {
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingPlaces.data.map((m) => <Marker key={`${m.place.id}`} position={[m.place.lat, m.place.lng]} icon={locIcon}>
-          <Popup>
+          <Popup minWidth={400} className='bg-brown-100 rounded-lg p-4'>
           <button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
             onClick={() => onGenerate(m.place.wiki_id)}>generate</button>
-            <img src={`${m.place.main_image_url}`} alt={m.place.wiki_url}/>
+            <img className='rounded-lg' src={`${m.place.main_image_url}`} alt={m.place.wiki_url}/>
             {m.placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm"><h1 className="text-1xl font-bold underline">{g.title}</h1>{g.content}</div>)}
             [Generated with AI]
             <details><summary>{m.place.wiki_url}</summary>{m.place.summary}</details>
