@@ -4,10 +4,6 @@ import WikiJS from "wikijs";
 import mapWikiPage from "~/utils/mapWikiPage";
 import { Configuration, OpenAIApi } from "openai";
 
-interface Ids {
-  wiki_ids: string
-}
-
 export const placeTypeRouter = createTRPCRouter({
     request: publicProcedure
       .input(z.object({ wiki_id: z.string(), type: z.enum(['oldLegend']) }))
@@ -19,7 +15,7 @@ export const placeTypeRouter = createTRPCRouter({
             info: true,
           },
           where: {
-              wiki_id: input.wiki_id
+              id: input.wiki_id
           }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         }).then((res) => WikiJS().findById(res.wiki_id))

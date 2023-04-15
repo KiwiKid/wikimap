@@ -77,7 +77,7 @@ export const latLngRouter = createTRPCRouter({
                 console.log(`Creating ${newItem?.lat} ${newItem?.lat}`)
 
                 return prisma.place.create({data: newItem}).then((res) => {
-                  console.log(`Place created: ${newItem.wiki_url}`)
+                  console.log(`Place created: ${fp.id}`)
                   return res;
                 })
               })

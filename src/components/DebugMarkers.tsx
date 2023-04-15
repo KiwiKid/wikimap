@@ -89,7 +89,9 @@ export default function DebugMarkers() {
     }
 
     const onGenerate = (wiki_id: string) => {
-      getPlaceType.mutate({ wiki_id: wiki_id, type: 'oldLegend'})
+      const res = getPlaceType.mutate({ wiki_id: wiki_id, type: 'oldLegend'})
+
+      console.log(res);
     }
 
   return (
@@ -115,7 +117,7 @@ export default function DebugMarkers() {
           <Popup>{m.wiki_url} {m.wiki_url} {m.id} {m.wiki_id}
           <button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
-            onClick={() => onGenerate(m.wiki_id)}>generate</button>
+            onClick={() => onGenerate(m.id)}>generate</button>
           </Popup>
         </Marker>) 
       : null}
