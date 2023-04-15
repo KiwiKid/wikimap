@@ -1,6 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { latLngRouter } from "./routers/init";
 import { placeRouter } from "./routers/place";
+import { placeTypeRouter } from "./routers/placetype";
 
 /**
  * This is the primary router for your server.
@@ -9,7 +10,8 @@ import { placeRouter } from "./routers/place";
  */
 export const appRouter = createTRPCRouter({
   latLng: latLngRouter,
-  place: placeRouter
+  place: placeRouter,
+  placeType: placeTypeRouter,
 });
 
 // export type definition of API

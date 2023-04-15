@@ -28,12 +28,10 @@ export const placeRouter = createTRPCRouter({
             lng: true,
             status: true,
             wiki_url: true,
-            categories: true,
-            content: true,
-            images: true,
+            summary: true,
+            wiki_id: true,
             info: true,
-            main_image: true,
-            references: true
+            main_image_url: true,
           }
         })),
     getInside: publicProcedure
@@ -44,7 +42,11 @@ export const placeRouter = createTRPCRouter({
         wiki_url: true,
         lat: true,
         lng: true,
-        status:true
+        status:true,
+        summary: true,
+        info:true,
+        main_image_url: true,
+        wiki_id: true
       },
       where: {
         lat: {

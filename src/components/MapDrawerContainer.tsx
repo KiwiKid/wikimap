@@ -1,5 +1,5 @@
 import { type RouterOutputs } from '~/utils/api';
-import MapDrawer from './MapDrawer';
+import MapDrawer from '../pages/MapDrawer';
 
 interface MapContainerProps{
   places:RouterOutputs['place']['getAll'] | null

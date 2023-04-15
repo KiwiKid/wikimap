@@ -2,11 +2,12 @@ import { z } from "zod";
 import WikiJS from 'wikijs'
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { LatLngToProcess, PrismaClient } from "@prisma/client";
+import { LatLngToProcess, Place, PrismaClient } from "@prisma/client";
 import { Page } from "wikijs";
 import { Coordinates } from "wikijs";
 import { getPointsSquare, RADIUS } from "~/pages/debug/init-latlng";
 import { RouterOutputs } from "~/utils/api";
+import mapWikiPage, { MappedPage } from "~/utils/mapWikiPage";
 /*
 interface WikiContent {
   title: string;
@@ -40,7 +41,7 @@ export const latLngRouter = createTRPCRouter({
           }
         })
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const result = await WikiJS().geoSearch(recordToProcess.lat, recordToProcess.lng, RADIUS)
+        return await WikiJS().geoSearch(recordToProcess.lat, recordToProcess.lng, RADIUS)
           .then(async (res: string[]) => {
               // TODO: do we need to filter to just regions here?
               if(res?.length == 0){
@@ -60,33 +61,20 @@ export const latLngRouter = createTRPCRouter({
               }
           })
           .then((pageName:string[]) => Promise.allSettled(pageName.map((pn) => WikiJS().page(pn)
-              .then(async (page:Page) => {
-                return {
-                  url: page.url(),
-                  summary: await page.summary(),
-                  info: await page.fullInfo(),
-                  content: await page.content(),
-                  mainImage: await page.mainImage(),
-                  images: await page.images(),
-                  categories: await page.categories(),
-                  references: await page.references(),
-                  latLng: await page.coordinates(),
-                }
-              })
-              .then((fp) => {
+              .then(mapWikiPage)
+              .then((fp:MappedPage) => {
+
                 const newItem = {
-                    lat: fp.latLng.lat,
-                    lng: fp.latLng.lon,
+                    lat: fp.lat,
+                    lng: fp.lng,
+                    wiki_id: fp.id,
                     wiki_url: fp.url,
                     status: 'pending',
                     info: JSON.stringify(fp.info),
-                    content: fp.content,
-                    main_image: fp.mainImage,
-                    images: fp.images,
-                    categories: fp.categories,
-                    references: fp.references,
+                    summary: fp.summary,
+                    main_image_url: fp.mainImage,
                   }
-                console.log(`Creating ${newItem.lat} ${newItem.lat}`)
+                console.log(`Creating ${newItem?.lat} ${newItem?.lat}`)
 
                 return prisma.place.create({data: newItem}).then((res) => {
                   console.log(`Place created: ${newItem.wiki_url}`)
@@ -94,9 +82,6 @@ export const latLngRouter = createTRPCRouter({
                 })
               })
           )))
-      return {
-          result,
-      };
     }),
     getSummary: publicProcedure
       .query(({ ctx}) => ctx.prisma.latLngToProcess.count({

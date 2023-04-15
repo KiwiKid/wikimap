@@ -26,14 +26,12 @@ model Place {
     /// 'pending'
     status          String
     wiki_url        String
+    wiki_id         String
     lat             Float
     lng             Float
+    summary         String
     info            Json
-    content         Json
-    main_image      String
-    images          String[]
-    categories      String[]
-    references      String[]
+    main_image_url  String
     @@unique([lat, lng], name: "OnlyUniquePlaces")
 
 }
