@@ -138,7 +138,7 @@ export default function DebugMarkers() {
   {loadingAreas.map((la) => <CircleMarker 
         key={`${la.lat}_${la.lng}`} 
         center={[la.lat, la.lng]} 
-        radius={80}
+        radius={100}
       />)}
        {existingPlaces?.data 
       && existingPlaces?.data?.length > 0 
