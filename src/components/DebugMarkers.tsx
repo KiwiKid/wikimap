@@ -1,11 +1,12 @@
 import 'leaflet/dist/leaflet.css';
-import { Icon, LatLng, LatLngLiteral } from 'leaflet';
+import L, { Icon, LatLng, LatLngLiteral } from 'leaflet';
 import { useState } from 'react';
-import { CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { Circle, CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
 import locIconFile from 'src/styles/loc.png'
 import { PlaceType } from '@prisma/client';
+
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
@@ -83,17 +84,18 @@ export default function DebugMarkers() {
       bottomRightLng: bottomRight.lng
     },{
       cacheTime: Infinity,
-      refetchInterval: 100000
+      refetchInterval: 10000
     })
 
     const [generations, setGenerations] = useState<PlaceType[]|null>();
 
 
     const getPlaceType = api.placeType.request.useMutation({
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         setGenerations(generations?.concat(data));
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
+        await existingPlaces.refetch()
       },
       onError: (data) => console.error('Failed to placeType.request'+data.message)
     });
@@ -116,6 +118,9 @@ export default function DebugMarkers() {
       console.log(res);
     }
 
+    const loadingCircleSizeMeters = 1000;
+
+
   return (
     <><style>
       {`
@@ -135,10 +140,10 @@ export default function DebugMarkers() {
           </Popup>
         </Marker>) 
   : null*/}
-  {loadingAreas.map((la) => <CircleMarker 
+  {loadingAreas.map((la) => <Circle
         key={`${la.lat}_${la.lng}`} 
         center={[la.lat, la.lng]} 
-        radius={100}
+        radius={loadingCircleSizeMeters}
       />)}
        {existingPlaces?.data 
       && existingPlaces?.data?.length > 0 

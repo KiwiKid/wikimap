@@ -56,13 +56,10 @@ export const placeTypeRouter = createTRPCRouter({
           const openai = new OpenAIApi(configuration);
           try {
 
-            const prompt = `Create short lighthearted Lord of the Rings style backstory related to the following place information, dont include any Christian nationalism or crusades, 
-            when responding, use the format:
+            const prompt = `Write a short Lord of the Rings style backstory related to this place information, when responding use the format:
             TITLE:
             CONTENT:
-
-            ${fp.url} 
-            ${fp.summary}`
+            [${fp.url}] ${fp.summary}`
             
               const completion = await openai.createCompletion({
                 model: "text-davinci-003",
