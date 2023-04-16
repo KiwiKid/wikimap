@@ -23,6 +23,13 @@ function parseAIResponse(input: string): AIResponse {
 
 
 export const placeTypeRouter = createTRPCRouter({
+    delete: publicProcedure
+    .input(z.object({ id: z.string() }))
+      .mutation((m) => m.ctx.prisma.placeType.delete({
+        where: {
+          id: m.input.id
+        }
+      })),
     request: publicProcedure
       .input(z.object({ wiki_id: z.string(), type: z.string() }))
       .mutation(({ ctx, input }) => ctx.prisma.place.findFirstOrThrow({
@@ -30,6 +37,8 @@ export const placeTypeRouter = createTRPCRouter({
             wiki_id: true,
             summary: true,
             info: true,
+            lat: true,
+            lng: true
           },
           where: {
               wiki_id: input.wiki_id
@@ -47,7 +56,8 @@ export const placeTypeRouter = createTRPCRouter({
           const openai = new OpenAIApi(configuration);
           try {
 
-            const prompt = `Create short related Lord of the Rings style backstory related to the following place information, dont include any Christian nationalism or crusades, use the format
+            const prompt = `Create short lighthearted Lord of the Rings style backstory related to the following place information, dont include any Christian nationalism or crusades, 
+            when responding, use the format:
             TITLE:
             CONTENT:
 
@@ -66,7 +76,9 @@ export const placeTypeRouter = createTRPCRouter({
                 })
                 return {
                   result: 'Error - no response',
-                  wiki_id: fp.wiki_id
+                  wiki_id: fp.wiki_id,
+                  lat: fp.lat,
+                  lng: fp.lng,
                 }
               }
 
@@ -77,6 +89,8 @@ export const placeTypeRouter = createTRPCRouter({
                 return {
                   result: 'Error, no choices',
                   wiki_id: fp.wiki_id,
+                  lat: fp.lat,
+                  lng: fp.lng,
                   raw: completion
                 }
               }
@@ -88,6 +102,8 @@ export const placeTypeRouter = createTRPCRouter({
                 title: title,
                 content: content,
                 wiki_id: fp.wiki_id,
+                lat: fp.lat,
+                lng: fp.lng,
                 raw: completion
               }
 
@@ -95,6 +111,8 @@ export const placeTypeRouter = createTRPCRouter({
             return {
               result: JSON.stringify(err),
               wiki_id: fp.wiki_id,
+              lat: fp.lat,
+              lng: fp.lng,
             }
           }
         })
@@ -104,7 +122,13 @@ export const placeTypeRouter = createTRPCRouter({
           title: openAIRes.title || 'NA',
           content: openAIRes?.content || 'no content?',
           type: input.type,
-        }})
+        }}).then((res) => {
+          return {
+            ...res,
+            lat: openAIRes.lat,
+            lng: openAIRes.lng
+          }
+        })
       })
       ),
       getInside: publicProcedure

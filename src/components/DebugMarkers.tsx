@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import { Icon, LatLng, LatLngLiteral } from 'leaflet';
 import { useState } from 'react';
-import { Marker, Popup, useMapEvents } from 'react-leaflet';
+import { CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
 import locIconFile from 'src/styles/loc.png'
@@ -19,10 +19,14 @@ const locIcon = new Icon({
   iconAnchor: [12, 41],
 });
 
+interface Loading {
+  lat: number
+  lng: number
+}
 
 export default function DebugMarkers() {
 
-  const [isLoading, setIsLoading] = useState(true)
+  const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
 
   const processLatLng = api.latLng.process.useMutation({
     onSuccess: (newPlaces) => {
@@ -38,21 +42,22 @@ export default function DebugMarkers() {
       // await existingMarkers.refetch()
       processLatLng.mutate({ id: data.id})
 
-      setIsLoading(false)
     },
     onError: (data) => console.log('Woah, failed'+data.message),
-    onMutate: () => {
-      setIsLoading(true)
-    }
   });
   
     const map = useMapEvents({
         click: (e) => {
           if(e.latlng){
+            console.log('CLICK')
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);
             // L.marker([lat, lng], { icon }).addTo(map);
             createLatLng.mutate({ lat: newPoint.lat, lng: newPoint.lng})
+            setIsLoadingAreas(loadingAreas.concat(newPoint))
+            console.log('CLICK-newlatlng')
+
+            
           }else{
             console.error('e.latlng is nulll')
           }
@@ -62,14 +67,14 @@ export default function DebugMarkers() {
     const bounds = map.getBounds()
     const topLeft = bounds.getNorthWest()
     const bottomRight = bounds.getSouthEast()
-    const existingMarkers = api.latLng.getInside.useQuery({
+   /* const existingMarkers = api.latLng.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng
     },{
       cacheTime: Infinity
-    })
+    })*/
 
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
@@ -88,14 +93,23 @@ export default function DebugMarkers() {
       onSuccess: (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         setGenerations(generations?.concat(data));
+        setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
       },
       onError: (data) => console.error('Failed to placeType.request'+data.message)
     });
 
-    const onProcess = (pointId:string) => {
-        processLatLng.mutate({ id: pointId})
-    }
+    const deletePlaceType = api.placeType.delete.useMutation({
+      onSuccess: (data) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        setGenerations(generations?.filter((g) => g.id !== data.id));
+      },
+      onError: (data) => console.error('Failed to placeType.request'+data.message)
+    });
 
+    const onDeletePlaceType = (placeTypeId:string) => {
+      deletePlaceType.mutate({ id: placeTypeId})
+  }
+    
     const onGenerate = (wiki_id: string) => {
       const res = getPlaceType.mutate({ "wiki_id": wiki_id, "type": 'oldLegend'})
 
@@ -108,8 +122,7 @@ export default function DebugMarkers() {
 
       `}
     </style>
-      {isLoading && <div style={{zIndex: 999999}}>Loading...</div>}
-      {existingMarkers?.data 
+      {/*existingMarkers?.data 
       && existingMarkers?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingMarkers.data.map((m) => <Marker key={`${m.id}`} position={[m.lat, m.lng]} icon={customIcon}>
@@ -121,7 +134,12 @@ export default function DebugMarkers() {
           {isLoading && <div style={{zIndex: 999999}}>Loading...</div>}
           </Popup>
         </Marker>) 
-      : null}
+  : null*/}
+  {loadingAreas.map((la) => <CircleMarker 
+        key={`${la.lat}_${la.lng}`} 
+        center={[la.lat, la.lng]} 
+        radius={80}
+      />)}
        {existingPlaces?.data 
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -130,8 +148,16 @@ export default function DebugMarkers() {
           <button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
             onClick={() => onGenerate(m.place.wiki_id)}>generate</button>
+            
             <img className='rounded-lg' src={`${m.place.main_image_url}`} alt={m.place.wiki_url}/>
-            {m.placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm"><h1 className="text-1xl font-bold underline">{g.title}</h1>{g.content}</div>)}
+            {m.placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm">
+                  <h1 className="text-1xl font-bold underline">{g.title} ({loadingAreas.length})</h1>
+                  {g.content}
+                  <button 
+            className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
+            onClick={() => onDeletePlaceType(g.id)}>[delete]</button>
+                  
+            </div>)}
             [Generated with AI]
             <details><summary>{m.place.wiki_url}</summary>{m.place.summary}</details>
           </Popup>
