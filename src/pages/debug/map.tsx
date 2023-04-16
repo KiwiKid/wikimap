@@ -1,5 +1,6 @@
 import { NextPage } from "next"
 import dynamic from "next/dynamic";
+import MapDrawerContainer from "~/components/MapDrawerContainer";
 
 
 const DebugMapWithNoSSR = dynamic(() => import('../../components/DebugMapView'), {
@@ -9,7 +10,12 @@ const DebugMapWithNoSSR = dynamic(() => import('../../components/DebugMapView'),
 
 
 const DebugMap:NextPage = () => {
-    return <><DebugMapWithNoSSR /></>
+    return <>
+    <DebugMapWithNoSSR />
+    <MapDrawerContainer>
+      <>Woah</>
+      </MapDrawerContainer>
+</>
 }
 
 export default DebugMap

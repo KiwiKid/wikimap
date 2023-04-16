@@ -1,16 +1,14 @@
 import { type RouterOutputs } from '~/utils/api';
 import MapDrawer from '../pages/MapDrawer';
 
-interface MapContainerProps{
-  places:RouterOutputs['place']['getAll'] | null
+
+interface MapDrawerContainerProps {
+  children:React.ReactElement
 }
 
-const MapDrawerContainer = ({places}:MapContainerProps) => {
+const MapDrawerContainer = ({children}:MapDrawerContainerProps) => {
   return (<MapDrawer>
-          <div>
-            This is the map drawer
-            {!!places ? places?.map((p) => <div key={p.id}>{JSON.stringify(p)}</div>) : 'no places'}
-          </div>
+          {children}
         </MapDrawer>
     )
 

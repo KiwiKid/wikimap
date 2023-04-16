@@ -8,6 +8,11 @@ import mapWikiPage, { type MappedPage } from "~/utils/mapWikiPage";
 import { prisma } from "~/server/db";
 import { type PrismaClientValidationError } from "@prisma/client/runtime";
 
+interface WikiSearchResult {
+  lat: number,
+  lng: number,
+  pageNames: string[]
+}
 export const latLngRouter = createTRPCRouter({
   process: publicProcedure
     .input(z.object({ id: z.string().optional() }))
@@ -32,15 +37,22 @@ export const latLngRouter = createTRPCRouter({
                     status: 'no-matches'
                   }
                 })
-                console.error(`No match found for ${recordToProcess.lat} ${recordToProcess.lng}`)
-                return [];
-              }else{
+                return {
+                  pageNames: [],
+                  lat: recordToProcess.lat,
+                  lng: recordToProcess.lng
+                };
+              } else {
                 console.log(`Found ${res.length} matches`)
-                return res;
+                return {
+                  pageNames: res as unknown as string[],
+                  lat: recordToProcess.lat,
+                  lng: recordToProcess.lng
+                };
               }
           })
-          .then(async (pageName:string[]) => {
-            const newPlaces = await Promise.allSettled(pageName.map((pn) => WikiJS().page(pn)
+          .then(async (results:WikiSearchResult) => {
+            const newPlaces = await Promise.allSettled(results.pageNames.map((pn: string) => WikiJS().page(pn)
               .then(mapWikiPage)
               .then(async (fp:MappedPage) => {
 

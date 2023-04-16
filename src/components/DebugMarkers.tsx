@@ -34,6 +34,10 @@ export default function DebugMarkers() {
       newPlaces.forEach((np) => {
         getPlaceType.mutate({ "wiki_id": np.wiki_id, "type": 'oldLegend'})
       })
+      if(newPlaces.length == 0){
+        // ALERT - NO places found
+        loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng)
+      }
     },
     onError: (data) => console.error('Failed to latLng.process'+data.message),
   });

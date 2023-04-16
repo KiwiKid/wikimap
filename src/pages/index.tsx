@@ -5,17 +5,12 @@ import Head from "next/head";
 import { api, RouterOutputs } from "~/utils/api";
 import MapDrawerContainer from "../components/MapDrawerContainer";
 
-interface PageProps {
-  places:RouterOutputs['place']['getAll'] | null
-  // Define the component's props here
-}
-
 const MapWithNoSSR = dynamic(() => import('../components/MapView'), {
   ssr: false,
   loading: () => <div>Loading....</div>,
 });
 
-const Home: NextPage<PageProps> = () => {
+const Home: NextPage = () => {
  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
   
     const places = api.place.getAll.useQuery({
@@ -50,7 +45,9 @@ const Home: NextPage<PageProps> = () => {
       </Head>
       <main>
           <MapWithNoSSR places={places.data ?? null}/>
-          <MapDrawerContainer places={places?.data ?? null}/>
+            <MapDrawerContainer >
+            <div>{JSON.stringify(places.data)}</div>
+            </MapDrawerContainer>
       </main>
     </>
   );

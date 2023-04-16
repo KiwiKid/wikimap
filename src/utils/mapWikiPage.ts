@@ -30,12 +30,26 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
   if(!id){
     throw new Error('could not get id from wiki url')
   }
-    return {
+
+  const sortFirstFields = ['History','Content']
+  const filterFields = ['References', 'External Links']
+    const pageRes = {
       url: page.url(),
       id: id,
       wiki_id: page.raw.pageid,
       summary: (await page.content() as unknown as wikiContent[])
-            .map((wc) => `${wc.title.toUpperCase()}:${wc.content}`).join('').substring(0, CONTENT_LENGTH),
+            .sort((a,b) => {
+              if(sortFirstFields.includes(a.title)){
+                return -1;
+              }else if(sortFirstFields.includes(b.title)){
+                return 1;
+              }else{
+                return 0
+              }
+            })
+            .filter((wc) => !filterFields.includes(wc.title))
+            .map((wc) => `${wc.title.toUpperCase()}:${wc.content}`)
+            .join('').substring(0, CONTENT_LENGTH),
       info: await page.fullInfo(),
       mainImage: await page.mainImage(),
       images: await page.images(),
@@ -44,6 +58,9 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
       lat: coords.lat,
       lng: coords.lon,
     }
+
+
+    return pageRes;
 }
 
 export default mapWikiPage

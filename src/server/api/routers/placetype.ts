@@ -56,15 +56,17 @@ export const placeTypeRouter = createTRPCRouter({
           const openai = new OpenAIApi(configuration);
           try {
 
-            const prompt = `Write a short Lord of the Rings style backstory related to this place information, when responding use the format:
+            const prompt = `Write a short related Lord of the Rings story with themes from this place information, when responding use the format:
             TITLE:
             CONTENT:
+            This is the place information:
             [${fp.url}] ${fp.summary}`
             
               const completion = await openai.createCompletion({
                 model: "text-davinci-003",
                 prompt: prompt,
-                max_tokens: 500
+                max_tokens: 500,
+                
               })
 
               if(!completion || !completion.data || completion?.data?.choices?.length == 0 || !completion?.data?.choices[0]?.text){
