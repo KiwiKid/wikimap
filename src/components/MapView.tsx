@@ -15,10 +15,11 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 
 export interface MapViewProps {
   setVisiblePlaces:React.Dispatch<React.SetStateAction<PlaceResult[]>>
+  promptType:string
 }
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 
-export default function MapView({setVisiblePlaces}:MapViewProps) {
+export default function MapView({setVisiblePlaces, promptType}:MapViewProps) {
 
   return (
     <MapContainer center={WELLINGTON_CENTER} zoom={12} style={{ height: '100vh', width: '100%' }}>
@@ -26,7 +27,7 @@ export default function MapView({setVisiblePlaces}:MapViewProps) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <DebugMarkers setVisiblePlaces={setVisiblePlaces}/>
+      <DebugMarkers setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
     </MapContainer>
   );
 }

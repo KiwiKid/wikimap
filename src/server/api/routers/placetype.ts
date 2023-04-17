@@ -16,8 +16,8 @@ function parseAIResponse(input: string): AIResponse {
   const title = input.substring(startIndex, endIndex).trim();
 
   const contentIndex = input.indexOf("CONTENT:") + 9;
-  const content = input.substring(contentIndex).trim();
-
+  const content = input.substring(contentIndex).replaceAll(/\[(\d+)\]/, ' ').trim();
+  
   return { title, content };
 }
 
@@ -27,6 +27,8 @@ export const defaultPlaceTypeSelect = {
   title: true,
   content: true,
   type: true,
+  upvotes: true,
+  downvotes: true
 }
 
 export const defaultPlaceSelect = {
@@ -51,8 +53,8 @@ export const placeTypeRouter = createTRPCRouter({
         }
       })),
     request: publicProcedure
-      .input(z.object({ wiki_id: z.string(), type: z.string() }))
-      .mutation(({ ctx, input }) => ctx.prisma.place.findFirstOrThrow({
+      .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
+      .mutation(async ({ ctx, input }) => ctx.prisma.place.findFirstOrThrow({
           select: {
             wiki_id: true,
             summary: true,
@@ -64,7 +66,8 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: input.wiki_id
           }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-template-expressions
-        }).then((res) => WikiJS().findById(`${res.wiki_id}`).catch((err) => {
+      })
+      .then((res) => WikiJS().findById(`${res.wiki_id}`).catch((err) => {
           console.error(err)
           throw new Error('wiki js failed')
         })
@@ -75,6 +78,20 @@ export const placeTypeRouter = createTRPCRouter({
           });
           const openai = new OpenAIApi(configuration);
           try {
+
+            const promptRow = await ctx.prisma.prompt.findFirst({
+              select:{
+                text: true,
+                type: true
+              },
+              where: {
+                type: input.promptType
+              }
+            })
+
+            if(!promptRow){
+              throw new Error("No matching row")
+            }
 
             const prompt = `Write a short related Lord of the Rings story with themes from this place information, when responding use the format:
             TITLE:
@@ -140,7 +157,9 @@ export const placeTypeRouter = createTRPCRouter({
           wiki_id: openAIRes.wiki_id.toString(),
           title: openAIRes.title || 'NA',
           content: openAIRes?.content || 'no content?',
-          type: input.type,
+          type: input.promptType,
+          upvotes: 0,
+          downvotes: 0
         }}).then((res) => {
           return {
             ...res,
@@ -192,7 +211,28 @@ export const placeTypeRouter = createTRPCRouter({
                     placeTypes
                   }
                 }))
-              })
+              }),
+              upvote: publicProcedure
+                .input(z.object({ id: z.string() }))
+                .mutation((m) => m.ctx.prisma.placeType.update({
+                  data: {
+                    upvotes: { increment: 1}
+                  },
+                  where: {
+                    id: m.input.id
+                  }
+                })),
+                downvote: publicProcedure
+                  .input(z.object({ id: z.string() }))
+                  .mutation((m) => m.ctx.prisma.placeType.update({
+                    data: {
+                      downvotes: { increment: 1}
+                    },
+                    where: {
+                      id: m.input.id
+                    }
+                  }))
+                  
   })
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     

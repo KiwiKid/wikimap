@@ -13,14 +13,18 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592];
 
-export default function DebugMapView():React.ReactElement {
+interface DebugMapViewProps {
+  placeType:string
+}
+
+export default function DebugMapView({placeType}:DebugMapViewProps):React.ReactElement {
   return (
     <MapContainer center={WELLINGTON_CENTER} zoom={12} style={{ height: '100vh', width: '100%' }}>
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <DebugMarkers setVisiblePlaces={() => console.log('expression!')}/>
+      <DebugMarkers setVisiblePlaces={() => console.log('expression!')} placeType={placeType}/>
     </MapContainer>
   );
 }

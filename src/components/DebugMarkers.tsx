@@ -39,16 +39,17 @@ export interface PlaceResult {
 }
 interface DebugMarkersProps {
   setVisiblePlaces?:React.Dispatch<React.SetStateAction<PlaceResult[]>>
+  promptType:string
 }
 
-export default function DebugMarkers({setVisiblePlaces}:DebugMarkersProps) {
+export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkersProps) {
 
   const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
 
   const processLatLng = api.latLng.process.useMutation({
     onSuccess: (processResults) => {
       processResults.places.forEach((np) => {
-        getPlaceType.mutate({ "wiki_id": np.wiki_id, "type": 'oldLegend'})
+        getPlaceType.mutate({ "wiki_id": np.wiki_id, "promptType": promptType})
       })
         // ALERT - NO places found
       loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng)
@@ -134,7 +135,7 @@ export default function DebugMarkers({setVisiblePlaces}:DebugMarkersProps) {
   }
     
     const onGenerate = (wiki_id: string) => {
-      const res = getPlaceType.mutate({ "wiki_id": wiki_id, "type": 'oldLegend'})
+      const res = getPlaceType.mutate({ "wiki_id": wiki_id, "promptType": promptType})
 
       console.log(res);
     }

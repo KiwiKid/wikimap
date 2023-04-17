@@ -1,5 +1,7 @@
-import { NextPage } from "next"
+import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from "next"
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import { PlaceResult } from "~/components/DebugMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
@@ -9,14 +11,40 @@ const Map = dynamic(() => import('../components/MapView'), {
     loading: () => <div>Loading....</div>,
   });
 
-const DebugMap:NextPage = () => {
+const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
     const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
+
+    const router = useRouter();
+    if (router.isFallback) {
+      return <div>Loading...{promptType}</div>;
+    }
+
     return <>
-    <Map setVisiblePlaces={setVisiblePlaces}/>
+    <Map setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
     <MapDrawerContainer visiblePlaces={visiblePlaces}>
-      <>Woah</>
+      <>{promptType}</>
     </MapDrawerContainer>
 </>
+}
+
+interface PagePropsIn extends ParsedUrlQuery {
+  placeType:string
+}
+
+interface PageProps {
+  promptType:string
+}
+
+export function getStaticProps(
+  context:GetStaticPropsContext<PagePropsIn>
+): Promise<GetStaticPropsResult<PageProps>> {
+  // The params will have a 'promptType',
+  const promptType:string = typeof context.params?.promptType !== 'string' ? 'oldLegend' : context.params?.promptType
+  return Promise.resolve({
+    props: {
+      promptType: promptType
+    }
+  })
 }
 
 export function getStaticPaths() {
@@ -24,12 +52,18 @@ export function getStaticPaths() {
     paths: [
       { 
         params: {
-        promptType: 'oldLegend',
+          promptType: 'oldLegend',
+        }
+      },
+      {
+        params: {
+          promptType: 'wizard'
+        }
       }
-    }],
-    fallback: false,
+      ],
+    fallback: true,
   };
 }
 
 
-export default DebugMap
+export default MapPage
