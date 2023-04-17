@@ -28,7 +28,7 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
 }
 
 interface PagePropsIn extends ParsedUrlQuery {
-  placeType:string
+  promptType:string
 }
 
 interface PageProps {

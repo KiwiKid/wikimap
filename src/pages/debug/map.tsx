@@ -11,7 +11,7 @@ const DebugMapWithNoSSR = dynamic(() => import('../../components/DebugMapView'),
 
 const DebugMap:NextPage = () => {
     return <>
-    <DebugMapWithNoSSR placeType="oldLegend"/>
+    <DebugMapWithNoSSR promptType="oldLegend"/>
     <MapDrawerContainer visiblePlaces={[]}>
       <>Woah</>
       </MapDrawerContainer>
