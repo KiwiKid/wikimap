@@ -6,5 +6,5 @@
 
 */
 -- AlterTable
-ALTER TABLE "PlaceType" ADD COLUMN     "downvotes" INTEGER NOT NULL,
-ADD COLUMN     "upvotes" INTEGER NOT NULL;
+ALTER TABLE "PlaceType" ADD COLUMN     "downvotes" INTEGER NULL,
+ADD COLUMN     "upvotes" INTEGER NULL;

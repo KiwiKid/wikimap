@@ -9,7 +9,7 @@ interface MapDrawerContainerProps {
 }
 
 const MapDrawerContainer = ({children, visiblePlaces}:MapDrawerContainerProps) => {
-  return (<MapDrawer>
+  return (<MapDrawer header={<>{visiblePlaces.length}</>}>
         {visiblePlaces?.length > 0 ? JSON.stringify(visiblePlaces) : null}
           {children}
         </MapDrawer>

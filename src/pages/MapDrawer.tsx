@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable'
 import useWindowSize from "~/utils/useWindowSize";
 
 const CLOSED_DRAW_POS = -60;
 
-const MapDrawer = ({children}:React.PropsWithChildren) => {
+interface MapDrawerProps extends React.PropsWithChildren {
+  header: ReactNode
+}
+
+const MapDrawer = ({children, header}:MapDrawerProps) => {
    const [isOpen, setIsOpen] = useState(false);
    const PX_FROM_BOTTOM = -50
 
@@ -56,7 +60,7 @@ const MapDrawer = ({children}:React.PropsWithChildren) => {
       >
         <div style={{ zIndex: 999999}} className={`absolute top-full left-0 w-full h-80vh transition-transform transform ${isOpen ? 'translate-y-0' : 'translate-y-84'}`}>
           <div className="handle w-full h-12 bg-gray-300 cursor-pointer" >
-            <div className="w-20 h-1 mx-auto mt-3 bg-gray-700">Click me</div>
+            {header}
           </div>
           <div className="px-4 py-2 bg-gray-200 h-84">
             {children}
