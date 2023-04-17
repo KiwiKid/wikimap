@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "postinstall": "pnpm prisma generate",
-    "db:m:prod": "pnpm prisma migrate",
+    "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",
     "start": "next start"

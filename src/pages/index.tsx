@@ -9,6 +9,9 @@ export default function Home(): JSX.Element {
         <div>
               The website works by pulling information from Wikipedia articles related to each location and using ChatGPT to generate stories based on local information
           </div>
+          <div>
+            Every months the stories reset!
+          </div>
           <Link href={'/oldLegend'}>Old Legend</Link>
           <Link href={'/wizard'}>Wizard</Link>
           <Link href={'/lovecraftian'}>Lovecraft</Link>

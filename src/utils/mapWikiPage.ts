@@ -22,7 +22,6 @@ interface wikiContent {
 const CONTENT_LENGTH = 1500
 
 const mapWikiPage = async (page:Page):Promise<MappedPage> => {
-  console.log('start mapWikiPage')
   const coords = await page.coordinates()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const urlParts:string[] = page.url().split('/')

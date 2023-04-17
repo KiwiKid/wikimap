@@ -6,8 +6,8 @@ import { Configuration, OpenAIApi } from "openai";
 import { prisma } from "~/server/db";
 
 interface AIResponse {
-  title:string
-  content:string
+  title?:string
+  content?:string
 }
 
 function parseAIResponse(input: string): AIResponse {
@@ -89,9 +89,10 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
 
-            if(!promptRow){
-              throw new Error("No matching row")
-            }
+            console.log(promptRow)
+           // if(!promptRow){
+            //  throw new Error("No matching row")
+           // }
 
             const prompt = `Write a short related Lord of the Rings story with themes from this place information, when responding use the format:
             TITLE:
@@ -103,7 +104,6 @@ export const placeTypeRouter = createTRPCRouter({
                 model: "text-davinci-003",
                 prompt: prompt,
                 max_tokens: 500,
-                
               })
 
               if(!completion || !completion.data || completion?.data?.choices?.length == 0 || !completion?.data?.choices[0]?.text){
@@ -111,7 +111,7 @@ export const placeTypeRouter = createTRPCRouter({
                   data: completion.data
                 })
                 return {
-                  result: 'Error - no response',
+                  result: 'OPENAI-Error - no response',
                   wiki_id: fp.wiki_id,
                   lat: fp.lat,
                   lng: fp.lng,
@@ -123,7 +123,7 @@ export const placeTypeRouter = createTRPCRouter({
               if(!firstChoice || !firstChoice.text){
                 console.error('Failed to get choices')
                 return {
-                  result: 'Error, no choices',
+                  result: 'OPENAI-Error, no choices',
                   wiki_id: fp.wiki_id,
                   lat: fp.lat,
                   lng: fp.lng,
@@ -133,7 +133,11 @@ export const placeTypeRouter = createTRPCRouter({
 
 
               const { title, content } = parseAIResponse(firstChoice?.text)
-        
+              
+              if(!title || !content || title.length == 0 || content.length == 0){
+                console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
+              }
+              
               return {
                 title: title,
                 content: content,
@@ -155,8 +159,8 @@ export const placeTypeRouter = createTRPCRouter({
       ).then((openAIRes) => {
         return prisma.placeType.create({data: {
           wiki_id: openAIRes.wiki_id.toString(),
-          title: openAIRes.title || 'NA',
-          content: openAIRes?.content || 'no content?',
+          title: openAIRes.title || '',
+          content: openAIRes?.content || '',
           type: input.promptType,
           upvotes: 0,
           downvotes: 0
