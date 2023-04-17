@@ -44,3 +44,10 @@ model PlaceType {
     created_at      DateTime @default(now())
     updated_at      DateTime @updatedAt
 }
+
+model Prompt {
+    id              String @id @default(cuid())
+    text            String
+    type            String
+    active          String
+}

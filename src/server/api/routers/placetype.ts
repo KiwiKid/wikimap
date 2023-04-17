@@ -21,6 +21,26 @@ function parseAIResponse(input: string): AIResponse {
   return { title, content };
 }
 
+export const defaultPlaceTypeSelect = {
+  id: true,
+  wiki_id: true,
+  title: true,
+  content: true,
+  type: true,
+}
+
+export const defaultPlaceSelect = {
+  id: true,
+  lat: true,
+  lng: true,
+  status: true,
+  wiki_url: true,
+  summary: true,
+  wiki_id: true,
+  info: true,
+  main_image_url: true,
+}
+
 
 export const placeTypeRouter = createTRPCRouter({
     delete: publicProcedure
@@ -131,55 +151,48 @@ export const placeTypeRouter = createTRPCRouter({
       })
       ),
       getInside: publicProcedure
-      .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
-      .query(async ({ ctx, input}) => {
-        
-        const places = await ctx.prisma.place.findMany({
-          select: {
-            id: true,
-            wiki_url: true,
-            lat: true,
-            lng: true,
-            status:true,
-            summary: true,
-            info:true,
-            main_image_url: true,
-            wiki_id: true
-          },
-          where: {
-            lat: {
-              lt: input.topLeftLat,
-              gt: input.bottomRightLat,
+        .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+        .query(async ({ ctx, input}) => {
+          
+          const places = await ctx.prisma.place.findMany({
+            select: {
+              id: true,
+              wiki_url: true,
+              lat: true,
+              lng: true,
+              status:true,
+              summary: true,
+              info:true,
+              main_image_url: true,
+              wiki_id: true
             },
-            lng: {
-              lt: input.bottomRightLng,
-              gt: input.topLeftLng
+            where: {
+              lat: {
+                lt: input.topLeftLat,
+                gt: input.bottomRightLat,
+              },
+              lng: {
+                lt: input.bottomRightLng,
+                gt: input.topLeftLng
+              }
             }
-          }
-        });
+          });
 
-        const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
-                    select: {
-                      id: true,
-                      wiki_id: true,
-                      title: true,
-                      content: true,
-                      type: true,
-                    },
-                    where: {
-                      wiki_id: wiki_id
-                    }
-                  })
+          const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
+                      select: defaultPlaceTypeSelect,
+                      where: {
+                        wiki_id: wiki_id
+                      }
+                    })
 
-            return Promise.all(places.map(async (p) => {
-                const placeTypes = await getPlaceTypes(p.wiki_id);
-                return {
-                  place: p,
-                  placeTypes
-                }
-              }))
-            })
-            
+              return Promise.all(places.map(async (p) => {
+                  const placeTypes = await getPlaceTypes(p.wiki_id);
+                  return {
+                    place: p,
+                    placeTypes
+                  }
+                }))
+              })
   })
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     

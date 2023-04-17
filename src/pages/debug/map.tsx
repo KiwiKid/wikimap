@@ -12,7 +12,7 @@ const DebugMapWithNoSSR = dynamic(() => import('../../components/DebugMapView'),
 const DebugMap:NextPage = () => {
     return <>
     <DebugMapWithNoSSR />
-    <MapDrawerContainer>
+    <MapDrawerContainer visiblePlaces={[]}>
       <>Woah</>
       </MapDrawerContainer>
 </>

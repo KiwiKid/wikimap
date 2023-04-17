@@ -5,7 +5,7 @@ import { Circle, CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
 import locIconFile from 'src/styles/loc.png'
-import { PlaceType } from '@prisma/client';
+import { Place, PlaceType } from '@prisma/client';
 
 
 const customIcon = new Icon({
@@ -25,28 +25,40 @@ interface Loading {
   lng: number
 }
 
-export default function DebugMarkers() {
+interface PublicPlaceType {
+    id: string
+    title: string
+    content: string
+    type: string
+    wiki_id: string
+}
+
+export interface PlaceResult {
+  place: Place, 
+  placeTypes: PublicPlaceType[]
+}
+interface DebugMarkersProps {
+  setVisiblePlaces?:React.Dispatch<React.SetStateAction<PlaceResult[]>>
+}
+
+export default function DebugMarkers({setVisiblePlaces}:DebugMarkersProps) {
 
   const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
 
   const processLatLng = api.latLng.process.useMutation({
-    onSuccess: (newPlaces) => {
-      newPlaces.forEach((np) => {
+    onSuccess: (processResults) => {
+      processResults.places.forEach((np) => {
         getPlaceType.mutate({ "wiki_id": np.wiki_id, "type": 'oldLegend'})
       })
-      if(newPlaces.length == 0){
         // ALERT - NO places found
-        loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng)
-      }
+      loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng)
     },
     onError: (data) => console.error('Failed to latLng.process'+data.message),
   });
 
   const createLatLng = api.latLng.createLatLng.useMutation({
     onSuccess: (data) =>  {
-      // await existingMarkers.refetch()
       processLatLng.mutate({ id: data.id})
-
     },
     onError: (data) => console.log('Woah, failed'+data.message),
   });
@@ -88,7 +100,12 @@ export default function DebugMarkers() {
       bottomRightLng: bottomRight.lng
     },{
       cacheTime: Infinity,
-      refetchInterval: 10000
+      refetchInterval: 10000,
+      onSuccess: () => {
+        if(setVisiblePlaces){
+          setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
+        }
+      }
     })
 
     const [generations, setGenerations] = useState<PlaceType[]|null>();

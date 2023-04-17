@@ -20,7 +20,7 @@ export default function DebugMapView():React.ReactElement {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <DebugMarkers/>
+      <DebugMarkers setVisiblePlaces={() => console.log('expression!')}/>
     </MapContainer>
   );
 }

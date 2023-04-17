@@ -81,9 +81,13 @@ export const latLngRouter = createTRPCRouter({
                 console.error('Some places failed to create', { failures });
               }
 
-              return newPlaces
-                .filter((r) => r.status === 'fulfilled')
-                .map((r) => (r as PromiseFulfilledResult<Place>).value);
+              return {
+                places: newPlaces
+                  .filter((r) => r.status === 'fulfilled')
+                  .map((r) => (r as PromiseFulfilledResult<Place>).value)
+                  , lat: results.lat
+                  , lng: results.lng
+              }
             })
       }),
     getSummary: publicProcedure

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { defaultPlaceSelect } from "./placetype";
 
 export const placeRouter = createTRPCRouter({
     /*search: publicProcedure
@@ -21,17 +22,7 @@ export const placeRouter = createTRPCRouter({
       .input(z.object({ page: z.number().min(0), length: z.number().min(0).max(50) }))
       .query(({ ctx }) => ctx.prisma.place.findMany({
           take: 1000,
-          select: {
-            id: true,
-            lat: true,
-            lng: true,
-            status: true,
-            wiki_url: true,
-            summary: true,
-            wiki_id: true,
-            info: true,
-            main_image_url: true,
-          }
+          select: defaultPlaceSelect
         })),
     getInside: publicProcedure
     .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
