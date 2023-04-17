@@ -11,12 +11,12 @@ interface AIResponse {
 }
 
 function parseAIResponse(input: string): AIResponse {
-  const startIndex = (input.indexOf("TITLE:") || input.indexOf('Title:')) + 7;
-  const endIndex = (input.indexOf("CONTENT:")|| input.indexOf('Content:')) - 1;
+  const startIndex = (input.indexOf("\nTITLE:") || input.indexOf('\nTitle:')) + 7;
+  const endIndex = (input.indexOf("\nCONTENT:")|| input.indexOf('\nContent:')) - 1;
   const title = input.substring(startIndex, endIndex).trim();
 
   const contentIndex = input.indexOf("CONTENT:") + 9;
-  const content = input.substring(contentIndex).replaceAll(/\[(\d+)\]/, ' ').trim();
+  const content = input.substring(contentIndex).replaceAll(/\[(\d+)\]/g, ' ').trim();
   
   return { title, content };
 }
@@ -131,13 +131,12 @@ export const placeTypeRouter = createTRPCRouter({
                 }
               }
 
-
               const { title, content } = parseAIResponse(firstChoice?.text)
               
               if(!title || !content || title.length == 0 || content.length == 0){
                 console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
               }
-              
+
               return {
                 title: title,
                 content: content,
