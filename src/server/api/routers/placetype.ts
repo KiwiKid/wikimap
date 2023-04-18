@@ -167,6 +167,7 @@ export const placeTypeRouter = createTRPCRouter({
           upvotes: 0,
           downvotes: 0,
           failed_ai_res: openAIRes.raw,
+          status: openAIRes.title ? 'active' : 'failed'
         }}).then((res) => {
           return {
             ...res,
