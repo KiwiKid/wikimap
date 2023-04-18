@@ -11,7 +11,7 @@ interface AIResponse {
 }
 
 function parseAIResponse(input: string): AIResponse {
-  const trimedInput = input.trim();
+  const trimedInput = input.replace(/^\n+/, '').trim();
   const startIndex = (trimedInput.indexOf("TITLE: ") || trimedInput.indexOf('Title:')) + 7;
   const endIndex = (trimedInput.indexOf("CONTENT: ")|| trimedInput.indexOf('Content: ')) - 1;
   const title = trimedInput.substring(startIndex, endIndex).trim();
