@@ -11,12 +11,13 @@ interface AIResponse {
 }
 
 function parseAIResponse(input: string): AIResponse {
-  const startIndex = (input.indexOf("\nTITLE:") || input.indexOf('\nTitle:')) + 7;
-  const endIndex = (input.indexOf("\nCONTENT:")|| input.indexOf('\nContent:')) - 1;
-  const title = input.substring(startIndex, endIndex).trim();
+  const trimedInput = input.trim();
+  const startIndex = (trimedInput.indexOf("TITLE: ") || trimedInput.indexOf('Title:')) + 7;
+  const endIndex = (trimedInput.indexOf("CONTENT: ")|| trimedInput.indexOf('Content: ')) - 1;
+  const title = trimedInput.substring(startIndex, endIndex).trim();
 
-  const contentIndex = input.indexOf("CONTENT:") + 9;
-  const content = input.substring(contentIndex).replaceAll(/\[(\d+)\]/g, ' ').trim();
+  const contentIndex = trimedInput.indexOf("CONTENT:") + 9;
+  const content = trimedInput.substring(contentIndex).replaceAll(/\[(\d+)\]/g, ' ').trim();
   
   return { title, content };
 }
@@ -94,11 +95,13 @@ export const placeTypeRouter = createTRPCRouter({
             //  throw new Error("No matching row")
            // }
 
-            const prompt = `Write a short related Lord of the Rings story with themes from this place information, when responding use the format:
+            const prompt = `In the style of J.R.R. Tolkien's "Lord of the Rings," write an exciting short story. Include some details from the [place information] below. 
+            This is the [place information]:
+            [${fp.url}] ${fp.summary}
+
+            When responding use the format:
             TITLE:
-            CONTENT:
-            This is the place information:
-            [${fp.url}] ${fp.summary}`
+            CONTENT:`
             
               const completion = await openai.createCompletion({
                 model: "text-davinci-003",
@@ -127,7 +130,7 @@ export const placeTypeRouter = createTRPCRouter({
                   wiki_id: fp.wiki_id,
                   lat: fp.lat,
                   lng: fp.lng,
-                  raw: completion
+                  raw: JSON.stringify(completion.data.choices)
                 }
               }
 
@@ -143,7 +146,7 @@ export const placeTypeRouter = createTRPCRouter({
                 wiki_id: fp.wiki_id,
                 lat: fp.lat,
                 lng: fp.lng,
-                raw: completion
+                raw: firstChoice?.text
               }
 
           } catch(err) {
@@ -162,7 +165,8 @@ export const placeTypeRouter = createTRPCRouter({
           content: openAIRes?.content || '',
           type: input.promptType,
           upvotes: 0,
-          downvotes: 0
+          downvotes: 0,
+          failed_ai_res: openAIRes.raw,
         }}).then((res) => {
           return {
             ...res,

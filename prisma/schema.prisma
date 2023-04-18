@@ -45,6 +45,8 @@ model PlaceType {
     updated_at      DateTime @updatedAt
     upvotes         Int @default(0)
     downvotes       Int @default(0)
+    failed_ai_res   String?
+    status          String  @default("active")
 }
 
 model Prompt {
