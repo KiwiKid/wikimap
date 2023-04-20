@@ -1,13 +1,12 @@
 import 'leaflet/dist/leaflet.css';
-import L, { Icon, LatLng, LatLngLiteral } from 'leaflet';
+import L, { Icon, LatLng } from 'leaflet';
 import { useState } from 'react';
-import { Circle, CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { Circle, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
 import loadingIconFile from 'src/styles/loading.gif'
 import locIconFile from 'src/styles/loc.png'
 import { Place, PlaceType } from '@prisma/client';
-
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
