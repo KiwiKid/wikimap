@@ -12,9 +12,10 @@ export default function Home(): JSX.Element {
           <div>
             Every months the stories reset!
           </div>
-          <Link href={'/oldLegend'}>Old Legend</Link>
-          <Link href={'/wizard'}>Wizard</Link>
-          <Link href={'/lovecraftian'}>Lovecraft</Link>
+          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/oldLegend'}>
+            Old Legend</Link>
+          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/wizard'}>Wizard</Link>
+          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/lovecraftian'}>Lovecraft</Link>
     </>
   );
 }
