@@ -18,35 +18,47 @@ export const placeRouter = createTRPCRouter({
             }
         })
       }),*/
-      getAll: publicProcedure
+    getAll: publicProcedure
       .input(z.object({ page: z.number().min(0), length: z.number().min(0).max(50) }))
       .query(({ ctx }) => ctx.prisma.place.findMany({
           take: 1000,
           select: defaultPlaceSelect
         })),
+    /*createTypeForPlace: publicProcedure
+        .input(z.object({ placeId: z.string() }))
+        .mutation(({ ctx, input }) => {ctx.prisma.place.findFirstOrThrow({
+          select: {
+            wiki_id: true
+          },
+          where: {
+            id: input.placeId
+          }
+        })).then((res) => {
+
+        }),*/
     getInside: publicProcedure
-    .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
-    .query(({ ctx, input}) => ctx.prisma.place.findMany({
-      select: {
-        id: true,
-        wiki_url: true,
-        lat: true,
-        lng: true,
-        status:true,
-        summary: true,
-        info:true,
-        main_image_url: true,
-        wiki_id: true
-      },
-      where: {
-        lat: {
-          lt: input.topLeftLat,
-          gt: input.bottomRightLat,
+      .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+      .query(({ ctx, input}) => ctx.prisma.place.findMany({
+        select: {
+          id: true,
+          wiki_url: true,
+          lat: true,
+          lng: true,
+          status:true,
+          summary: true,
+          info:true,
+          main_image_url: true,
+          wiki_id: true
         },
-        lng: {
-          lt: input.bottomRightLng,
-          gt: input.topLeftLng
+        where: {
+          lat: {
+            lt: input.topLeftLat,
+            gt: input.bottomRightLat,
+          },
+          lng: {
+            lt: input.bottomRightLng,
+            gt: input.topLeftLng
+          }
         }
-      }
     }))
   })

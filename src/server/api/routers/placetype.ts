@@ -44,6 +44,16 @@ export const defaultPlaceSelect = {
   main_image_url: true,
 }
 
+interface OpenAIRes {
+    title?: string,
+    content?: string,
+    wiki_id: string,
+    lat: number,
+    lng: number,
+    raw: string
+    status: string
+}
+
 
 export const placeTypeRouter = createTRPCRouter({
     delete: publicProcedure
@@ -55,9 +65,11 @@ export const placeTypeRouter = createTRPCRouter({
       })),
     request: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
-      .mutation(async ({ ctx, input }) => ctx.prisma.place.findFirstOrThrow({
+      .mutation(async ({ ctx, input }) => {
+        const place = await ctx.prisma.place.findFirstOrThrow({
           select: {
             wiki_id: true,
+            wiki_url: true,
             summary: true,
             info: true,
             lat: true,
@@ -65,19 +77,13 @@ export const placeTypeRouter = createTRPCRouter({
           },
           where: {
               wiki_id: input.wiki_id
-          }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-template-expressions
-      })
-      .then((res) => WikiJS().findById(`${res.wiki_id}`).catch((err) => {
-          console.error(err)
-          throw new Error('wiki js failed')
-        })
-        .then(mapWikiPage)
-        .then(async (fp) => {
+          }});
+
           const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
           });
           const openai = new OpenAIApi(configuration);
+          let openAIRes:OpenAIRes
           try {
 
             const promptRow = await ctx.prisma.prompt.findFirst({
@@ -97,7 +103,7 @@ export const placeTypeRouter = createTRPCRouter({
 
             const prompt = `In the style of J.R.R. Tolkien's "Lord of the Rings," write an exciting short story. Include some details from the [place information] below. 
             This is the [place information]:
-            [${fp.url}] ${fp.summary}
+            [${place.wiki_url}] ${place.summary}
 
             When responding use the format:
             TITLE:
@@ -115,21 +121,23 @@ export const placeTypeRouter = createTRPCRouter({
                 })
                 return {
                   result: 'OPENAI-Error - no response',
-                  wiki_id: fp.wiki_id,
-                  lat: fp.lat,
-                  lng: fp.lng,
+                  wiki_id: place.wiki_id,
+                  lat: place.lat,
+                  lng: place.lng,
+                  status: 'error-1'
                 }
               }
 
               const firstChoice = completion.data.choices[0]
-
+              
               if(!firstChoice || !firstChoice.text){
                 console.error('Failed to get choices')
                 return {
                   result: 'OPENAI-Error, no choices',
-                  wiki_id: fp.wiki_id,
-                  lat: fp.lat,
-                  lng: fp.lng,
+                  status: 'error-2',
+                  wiki_id: place.wiki_id,
+                  lat: place.lat,
+                  lng: place.lng,
                   raw: JSON.stringify(completion.data.choices)
                 }
               }
@@ -140,25 +148,26 @@ export const placeTypeRouter = createTRPCRouter({
                 console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
               }
 
-              return {
+              openAIRes = {
                 title: title,
                 content: content,
-                wiki_id: fp.wiki_id,
-                lat: fp.lat,
-                lng: fp.lng,
+                status: 'success',
+                wiki_id: place.wiki_id,
+                lat: place.lat,
+                lng: place.lng,
                 raw: firstChoice?.text
               }
 
           } catch(err) {
-            return {
-              result: JSON.stringify(err),
-              wiki_id: fp.wiki_id,
-              lat: fp.lat,
-              lng: fp.lng,
+            openAIRes = {
+              status: 'error-3',
+              wiki_id: place.wiki_id,
+              lat: place.lat,
+              lng: place.lng,
+              raw: JSON.stringify(err),
             }
           }
-        })
-      ).then((openAIRes) => {
+
         return prisma.placeType.create({data: {
           wiki_id: openAIRes.wiki_id.toString(),
           title: openAIRes.title || '',
@@ -167,7 +176,7 @@ export const placeTypeRouter = createTRPCRouter({
           upvotes: 0,
           downvotes: 0,
           failed_ai_res: openAIRes.raw,
-          status: openAIRes.title ? 'active' : 'failed'
+          status: openAIRes.status
         }}).then((res) => {
           return {
             ...res,
@@ -175,8 +184,7 @@ export const placeTypeRouter = createTRPCRouter({
             lng: openAIRes.lng
           }
         })
-      })
-      ),
+      }),
       getInside: publicProcedure
         .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
         .query(async ({ ctx, input}) => {

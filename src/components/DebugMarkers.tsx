@@ -54,7 +54,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         // ALERT - NO places found
       loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng)
     },
-    onError: (data) => console.error('Failed to latLng.process'+data.message),
+    onError: (data) => console.error('Failed to latLng.process', {res: data}),
   });
 
   const createLatLng = api.latLng.createLatLng.useMutation({
