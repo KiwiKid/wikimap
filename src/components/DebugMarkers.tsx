@@ -56,7 +56,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
   const processLatLng = api.latLng.process.useMutation({
     onSuccess: (processResults) => {
       processResults.places.forEach((np) => {
-        getPlaceType.mutate({ "wiki_id": np.wiki_id, "promptType": promptType})
+        getPlaceTypeStory.mutate({ "wiki_id": np.wiki_id, "promptType": promptType})
       })
         // ALERT - NO places found
       setIsLoadingAreas(loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng))
@@ -131,14 +131,14 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
     const [generations, setGenerations] = useState<PlaceType[]|null>();
 
 
-    const getPlaceType = api.placeType.request.useMutation({
+    const getPlaceTypeStory = api.placeType.getAndPopulateStory.useMutation({
       onSuccess: (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         setGenerations(generations?.concat([data.placeType]));
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
         
       },
-      onError: (data) => console.error('Failed to placeType.request', { data })
+      onError: (data) => console.error('Failed to placeType.request', { data }),
     });
 
     const deletePlaceType = api.placeType.delete.useMutation({
@@ -154,9 +154,9 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
   }
     
     const onGenerate = (wiki_id: string) => {
-      const res = getPlaceType.mutate({ "wiki_id": wiki_id, "promptType": promptType})
+      getPlaceTypeStory.mutate({ "wiki_id": wiki_id, "promptType": promptType})
 
-      console.log(res);
+      //console.log(res);
     }
 
     const loadingCircleSizeMeters = 1000;

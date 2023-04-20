@@ -63,7 +63,7 @@ export const placeTypeRouter = createTRPCRouter({
           id: m.input.id
         }
       })),
-    request: publicProcedure
+    getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
         const place = await ctx.prisma.place.findFirstOrThrow({
@@ -109,10 +109,14 @@ export const placeTypeRouter = createTRPCRouter({
             TITLE:
             CONTENT:`
             
-              const completion = await openai.createCompletion({
-                model: "text-davinci-003",
-                prompt: prompt,
-                max_tokens: 500,
+              const completion = await openai.createChatCompletion({
+                model: "gpt-3.5-turbo",
+                messages: [{
+                  role: "system",
+                  content: prompt
+                }],
+                max_tokens: 300,
+                temperature: 0.8,
               })
 
               if(!completion || !completion.data || completion?.data?.choices?.length == 0 || !completion?.data?.choices[0]?.text){
@@ -130,7 +134,7 @@ export const placeTypeRouter = createTRPCRouter({
 
               const firstChoice = completion.data.choices[0]
               
-              if(!firstChoice || !firstChoice.text){
+              if(!firstChoice || !firstChoice.message || !firstChoice.message.content){
                 console.error('Failed to get choices')
                 openAIRes =  {
                   status: 'error-2',
@@ -141,10 +145,10 @@ export const placeTypeRouter = createTRPCRouter({
                 }
               }else{
 
-                const { title, content } = parseAIResponse(firstChoice?.text)
+                const { title, content } = parseAIResponse(firstChoice?.message.content)
                 
                 if(!title || !content || title.length == 0 || content.length == 0){
-                  console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
+                  console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.message.content})
                 }
 
                 openAIRes = {
@@ -154,7 +158,7 @@ export const placeTypeRouter = createTRPCRouter({
                   wiki_id: place.wiki_id,
                   lat: place.lat,
                   lng: place.lng,
-                  raw: firstChoice?.text
+                  raw: firstChoice?.message.content
                 }
               }
 
