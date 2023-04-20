@@ -6,7 +6,7 @@ dependencies:
     version: 4.12.0(prisma@4.12.0)
   '@supabase/postgrest-js':
     specifier: github:supabase/postgrest-js
-    version: github.com/supabase/postgrest-js/320ac92ea7b86e3c77a2a248483c330603607a02
+    version: github.com/supabase/postgrest-js/ad746086ceb7a56c126e547f1aec9c01e0b54286
   '@tanstack/react-query':
     specifier: ^4.28.0
     version: 4.28.0(react-dom@18.2.0)(react@18.2.0)
@@ -25,6 +25,9 @@ dependencies:
   '@types/leaflet':
     specifier: ^1.9.3
     version: 1.9.3
+  '@vercel/analytics':
+    specifier: ^1.0.0
+    version: 1.0.0(react@18.2.0)
   leaflet:
     specifier: ^1.9.3
     version: 1.9.3
@@ -656,6 +659,14 @@ packages:
       '@typescript-eslint/types': 5.57.1
       eslint-visitor-keys: 3.4.0
     dev: true
+
+  /@vercel/analytics@1.0.0(react@18.2.0):
+    resolution: {integrity: sha512-RQmj7pv82JwGDHrnKeRc6TtSw2U7rWNubc2IH0ernTzWTj02yr9zvIYiYJeztsBzrJtWv7m8Nz6vxxb+cdEtJw==}
+    peerDependencies:
+      react: ^16.8||^17||^18
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /acorn-jsx@5.3.2(acorn@8.8.2):
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3326,8 +3337,8 @@ packages:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
-  github.com/supabase/postgrest-js/320ac92ea7b86e3c77a2a248483c330603607a02:
-    resolution: {tarball: https://codeload.github.com/supabase/postgrest-js/tar.gz/320ac92ea7b86e3c77a2a248483c330603607a02}
+  github.com/supabase/postgrest-js/ad746086ceb7a56c126e547f1aec9c01e0b54286:
+    resolution: {tarball: https://codeload.github.com/supabase/postgrest-js/tar.gz/ad746086ceb7a56c126e547f1aec9c01e0b54286}
     name: '@supabase/postgrest-js'
     version: 0.0.0-automated
     dependencies:
