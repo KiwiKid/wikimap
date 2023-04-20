@@ -9,7 +9,9 @@
     "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "start:ai": "pnpm supabase functions serve completePlaceType",
+    "deploy:ai": "pnpm supabase functions deploy completePlaceType"
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",

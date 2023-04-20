@@ -86,7 +86,7 @@ export const placeTypeRouter = createTRPCRouter({
           let openAIRes:OpenAIRes
           try {
 
-            const promptRow = await ctx.prisma.prompt.findFirst({
+          /*  const promptRow = await ctx.prisma.prompt.findFirst({
               select:{
                 text: true,
                 type: true
@@ -96,7 +96,7 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
 
-            console.log(promptRow)
+            console.log(promptRow)*/
            // if(!promptRow){
             //  throw new Error("No matching row")
            // }

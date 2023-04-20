@@ -1,0 +1,14 @@
+POST https://[PROJECT_ID].functions.supabase.co/completePlaceType
+Content-Type: application/json
+Authorization: Bearer [ANON-YWT]
+
+{
+  "data": {
+    "placeType":{
+      "wiki_id": "Woah"
+    },
+    "prompt": {
+      "prompt": "prompt"
+    }
+  }
+}
