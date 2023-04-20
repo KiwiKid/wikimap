@@ -4,12 +4,20 @@ import { useState } from 'react';
 import { Circle, CircleMarker, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
+import loadingIconFile from 'src/styles/loading.gif'
 import locIconFile from 'src/styles/loc.png'
 import { Place, PlaceType } from '@prisma/client';
 
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+
+const loadingIcon = new Icon({
+  iconUrl: loadingIconFile.src,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
@@ -74,11 +82,19 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
             createLatLng.mutate({ lat: newPoint.lat, lng: newPoint.lng})
             setIsLoadingAreas(loadingAreas.concat(newPoint))
             console.log('CLICK-newlatlng')
-
-            
           }else{
             console.error('e.latlng is nulll')
           }
+        },
+        zoomend: (e) => {
+          void (async () => {
+            await existingPlaces.refetch()
+          })()
+        },
+        dragend: (e) => {
+          void (async () => {
+            await existingPlaces.refetch()
+          })()
         }
     });
 
@@ -113,11 +129,11 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
 
     const getPlaceType = api.placeType.request.useMutation({
-      onSuccess: async (data) => {
+      onSuccess: (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        setGenerations(generations?.concat(data));
+        setGenerations(generations?.concat([data.placeType]));
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
-        await existingPlaces.refetch()
+        
       },
       onError: (data) => console.error('Failed to placeType.request'+data.message)
     });

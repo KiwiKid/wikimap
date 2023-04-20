@@ -44,7 +44,7 @@ export const defaultPlaceSelect = {
   main_image_url: true,
 }
 
-interface OpenAIRes {
+type OpenAIRes = {
     title?: string,
     content?: string,
     wiki_id: string,
@@ -119,12 +119,12 @@ export const placeTypeRouter = createTRPCRouter({
                 console.error('Open API error response', {
                   data: completion.data
                 })
-                return {
-                  result: 'OPENAI-Error - no response',
+                openAIRes = {
                   wiki_id: place.wiki_id,
                   lat: place.lat,
                   lng: place.lng,
-                  status: 'error-1'
+                  status: 'error-no-response',
+                  raw: 'none'
                 }
               }
 
@@ -132,30 +132,30 @@ export const placeTypeRouter = createTRPCRouter({
               
               if(!firstChoice || !firstChoice.text){
                 console.error('Failed to get choices')
-                return {
-                  result: 'OPENAI-Error, no choices',
+                openAIRes =  {
                   status: 'error-2',
                   wiki_id: place.wiki_id,
                   lat: place.lat,
                   lng: place.lng,
                   raw: JSON.stringify(completion.data.choices)
                 }
-              }
+              }else{
 
-              const { title, content } = parseAIResponse(firstChoice?.text)
-              
-              if(!title || !content || title.length == 0 || content.length == 0){
-                console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
-              }
+                const { title, content } = parseAIResponse(firstChoice?.text)
+                
+                if(!title || !content || title.length == 0 || content.length == 0){
+                  console.error('OPENAI-Could not parseAIResponse', {aires: firstChoice?.text})
+                }
 
-              openAIRes = {
-                title: title,
-                content: content,
-                status: 'success',
-                wiki_id: place.wiki_id,
-                lat: place.lat,
-                lng: place.lng,
-                raw: firstChoice?.text
+                openAIRes = {
+                  title: title,
+                  content: content,
+                  status: 'success',
+                  wiki_id: place.wiki_id,
+                  lat: place.lat,
+                  lng: place.lng,
+                  raw: firstChoice?.text
+                }
               }
 
           } catch(err) {
@@ -179,7 +179,7 @@ export const placeTypeRouter = createTRPCRouter({
           status: openAIRes.status
         }}).then((res) => {
           return {
-            ...res,
+            placeType: res,
             lat: openAIRes.lat,
             lng: openAIRes.lng
           }
@@ -228,6 +228,7 @@ export const placeTypeRouter = createTRPCRouter({
                   }
                 }))
               }),
+
               upvote: publicProcedure
                 .input(z.object({ id: z.string() }))
                 .mutation((m) => m.ctx.prisma.placeType.update({
