@@ -60,16 +60,20 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         getPlaceType.mutate({ "wiki_id": np.wiki_id, "promptType": promptType})
       })
         // ALERT - NO places found
-      loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng)
+      setIsLoadingAreas(loadingAreas.filter((la) => la.lat == processResults.lat && la.lng == processResults.lng))
     },
-    onError: (data) => console.error('Failed to latLng.process', {res: data}),
+    onError: (data) => console.error('Failed to latLng.process here ', {res: data}),
   });
 
   const createLatLng = api.latLng.createLatLng.useMutation({
     onSuccess: (data) =>  {
       processLatLng.mutate({ id: data.id})
     },
-    onError: (data) => console.log('Woah, failed'+data.message),
+    onError: (data) => {
+      // Bit of a hack, we don't know which failed
+      setIsLoadingAreas([]);
+      console.log('Woah, failed'+data.message)
+    }
   });
   
     const map = useMapEvents({
@@ -104,7 +108,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
    /* const existingMarkers = api.latLng.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
-      bottomRightLat: bottomRight.lat,
+      bottomRightLat: b{ottomRight.lat,
       bottomRightLng: bottomRight.lng
     },{
       cacheTime: Infinity
@@ -135,7 +139,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
         
       },
-      onError: (data) => console.error('Failed to placeType.request'+data.message)
+      onError: (data) => console.error('Failed to placeType.request', { data })
     });
 
     const deletePlaceType = api.placeType.delete.useMutation({
