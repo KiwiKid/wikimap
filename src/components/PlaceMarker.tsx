@@ -63,7 +63,7 @@ export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
                 
 </div>)
             [Generated with AI]*/}
-            <details>{wikiPlace.title}<summary></summary>{wikiPlace.summary}</details>
+            <details>{wikiPlace.wiki_id}<summary></summary>{JSON.stringify(wikiPlace.summary)}</details>
         </Popup>
 
     </Marker>)
