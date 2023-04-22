@@ -65,16 +65,6 @@ export const placeTypeRouter = createTRPCRouter({
           id: m.input.id
         }
       })),
-      setAIProcess: publicProcedure
-        .input(z.object({ placeTypeId: z.string()}))
-        .mutation(({input, ctx}) => ctx.prisma.placeType.update({
-          where: {
-            id: input.placeTypeId
-          },
-          data: {
-            status: 'ai-complete'
-          }
-        })),
       processPageName: publicProcedure
         .input(z.object({ pageName: z.string()}))
         .mutation(({input, ctx}) => WikiJS().page(input.pageName)
@@ -107,12 +97,12 @@ export const placeTypeRouter = createTRPCRouter({
                     lng: fp.lng,
                     wiki_id: fp.wiki_id.toString(),
                     wiki_url: fp.url,
-                    status: 'ai-pending',
                     info: JSON.stringify(fp.info),
                     summary: fp.summary,
+                    status: 'loaded',
                     main_image_url: fp.mainImage || '',
                   }
-                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
+                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lng}`)
 
                 return await ctx.prisma.place.create({data: newItem})
               }
