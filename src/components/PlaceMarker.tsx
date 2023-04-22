@@ -178,18 +178,20 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}
         eventHandlers={{
             click: (e) => {
+                setIsLoadingStory(true)
                 requestStory()
+                setIsLoadingStory(false)
             },
           }}
         />
     }
 
-    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={redIcon}>
+    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={isLoadingStory ? loadingIcon : redIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
 
             <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm">
-                <h1 className="max-h-24 text-1xl font-bold underline ">{g.title}</h1>
+                <h1 className="max-h-24 font-bold underline ">{g.title}</h1>
                 {g.content}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"

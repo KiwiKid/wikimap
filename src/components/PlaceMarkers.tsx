@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css';
-import L, { Icon, LatLng } from 'leaflet';
-import { useState } from 'react';
+import L, { Icon, LatLng, Map } from 'leaflet';
+import { useCallback, useEffect, useState } from 'react';
 import { Circle, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png'
@@ -52,11 +52,31 @@ interface DebugMarkersProps {
   promptType:string
 }
 
+interface MapPosition {
+  topLeftLat:number
+  topLeftLng:number
+  bottomRightLat:number
+  bottomRightLng:number
+}
+
 const loadingCircleSizeMeters = 1000;
+
+const getLoadPoints = (map:Map) => {
+  const bounds = map.getBounds()
+    const topLeft = bounds.getNorthWest()
+    const bottomRight = bounds.getSouthEast()
+  return {
+    topLeftLat: topLeft.lat,
+    topLeftLng: topLeft.lng,
+    bottomRightLat: bottomRight.lat,
+    bottomRightLng: bottomRight.lng,
+  }
+}
 
 export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
+
     
     const map = useMapEvents({
       click: (e) => {
@@ -72,21 +92,31 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
         }
       },
       zoomend: (e) => {
-        void (async () => {
-          await existingPlaces.refetch()
-        })()
+        const handler = setTimeout(() => {
+          setDelayedMapPosition(getLoadPoints(map))
+        }, 400)
+        return () => {
+          clearTimeout(handler);
+        };
       },
       dragend: (e) => {
-        void (async () => {
-          await existingPlaces.refetch()
-        })()
+        const handler = setTimeout(() => {
+          setDelayedMapPosition(getLoadPoints(map))
+        }, 400)
+        return () => {
+          clearTimeout(handler);
+        };
       }
     });
+
+
 
     const bounds = map.getBounds()
     const topLeft = bounds.getNorthWest()
     const bottomRight = bounds.getSouthEast()
-    
+
+    const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(null);
+
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
@@ -95,6 +125,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     },{
       cacheTime: Infinity,
       refetchInterval: 20000,
+      
       onSuccess: (data) => {
         console.log('existingPlaces')
         console.log(data)
@@ -108,29 +139,35 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
       }
     })
 
+    useEffect(() => {
+      existingPlaces.refetch().catch((err) => {
+        console.error(err)
+      })
+    }, [delayedMapPosition])
+
     const removePoint = (lat:number,lng:number) => {
       setIsLoadingAreas(loadingAreas.filter((la) => la.lat == lat && la.lng == lng))
     }
 
-    const onPageNames = (lat:number, lng: number, pageNames:string[]) => {
+    const onPageNames = useCallback((lat:number, lng: number, pageNames:string[]) => {
       // Change circle to "found" loading
       console.log('page found')
-    }
+    }, [])
 
-    const onPlaceSuccess = (wikiPlace:Place) => {
+    const onPlaceSuccess = useCallback((wikiPlace:Place) => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
       console.log(`new page ${wikiPlace?.summary}`)
      // setPlaces(places.concat(wikiPlace))
-    }
+    }, [])
 
-    const onFailure = (lat:number, lng:number) => {
+    const onFailure = useCallback((lat:number, lng:number) => {
       console.error(`Failed lng:'+${lat}+'lng: '+${lng}`)
       removePoint(lat, lng)
-    }
+    }, [])
     
-    const onFinished = (lat:number, lng:number) => {
+    const onFinished = useCallback((lat:number, lng:number) => {
       removePoint(lat, lng)
-    }
+    }, [])
 
 
 return (<>  

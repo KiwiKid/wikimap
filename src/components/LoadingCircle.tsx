@@ -112,9 +112,9 @@ export default function LoadingCircle({
     }, [lat, lng])
 
 
-    if(circleState == 'ready-to-gen'){
-      return null;
-    }
+ //   if(circleState == 'ready-to-gen'){
+ //     return null;
+ //   }
     return (<Circle
         key={`${lat}_${lng}`} 
         center={[lat, lng]}
