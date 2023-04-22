@@ -5,15 +5,15 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "dev:superbase":"yarn supabase:dev",
+    "dev:superbase": "yarn supabase:dev",
     "postinstall": "pnpm prisma generate",
+    "build:db": "docker run --name wiki-postgres -e POSTGRES_PASSWORD=completion45eaturesyouonneedoe -d postgres",
     "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",
     "start": "next start",
-    
-    "start:ai": "pnpm supabase functions serve completePlaceType",
-    "deploy:ai": "pnpm supabase functions deploy completePlaceType"
+    "start:ai": "npx supabase functions serve completePlaceType",
+    "deploy:ai": "supabase secrets set --env-file ./supabase/.env && supabase functions deploy completePlaceType --import-map supabase/functions/import_map_deploy.json --debug"
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",
@@ -25,6 +25,7 @@
     "@trpc/server": "^10.18.0",
     "@types/leaflet": "^1.9.3",
     "@vercel/analytics": "^1.0.0",
+    "langchain": "^0.0.61",
     "leaflet": "^1.9.3",
     "next": "^13.2.4",
     "openai": "^3.2.1",
@@ -35,7 +36,6 @@
     "react-dom": "18.2.0",
     "react-draggable": "^4.4.5",
     "react-leaflet": "^4.2.1",
-    "supabase": "^1.50.4",
     "superjson": "1.12.2",
     "wikijs": "^6.4.1",
     "zod": "^3.21.4"
@@ -55,6 +55,7 @@
     "prettier": "^2.8.6",
     "prettier-plugin-tailwindcss": "^0.2.6",
     "prisma": "^4.11.0",
+    "supabase": "1.49.4",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.2"
   },

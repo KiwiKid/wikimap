@@ -1,9 +1,17 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import WikiJS from "wikijs";
-import mapWikiPage from "~/utils/mapWikiPage";
-import { Configuration, OpenAIApi } from "openai";
-import { prisma } from "~/server/db";
+//import WikiJS from "wikijs";
+//import mapWikiPage from "~/utils/mapWikiPage";
+//import { Configuration, OpenAIApi } from "openai";
+//import { prisma } from "~/server/db";
+
+import * as openaiChat from "langchain/chat_models/openai";
+import * as chains from "langchain/chains";
+//import { CallbackManager } from "langchain/callbacks";
+import {
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+} from "langchain/prompts";
 
 interface AIResponse {
   title?:string
@@ -45,14 +53,9 @@ export const defaultPlaceSelect = {
 }
 
 type OpenAIRes = {
-    title?: string,
-    content?: string,
-    wiki_id: string,
-    lat: number,
-    lng: number,
-    raw: string
-    status: string
+    text:string
 }
+          
 
 
 export const placeTypeRouter = createTRPCRouter({
@@ -98,6 +101,28 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: input.wiki_id
           }});
 
+          const prompt = ChatPromptTemplate.fromPromptMessages([
+            
+            HumanMessagePromptTemplate.fromTemplate("{input}"),
+          ]);
+
+          
+          const llm = new openaiChat.ChatOpenAI();
+          const chain = new chains.LLMChain({ prompt, llm });
+          const response = await chain.call({ input });
+
+          if(!response || !response?.text !== 'string'){
+            return {
+              text: 'failed'
+            }
+          }
+
+          return {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            text: response?.text
+          } as OpenAIRes;
+        }),
+/*
           const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
           });
@@ -115,7 +140,7 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
 
-            console.log(promptRow)*/
+            console.log(promptRow)
            // if(!promptRow){
             //  throw new Error("No matching row")
            // }
@@ -207,7 +232,7 @@ export const placeTypeRouter = createTRPCRouter({
             lng: openAIRes.lng
           }
         })
-      }),
+      }),*/
       getInside: publicProcedure
         .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
         .query(async ({ ctx, input}) => {

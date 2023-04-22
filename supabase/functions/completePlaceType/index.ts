@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore-file
 import { serve } from "http/server.ts";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { LLMChain } from "langchain/chains";
@@ -36,6 +41,7 @@ serve(async (req) => {
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token) => {
             await writer.ready;
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             await writer.write(encoder.encode(`data: ${token}\n\n`));
           },
           handleLLMEnd: async () => {

@@ -18,7 +18,7 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*", "./supabase/*"]
     }
   },
   "include": [
@@ -29,5 +29,5 @@
     "**/*.cjs",
     "**/*.mjs"
   ],
-  "exclude": ["node_modules", "supabase/functions"]
+  "exclude": ["node_modules"]
 }
