@@ -4,7 +4,7 @@ import { Icon  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
 import { api } from '~/utils/api'
-import { type Place } from '@prisma/client'
+import { type Place } from "@prisma/client";
 
 const locIcon = new Icon({
     iconUrl: locIconFile.src,
@@ -16,7 +16,7 @@ import WikiJS from 'wikijs'
 import { type RouterOutputs } from '~/utils/api'
 const RADIUS = 1000;
 
-interface PublicPlaceType {
+export interface PublicPlaceType {
     id: string
     title: string
     content: string
@@ -55,13 +55,10 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         && !getAndPopulateStory?.data 
         && !hasRun
         ){
-        setHasRun(true)
-            getAndPopulateStory.mutate({ wiki_id: wiki_id, promptType: 'oldLegend'},
-            {
-                staleTime: Infinity,
-                cacheTime: Infinity,
-                retry: false
-            })
+            if(!hasRun){
+                setHasRun(true)
+                getAndPopulateStory.mutate({ wiki_id: wiki_id, promptType: 'oldLegend'})
+            }
         }
     }
 

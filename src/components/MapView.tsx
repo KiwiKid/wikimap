@@ -1,12 +1,11 @@
-import { useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { type Map } from 'leaflet'
 import { type LatLngExpression } from 'leaflet';
 import { Place } from '@prisma/client';
-import DebugMarkers, { PlaceResult } from './DebugMarkers';
 import { useRouter } from 'next/router'
 import PlaceMarkers from './PlaceMarkers'
+import { type PlaceResult } from './PlaceMarker'
 
 export function ChangeView({ coords }:{ coords: LatLngExpression }) {
   const mapp:Map = useMap();

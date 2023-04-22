@@ -146,7 +146,7 @@ return (<>
 
             {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 
-              : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`} placeRes={ep} >{JSON.stringify(ep)}</PlaceMarker>)}</div>
+              : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`}  place={ep.place} placeTypes={ep.placeTypes} />)}</div>
           }
         </>
     )

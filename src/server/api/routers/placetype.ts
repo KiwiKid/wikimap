@@ -71,7 +71,7 @@ export const placeTypeRouter = createTRPCRouter({
           where: {
             id: input.placeTypeId
           },
-          date: {
+          data: {
             status: 'ai-complete'
           }
         })),
@@ -87,6 +87,7 @@ export const placeTypeRouter = createTRPCRouter({
                   lng: fp.lng
                 },
                 select: {
+                  id: true,
                   lat: true,
                   lng: true,
                   wiki_id: true,

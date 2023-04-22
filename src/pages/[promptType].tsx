@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { type ParsedUrlQuery } from "querystring";
 import { useState } from "react";
-import { type PlaceResult } from "~/components/DebugMarkers";
+import { type PlaceResult } from "~/components/PlaceMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
 
 const Map = dynamic(() => import('../components/MapView'), {
