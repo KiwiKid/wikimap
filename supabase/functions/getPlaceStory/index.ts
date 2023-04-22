@@ -36,10 +36,15 @@ interface Response {
 }
 
 serve(async (req) => {
+  console.log('request')
 
   if (req.method === 'OPTIONS') {
+    console.log('CORS request')
     return new Response('ok', { headers: corsHeaders })
   }
+
+  console.log('non-CORS request')
+
   try{
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { 
@@ -73,7 +78,7 @@ serve(async (req) => {
         JSON.stringify({error: {
           message: 'No text repsonse'
         }}),
-        { headers: { "Content-Type": "application/json" } },
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       )
     }else{
       res = {
@@ -92,7 +97,7 @@ serve(async (req) => {
           status: 'success'
         }
       }),
-    { headers: { "Content-Type": "application/json" } }
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
 
   }catch(err){
@@ -101,7 +106,7 @@ serve(async (req) => {
       JSON.stringify({error: {
         message: 'Invalid Call'
       }}),
-      { headers: { "Content-Type": "application/json" } },
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     )
   }
 })

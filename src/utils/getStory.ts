@@ -33,7 +33,6 @@ const getClient = () => {
 
 
 const getStory = async (wiki_id:string, wiki_url:string, summary:string, prompt_type:string) => {
-    debugger;
     const supabase = getClient();
     const res = await supabase.rpc<'getPlaceStory', Response>('getPlaceStory', { wiki_url: wiki_url, wiki_id: wiki_id, summary: summary, prompt_type: prompt_type })
     
