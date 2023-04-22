@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Icon  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
-import loadingIconFile from 'src/styles/bang.png'
+import redIcon from 'src/styles/bang.png'
+import loadingIconFile from 'src/styles/loading.png'
 import errorIconFile from 'src/styles/error.png'
 
 
@@ -56,6 +57,8 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     const promptType = 'oldLegend'
 
+    const [isLoadingStory, setIsLoadingStory] = useState(false)
+
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
@@ -105,26 +108,31 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
     // TODO: add check for promptType and old record
 
     const requestStory = () => {
-        getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
-        .then((s) => {
-            console.log('GET STORY FINISHED')
-            console.log(s)
+        if(!isLoadingStory){
+            setIsLoadingStory(true)
+            getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
+            .then((s) => {
+                console.log('GET STORY FINISHED')
+                console.log(s)
 
-            if(s?.data){
-                saveStory.mutate({
-                    wiki_id: place.wiki_id
-                    , title: s.data.title
-                    , content: s.data.content
-                    , type: promptType
-                    , status: 'complete'
-                })
-            }else{
-                console.error('GET STORY FAILED', {s})
-            }
-            
-        }).catch((err) => {
-            console.error('Could got get story', {err: JSON.stringify(err)})
-        })
+                if(s?.data){
+                    saveStory.mutate({
+                        wiki_id: place.wiki_id
+                        , title: s.data.title
+                        , content: s.data.content
+                        , type: promptType
+                        , status: 'complete'
+                    })
+                }else{
+                    console.error('GET STORY FAILED', {s})
+                }
+                
+            }).catch((err) => {
+                console.error('Could got get story', {err: JSON.stringify(err)})
+            }).finally(() =>{
+                setIsLoadingStory(false)
+            })
+        }
     }
 /*
     useEffect(() => {
@@ -148,7 +156,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
     }
 
     if(place && !place.summary){
-        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={errorIcon}>
+        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}>
              <Popup>
                 {JSON.stringify(place, undefined, 4)}
                 {JSON.stringify(placeTypes, undefined, 4)}
@@ -157,7 +165,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
     }
 
     if(place.summary && placeTypes.length == 0){
-        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}
+        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}
         eventHandlers={{
             click: (e) => {
                 requestStory()
@@ -166,11 +174,11 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         />
     }
 
-    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
+    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={isLoadingStory ? loadingIcon : locIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
 
             <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm">
+            {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm">
                 <h1 className="max-h-24 text-1xl font-bold underline ">{g.title}</h1>
                 {g.content}
                 {/*<button 
