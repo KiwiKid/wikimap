@@ -13,20 +13,19 @@ const locIcon = new Icon({
   });
 
 import WikiJS from 'wikijs'
+import { type RouterOutputs } from '~/utils/api'
 const RADIUS = 1000;
 
+
+type PlaceRes = RouterOutputs["placeType"]["getAndPopulateStory"]
 interface PlaceMarkerProps {
-    wiki_id:string
-    wikiPlace:{
-        id:string
-        url:string
-        lat:number
-        lng:number
-        summary:string
-    }
+    placeRes:PlaceRes
 }
 
-export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
+export default function PlaceMarker({placeRes}:PlaceMarkerProps) {
+
+    const { place, placeTypes } = placeRes;
+    const [hasRun, setHasRun] = useState<boolean>(false)
 
     const getAndPopulateStory = api.placeType.getAndPopulateStory.useMutation({
         onSuccess: (newPlace) => {
@@ -40,15 +39,26 @@ export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
         onError: (err) => {
             console.error(err)
            // onFailure(lat, lng);
-        }
+        },
+        staleTime: Infinity,
+        cacheTime: Infinity
     })
 
     useEffect(() => {
-        getAndPopulateStory.mutate({ wiki_id: wiki_id, promptType: 'oldLegend'})
-    })
+        if(!getAndPopulateStory.isLoading 
+            && !getAndPopulateStory.isError
+            && !getAndPopulateStory?.data 
+            && !hasRun
+            ){
+            setHasRun(true)
+            getAndPopulateStory.mutate({ wiki_id: place.wiki_id, promptType: 'oldLegend'})
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        
+    }, [])
 
 
-    return (<Marker key={`${wikiPlace.id} ${wikiPlace.url}`} position={[wikiPlace.lat, wikiPlace.lng]} icon={locIcon}>
+    return (<Marker key={`${place.id} ${place.url}`} position={[place.lat, place.lng]} icon={locIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
        {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
@@ -64,7 +74,7 @@ export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
                 
 </div>)
             [Generated with AI]*/}
-            <details>{wikiPlace.url}<summary></summary>{JSON.stringify(wikiPlace.summary)}</details>
+            <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>
 
     </Marker>)

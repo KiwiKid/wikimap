@@ -125,6 +125,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
     const onFailure = (lat:number, lng:number) => {
       console.error(`Failed lng:'+${lat}+'lng: '+${lng}`)
+      removePoint(lat, lng)
     }
     
     const onFinished = (lat:number, lng:number) => {
@@ -143,9 +144,9 @@ return (<>
                 onFinished={onFinished}
             /></>) : null}
 
-            {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces.data)}</div>            
+            {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 
-              : <div>{existingPlaces.data.map((ep) => <>{ep}</>)}</div>
+              : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`} placeRes={ep} >{JSON.stringify(ep)}</PlaceMarker>)}</div>
           }
         </>
     )

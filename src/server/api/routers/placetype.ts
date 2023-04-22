@@ -71,29 +71,41 @@ export const placeTypeRouter = createTRPCRouter({
             .then(mapWikiPage)
             .then(async (fp:MappedPage) => {
 
-              const newItem = {
+              const place = await ctx.prisma.place.findFirst({
+                where:{
                   lat: fp.lat,
-                  lng: fp.lng,
-                  wiki_id: fp.wiki_id.toString(),
-                  wiki_url: fp.url,
-                  status: 'pending',
-                  info: JSON.stringify(fp.info),
-                  summary: fp.summary,
-                  main_image_url: fp.mainImage || '',
+                  lng: fp.lng
+                },
+                select: {
+                  lat: true,
+                  lng: true,
+                  wiki_id: true,
+                  wiki_url: true,
+                  status: true,
+                  info: true,
+                  summary: true,
+                  main_image_url: true,
                 }
-              console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
+              })
 
-              return await ctx.prisma.place.create({data: newItem})
-              .catch((err:PrismaClientValidationError) => {
-                console.error('failed to create place (could already exist?', err)
-              })
-            }).catch((err) => {
-              console.error('failed to create place (could already exist?', {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                err: err
-              })
+              if(!!place){
+                return place;
+              }else{
+                const newItem = {
+                    lat: fp.lat,
+                    lng: fp.lng,
+                    wiki_id: fp.wiki_id.toString(),
+                    wiki_url: fp.url,
+                    status: 'pending',
+                    info: JSON.stringify(fp.info),
+                    summary: fp.summary,
+                    main_image_url: fp.mainImage || '',
+                  }
+                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
+
+                return await ctx.prisma.place.create({data: newItem})
+              }
             })
-
           ),
     setAIResults: publicProcedure
       .input(z.object({
@@ -127,8 +139,12 @@ export const placeTypeRouter = createTRPCRouter({
             lng: true
           },
           where: {
-              wiki_id: input.wiki_id
+              wiki_id: input.wiki_id,
           }});
+
+          if(!place){
+            return;
+          }
 
           const prompt = prompts.ChatPromptTemplate.fromPromptMessages([
             prompts.SystemMessagePromptTemplate.fromTemplate(
@@ -137,14 +153,11 @@ export const placeTypeRouter = createTRPCRouter({
             //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
           ]);
 
-          const promptInput = {
-    //        wiki_url: 'http//wikipedia.org/dunedin',
-            place_information: place.summary
-          }
-          
           const llm = new openaiChat.ChatOpenAI();
           const chain = new chains.LLMChain({ prompt, llm });
-          const response = await chain.call({ input: promptInput });
+          const response = await chain.call({ 
+            place_information: place.summary
+          });
 
           let res:{text:string};
           if(!response || response?.text !== 'string'){

@@ -5,9 +5,10 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "dev:db:migrate": "pnpm prisma migrate dev",
     "dev:superbase": "yarn supabase:dev",
     "postinstall": "pnpm prisma generate",
-    "build:db": "docker run --name wiki-postgres -e POSTGRES_PASSWORD=completion45eaturesyouonneedoe -d postgres",
+    "build:db": "docker-compose up",
     "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",

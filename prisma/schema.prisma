@@ -18,7 +18,7 @@ model LatLngToProcess {
     status      String 
     created_at   DateTime @default(now())
     updated_at   DateTime @updatedAt
-    @@unique([lat, lng], name: "OnlyUniquePoints")
+    @@unique([lat(sort: Desc), lng(sort: Desc)], name: "OnlyUniquePoints")
 }
 
 model Place {

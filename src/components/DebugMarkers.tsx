@@ -140,6 +140,8 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         
       },
       onError: (data) => console.error('Failed to placeType.request', { data }),
+      staleTime: Infinity,
+      cacheTime: Infinity
     });
 
     const deletePlaceType = api.placeType.delete.useMutation({
