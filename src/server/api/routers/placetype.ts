@@ -52,7 +52,6 @@ export const defaultPlaceSelect = {
 
 type OpenAIRes = {
     text:string
-    placeType:string
 }
           
 
@@ -122,7 +121,6 @@ export const placeTypeRouter = createTRPCRouter({
           },
           where: {
               wiki_id: input.wiki_id,
-              status: 'ai-pending'
           }});
 
           if(!place){
@@ -138,12 +136,12 @@ export const placeTypeRouter = createTRPCRouter({
 
           const llm = new openaiChat.ChatOpenAI();
           const chain = new chains.LLMChain({ prompt, llm });
-          const response = await chain.call({ 
+          const response:OpenAIRes = await chain.call({ 
             place_information: place.summary
           });
 
           let res:{text:string};
-          if(!response || response?.text !== 'string'){
+          if(!response || (response.text && response.text.length == 0)){
             res = {
               text: 'failed',
             }
@@ -312,7 +310,10 @@ export const placeTypeRouter = createTRPCRouter({
           const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
                       select: defaultPlaceTypeSelect,
                       where: {
-                        wiki_id: wiki_id
+                        wiki_id: wiki_id,
+                        NOT: {
+                          content: 'failed'
+                        }
                       }
                     })
 
