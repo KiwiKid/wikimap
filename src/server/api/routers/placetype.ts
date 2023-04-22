@@ -51,6 +51,7 @@ export const defaultPlaceSelect = {
 
 type OpenAIRes = {
     text:string
+    placeType:string
 }
           
 
@@ -110,16 +111,33 @@ export const placeTypeRouter = createTRPCRouter({
           const chain = new chains.LLMChain({ prompt, llm });
           const response = await chain.call({ input });
 
+          let res:{text:string};
           if(!response || !response?.text !== 'string'){
-            return {
-              text: 'failed'
+            res = {
+              text: 'failed',
+            }
+          }else{
+            res = {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              text: response.text,
             }
           }
-
-          return {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            text: response?.text
-          } as OpenAIRes;
+          
+          return ctx.prisma.placeType.create({data: {
+            wiki_id: place.wiki_id.toString(),
+            title: 'Placeholder title',
+            content: res.text || 'No content',
+            type: input.promptType,
+            upvotes: 0,
+            downvotes: 0,
+            status: 'success'
+          }}).then((res) => {
+            return {
+              placeType: res,
+              lat: place.lat,
+              lng: place.lng
+            }
+          })
         }),
 /*
           const configuration = new Configuration({

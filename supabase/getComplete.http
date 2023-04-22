@@ -1,7 +1,0 @@
-POST https://kbcxlnwzrftyhncwlxlj.functions.supabase.co/completePlaceType
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiY3hsbnd6cmZ0eWhuY3dseGxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODE1OTg3MjYsImV4cCI6MTk5NzE3NDcyNn0.2W1x7zd1dwR3ZLd99-smCO6MCsneczX73C_kCp4Ya-0
-
-{
-  "input": "How would you describe yourself?"
-}
