@@ -11,7 +11,7 @@ import {
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
 } from "langchain/prompts";
-
+import { corsHeaders } from '../_shared/cors.ts'
 interface Request {
   wiki_id:string
   wiki_url:string
@@ -36,6 +36,10 @@ interface Response {
 }
 
 serve(async (req) => {
+
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
   try{
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { 
