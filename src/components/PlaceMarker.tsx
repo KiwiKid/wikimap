@@ -65,15 +65,15 @@ export default function PlaceMarker({placeRes}:PlaceMarkerProps) {
             onClick={() => onGenerate(mappedPlace.wiki_id)}>generate</button>
 
             <img className='rounded-lg' src={`${mappedPlace.main_image_url}`} alt={mappedPlace.wiki_url}/>*/}
-            {/*mappedPlaceTypes.map((g) => <div key={g.title} className="font-ltor text-sm">
-                <h1 className="max-h-24 text-1xl font-bold underline ">{g.title} ({loadingAreas.length})</h1>
+            {placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm">
+                <h1 className="max-h-24 text-1xl font-bold underline ">{g.title}</h1>
                 {g.content}
-                <button 
+                {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
-            onClick={() => onDeletePlaceType(g.id)}>[delete]</button>
+        onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
-</div>)
-            [Generated with AI]*/}
+</div>)}
+            [Generated with AI]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>
 
