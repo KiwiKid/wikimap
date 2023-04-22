@@ -5,11 +5,13 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "dev:superbase":"yarn supabase:dev",
     "postinstall": "pnpm prisma generate",
     "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",
     "start": "next start",
+    
     "start:ai": "pnpm supabase functions serve completePlaceType",
     "deploy:ai": "pnpm supabase functions deploy completePlaceType"
   },

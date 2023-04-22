@@ -63,6 +63,25 @@ export const placeTypeRouter = createTRPCRouter({
           id: m.input.id
         }
       })),
+    setAIResults: publicProcedure
+      .input(z.object({
+        title: z.string(),
+        content: z.string(),
+        wiki_id: z.string(),
+        type: z.string(),
+        failed_ai_res: z.string(),
+        status: z.string(),
+      }))
+      .mutation(async ({ctx, input}) => ctx.prisma.placeType.create({
+        data: {
+          title: input.title,
+          content: input.content,
+          wiki_id: input.wiki_id,
+          type: input.type,
+          failed_ai_res: input.failed_ai_res,
+          status: input.status
+        }
+      })),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
