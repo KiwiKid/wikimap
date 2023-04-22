@@ -112,7 +112,7 @@ export default function LoadingCircle({
     }, [lat, lng])
 
 
-    if(circleState == 'read-to-gen'){
+    if(circleState == 'ready-to-gen'){
       return null;
     }
     return (<Circle
