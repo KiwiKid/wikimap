@@ -108,7 +108,7 @@ export const placeTypeRouter = createTRPCRouter({
 
           const promptInput = {
     //        wiki_url: 'http//wikipedia.org/dunedin',
-            place_information:'it has horses and people who like horses'
+            place_information: place.summary
           }
           
           const llm = new openaiChat.ChatOpenAI();
