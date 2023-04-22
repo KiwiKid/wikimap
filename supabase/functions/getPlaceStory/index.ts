@@ -64,9 +64,12 @@ serve(async (req) => {
       )
       //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
     ]);
+    const promptSettings = {
+      temperature: 1.5
+    }
 
     const llm = new ChatOpenAI();
-    const chain = new LLMChain({ prompt, llm });
+    const chain = new LLMChain({ prompt, llm, temperature: promptSettings.temperature });
     const response = await chain.call({ 
       place_information: summary
     });
@@ -91,7 +94,6 @@ serve(async (req) => {
       JSON.stringify({
         data: {
           wiki_id: wiki_id,
-          title: 'Placeholder title',
           content: res.text || 'No content',
           type: prompt_type,
           status: 'success'

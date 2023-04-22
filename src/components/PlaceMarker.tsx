@@ -161,9 +161,9 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         return (<div>No place?</div>)
     }
 
-    if(isLoadingStory || saveStory.isLoading){
-        <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}/>
-    }
+    //if(isLoadingStory || saveStory.isLoading){
+  //      <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}/>
+  //  }
 
     if(place && !place.summary){
         return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={errorIcon}>
@@ -174,16 +174,19 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
             </Marker>
     }
 
+    const loadPlace = () => {
+        setIsLoadingStory(true)
+        requestStory()
+        setIsLoadingStory(false)
+    }
+
     if(place.summary && placeTypes.length == 0){
         return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}
-        eventHandlers={{
-            click: (e) => {
-                setIsLoadingStory(true)
-                requestStory()
-                setIsLoadingStory(false)
-            },
-          }}
-        />
+        ><Popup>
+            <button onClick={loadPlace}>Load this place</button>
+            {isLoadingStory ? 'loading' : ''}
+        </Popup>
+        </Marker>
     }
 
     return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={isLoadingStory ? loadingIcon : redIcon}>
