@@ -41,10 +41,10 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/eslint": "^8.21.3",
-    "@types/node": "^18.15.5",
+    "@types/eslint": "^8.37.0",
+    "@types/node": "^18.15.11",
     "@types/prettier": "^2.7.2",
-    "@types/react": "^18.0.28",
+    "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",

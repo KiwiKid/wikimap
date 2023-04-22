@@ -8,10 +8,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import * as openaiChat from "langchain/chat_models/openai";
 import * as chains from "langchain/chains";
 //import { CallbackManager } from "langchain/callbacks";
-import {
-  ChatPromptTemplate,
-  HumanMessagePromptTemplate,
-} from "langchain/prompts";
+import * as prompts from "langchain/prompts";
 
 interface AIResponse {
   title?:string
@@ -101,9 +98,11 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: input.wiki_id
           }});
 
-          const prompt = ChatPromptTemplate.fromPromptMessages([
-            
-            HumanMessagePromptTemplate.fromTemplate("{input}"),
+          const prompt = prompts.ChatPromptTemplate.fromPromptMessages([
+            prompts.SystemMessagePromptTemplate.fromTemplate(
+              "You are a helpful assistant that translates {input_language} to {output_language}."
+            ),
+            prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
           ]);
 
           
