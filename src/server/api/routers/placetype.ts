@@ -112,7 +112,7 @@ export const placeTypeRouter = createTRPCRouter({
           const response = await chain.call({ input });
 
           let res:{text:string};
-          if(!response || !response?.text !== 'string'){
+          if(!response || response?.text !== 'string'){
             res = {
               text: 'failed',
             }
