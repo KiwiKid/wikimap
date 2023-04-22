@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { latLngRouter } from "./routers/init";
+import { latLngRouter } from "./routers/latlng";
 import { placeRouter } from "./routers/place";
 import { placeTypeRouter } from "./routers/placetype";
 import { utilsRouter } from "./routers/utils";

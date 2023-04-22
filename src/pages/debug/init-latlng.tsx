@@ -77,7 +77,7 @@ const InitLatLng:NextPage = () => {
     }, [pageNum, lengthNum])
 
     // Run a batch of seeds
-    const { refetch  } = api.latLng.initSeedLatLng.useQuery({ page: pageNum, length: lengthNum}, {
+ /*const { refetch  } = api.latLng.initSeedLatLng.useQuery({ page: pageNum, length: lengthNum}, {
         staleTime: Infinity,
         refetchOnWindowFocus: false,
         enabled: false
@@ -97,7 +97,7 @@ const InitLatLng:NextPage = () => {
                 console.error('Failed to init', {error})
             }
         })();
-    }
+    }*/ 
 
 
 
@@ -106,7 +106,7 @@ const InitLatLng:NextPage = () => {
         {pageNum >= 0 && <Link href={`/debug/init-latlng?page=${pageNum-1}&length=${lengthNum}`}>
             ««« Previous
         </Link>}
-        <button className="btn btn-blue" onClick={(evt) => handleClick()}>Save in db</button>
+        
         <Link href={`/debug/init-latlng?page=${pageNum+1}&length=${lengthNum}`}>
             Next »»»
         </Link>

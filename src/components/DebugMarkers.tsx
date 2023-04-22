@@ -52,8 +52,9 @@ interface DebugMarkersProps {
 export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkersProps) {
 
   const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
-
-  const processLatLng = api.latLng.process.useMutation({
+/*
+  const processLatLng = api.latLng.process.useMutation()
+  {
     onSuccess: (processResults) => {
       processResults.places.forEach((np) => {
         getPlaceTypeStory.mutate({ "wiki_id": np.wiki_id, "promptType": promptType})
@@ -111,7 +112,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
       bottomRightLng: bottomRight.lng
     },{
       cacheTime: Infinity
-    })*/
+    })
 
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
@@ -127,7 +128,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         }
       }
     })
-
+*/
     const [generations, setGenerations] = useState<PlaceType[]|null>();
 
 
@@ -186,7 +187,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
         center={[la.lat, la.lng]} 
         radius={loadingCircleSizeMeters}
       />)}
-       {existingPlaces?.data 
+       {/*existingPlaces?.data 
       && existingPlaces?.data?.length > 0 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ? existingPlaces.data.map((m) => <Marker key={`${m.place.id}`} position={[m.place.lat, m.place.lng]} icon={locIcon}>
@@ -209,7 +210,7 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
           </Popup>
           
         </Marker>) 
-      : null}
+  : null*/}
     </>
   );
 }

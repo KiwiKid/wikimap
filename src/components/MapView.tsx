@@ -6,7 +6,7 @@ import { type LatLngExpression } from 'leaflet';
 import { Place } from '@prisma/client';
 import DebugMarkers, { PlaceResult } from './DebugMarkers';
 import { useRouter } from 'next/router'
-
+import PlaceMarkers from './PlaceMarkers'
 
 export function ChangeView({ coords }:{ coords: LatLngExpression }) {
   const mapp:Map = useMap();
@@ -35,7 +35,7 @@ export default function MapView({setVisiblePlaces, promptType}:MapViewProps) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <DebugMarkers setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
+      <PlaceMarkers setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
     </MapContainer>
   );
 }

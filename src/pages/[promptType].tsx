@@ -1,9 +1,9 @@
-import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from "next"
+import { type GetStaticPropsContext, type GetStaticPropsResult, type NextPage } from "next"
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
+import { type ParsedUrlQuery } from "querystring";
 import { useState } from "react";
-import { PlaceResult } from "~/components/DebugMarkers";
+import { type PlaceResult } from "~/components/DebugMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
 
 const Map = dynamic(() => import('../components/MapView'), {

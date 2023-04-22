@@ -4,13 +4,6 @@ import { api } from "~/utils/api";
 
 const Debug:NextPage = () => {
 
-    const data = api.latLng.getAll.useQuery({
-        page: 1,
-        length: 50
-    }, {
-        staleTime: Infinity
-    })
-
     const tableHeadClass = "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
     const tableDataClass = "px-6 py-4 whitespace-nowrap"
 
@@ -39,7 +32,7 @@ const Debug:NextPage = () => {
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                            {data?.isFetched ? data.data?.map((d) => (
+                            {/*data?.isFetched ? data.data?.map((d) => (
                                 <tr key={d.id}>
                                     <td className={tableDataClass}>
                                         <div className="text-sm font-medium text-gray-900">{d.id}</div>
@@ -58,7 +51,7 @@ const Debug:NextPage = () => {
                                 <tr>
                                 <td className={tableDataClass} colSpan={3}>Not fetched</td>
                                 </tr>
-                            )}
+                            )*/}
                             </tbody>
                         </table>
                         </div>

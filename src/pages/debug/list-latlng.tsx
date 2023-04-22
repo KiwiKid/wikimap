@@ -15,28 +15,28 @@ const ListLatLng:NextPage = () => {
 
 
     // Run a batch of seeds
-    const { isFetched, data, isError, error } = api.latLng.getAll.useQuery({ page:pageNum, length: lengthNum })
+    //const { isFetched, data, isError, error } = api.latLng.getAll.useQuery({ page:pageNum, length: lengthNum })
     
 
-    const mutation = api.latLng.process.useMutation();
+   // const mutation = api.latLng.process.useMutation();
 
     const onProcess = (event:React.MouseEvent<HTMLButtonElement>) => {
         const value = (event.currentTarget as HTMLButtonElement).value;
-        mutation.mutate({ id: value})
+  //      mutation.mutate({ id: value})
     }
 
-    if(!isFetched){
+  /*  if(!isFetched){
         return <div>loading..</div>
     }
 
     if(isError){
-        return <div>{error.message} {JSON.stringify(error)}</div>
-    }
+        return <div> {JSON.stringify(error)}</div>
+    }*/
     
     return <div>
         <NavBar/>
         <div>{page} ({length})</div>
-        {data?.map((d) => 
+        {/*data?.map((d) => 
                 <div key={d.id}>
                     <div className="flex flex-wrap -mx-2">
                         <div className="w-full sm:w-1/4 px-2">
@@ -67,9 +67,9 @@ const ListLatLng:NextPage = () => {
                             Run-It
                         </button>
                         ) : 'Done'}
-                        </div>*/}
+                        </div>}
                 </div>
-            )}
+            )*/}
     </div>
 }
 

@@ -14,83 +14,67 @@ interface WikiSearchResult {
   pageNames: string[]
 }
 export const latLngRouter = createTRPCRouter({
-  process: publicProcedure
-    .input(z.object({ id: z.string().optional() }))
+  getPageNames: publicProcedure
+    .input(z.object({ lat: z.number(), lng: z.number() }))
     .mutation(async ({ input }) => {
-        const recordToProcess = await prisma.latLngToProcess.findFirstOrThrow({
-          where: {
-            status: 'pending',
-            id: input.id
-          },
-          orderBy: {
-            created_at: 'asc'
-          }
-        })
-        return await WikiJS().geoSearch(recordToProcess.lat, recordToProcess.lng, RADIUS)
-          .then(async (res: string[]) => {
+        return await WikiJS().geoSearch(input.lat, input.lng, RADIUS)
+          .then((res: string[]) => {
               if(res?.length == 0){
-                await prisma.latLngToProcess.update({
-                  where: {
-                    id: recordToProcess.id
-                  },
-                  data: {
-                    status: 'no-matches'
-                  }
-                })
                 return {
                   pageNames: [],
-                  lat: recordToProcess.lat,
-                  lng: recordToProcess.lng
-                };
+                  lat: input.lat,
+                  lng: input.lng
+                } as WikiSearchResult;
               } else {
                 console.log(`Found ${res.length} matches`)
                 return {
                   pageNames: res as unknown as string[],
-                  lat: recordToProcess.lat,
-                  lng: recordToProcess.lng
-                };
+                  lat: input.lat,
+                  lng: input.lng
+                } as WikiSearchResult;
               }
           })
-          .then(async (results:WikiSearchResult) => {
-            const newPlaces = await Promise.allSettled(results.pageNames.map((pn: string) => WikiJS().page(pn)
-              .then(mapWikiPage)
-              .then(async (fp:MappedPage) => {
+        }),
+      processPageName: publicProcedure
+        .input(z.object({ pageName: z.string()}))
+        .mutation(({input}) => {
+          WikiJS().page(input.pageName)
+            .then(mapWikiPage)
+            .then(async (fp:MappedPage) => {
 
-                const newItem = {
-                    lat: fp.lat,
-                    lng: fp.lng,
-                    wiki_id: fp.wiki_id.toString(),
-                    wiki_url: fp.url,
-                    status: 'pending',
-                    info: JSON.stringify(fp.info),
-                    summary: fp.summary,
-                    main_image_url: fp.mainImage || '',
-                  }
-                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
+              const newItem = {
+                  lat: fp.lat,
+                  lng: fp.lng,
+                  wiki_id: fp.wiki_id.toString(),
+                  wiki_url: fp.url,
+                  status: 'pending',
+                  info: JSON.stringify(fp.info),
+                  summary: fp.summary,
+                  main_image_url: fp.mainImage || '',
+                }
+              console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
 
-                return await prisma.place.create({data: newItem}).catch((err:PrismaClientValidationError) => {
-                  console.error('failed to create place (could already exist?', {
-                    err: err?.message,
-                    stack: err?.stack
-                  })
+              return await prisma.place.create({data: newItem})
+              .catch((err:PrismaClientValidationError) => {
+                console.error('failed to create place (could already exist?', {
+                  err: err?.message,
+                  stack: err?.stack
                 })
-              })))
-
-              const failures = newPlaces.filter((r) => r.status === 'rejected');
-              if(failures.length > 0){
-                console.error('Some places failed to create', { failures });
-              }
-
+                return {
+                  error: 'failed'
+                }
+              })
+            }).catch((err) => {
+              console.error('failed to create place (could already exist?', {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                err: err
+              })
               return {
-                places: newPlaces
-                  .filter((r) => r.status === 'fulfilled')
-                  .map((r) => (r as PromiseFulfilledResult<Place>).value)
-                  , lat: results.lat
-                  , lng: results.lng
+                error: 'failed'
               }
             })
-      }),
-    getSummary: publicProcedure
+          }),
+  /*  getSummary: publicProcedure
       .query(({ ctx}) => ctx.prisma.latLngToProcess.count({
         select: {
           id: true,
@@ -167,5 +151,5 @@ export const latLngRouter = createTRPCRouter({
             lng: input.lng,
             status: 'pending',
           },
-        }))
+        }))*/
 })
