@@ -32,14 +32,6 @@ interface Loading {
   lng: number
 }
 
-interface PublicPlaceType {
-    id: string
-    title: string
-    content: string
-    type: string
-    wiki_id: string
-}
-
 export interface PlaceResult {
   place: Place, 
   placeTypes: PublicPlaceType[]
@@ -134,14 +126,13 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
     const getPlaceTypeStory = api.placeType.getAndPopulateStory.useMutation({
       onSuccess: (data) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        setGenerations(generations?.concat([data.placeType]));
-        setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
+        if(data){
+          setGenerations(generations?.concat([data.placeType]));
+          setIsLoadingAreas(loadingAreas.filter((la) => la.lat == data.lat && la.lng == data.lng))
+        }
         
       },
-      onError: (data) => console.error('Failed to placeType.request', { data }),
-      staleTime: Infinity,
-      cacheTime: Infinity
+      onError: (data) => console.error('Failed to placeType.request', { data })
     });
 
     const deletePlaceType = api.placeType.delete.useMutation({
@@ -157,7 +148,11 @@ export default function DebugMarkers({setVisiblePlaces, promptType}:DebugMarkers
   }
     
     const onGenerate = (wiki_id: string) => {
-      getPlaceTypeStory.mutate({ "wiki_id": wiki_id, "promptType": promptType})
+      getPlaceTypeStory.mutate({ "wiki_id": wiki_id, "promptType": promptType}, {
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        retry: false
+      })
 
       //console.log(res);
     }

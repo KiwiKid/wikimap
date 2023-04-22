@@ -65,6 +65,16 @@ export const placeTypeRouter = createTRPCRouter({
           id: m.input.id
         }
       })),
+      setAIProcess: publicProcedure
+        .input(z.object({ placeTypeId: z.string()}))
+        .mutation(({input, ctx}) => ctx.prisma.placeType.update({
+          where: {
+            id: input.placeTypeId
+          },
+          date: {
+            status: 'ai-complete'
+          }
+        })),
       processPageName: publicProcedure
         .input(z.object({ pageName: z.string()}))
         .mutation(({input, ctx}) => WikiJS().page(input.pageName)
@@ -96,7 +106,7 @@ export const placeTypeRouter = createTRPCRouter({
                     lng: fp.lng,
                     wiki_id: fp.wiki_id.toString(),
                     wiki_url: fp.url,
-                    status: 'pending',
+                    status: 'ai-pending',
                     info: JSON.stringify(fp.info),
                     summary: fp.summary,
                     main_image_url: fp.mainImage || '',
@@ -107,25 +117,6 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
           ),
-    setAIResults: publicProcedure
-      .input(z.object({
-        title: z.string(),
-        content: z.string(),
-        wiki_id: z.string(),
-        type: z.string(),
-        failed_ai_res: z.string(),
-        status: z.string(),
-      }))
-      .mutation(async ({ctx, input}) => ctx.prisma.placeType.create({
-        data: {
-          title: input.title,
-          content: input.content,
-          wiki_id: input.wiki_id,
-          type: input.type,
-          failed_ai_res: input.failed_ai_res,
-          status: input.status
-        }
-      })),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -140,6 +131,7 @@ export const placeTypeRouter = createTRPCRouter({
           },
           where: {
               wiki_id: input.wiki_id,
+              status: 'ai-pending'
           }});
 
           if(!place){
