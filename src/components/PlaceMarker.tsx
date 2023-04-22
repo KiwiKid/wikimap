@@ -1,6 +1,6 @@
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup } from 'react-leaflet';
-import { useEffect, useState } from "react";
-import { Icon  } from 'leaflet';
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup, MarkerProps } from 'react-leaflet';
+import { Ref, useEffect, useRef, useState } from "react";
+import { Icon, Marker as MakerType  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
 import redIconFile from 'src/styles/bang.png'
@@ -65,6 +65,21 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     const [isLoadingStory, setIsLoadingStory] = useState(false)
 
+    const markerRef = useRef<MakerType<MarkerProps>>(null);
+
+    const getIcon = () => {
+        if(place && !place.summary) {
+            return errorIcon
+        }
+        if(place.summary && placeTypes.length == 0){
+            return locIcon
+        }
+
+        if(place.summary && placeTypes.length > 0){
+            return redIcon
+        }
+    }
+
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
@@ -114,30 +129,41 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
     // TODO: add check for promptType and old record
 
     const requestStory = () => {
-        if(!isLoadingStory){
-            setIsLoadingStory(true)
-            getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
-            .then((s) => {
-                console.log('GET STORY FINISHED')
-                console.log(s)
+        try{
+            console.log('requestStorys')
+            console.log(markerRef)
+            if(!isLoadingStory){
+                markerRef.current?.setPopupContent("Loading...")
+                markerRef.current?.setIcon(loadingIcon)
+                setIsLoadingStory(true)
+                getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
+                .then((s) => {
+                    console.log('GET STORY FINISHED')
+                    console.log(s)
 
-                if(s?.data){
-                    saveStory.mutate({
-                        wiki_id: place.wiki_id
-                        , title: s.data.title
-                        , content: s.data.content
-                        , type: promptType
-                        , status: 'complete'
-                    })
-                }else{
-                    console.error('GET STORY FAILED', {s})
-                }
-                
-            }).catch((err) => {
-                console.error('Could got get story', {err: JSON.stringify(err)})
-            }).finally(() =>{
-                setIsLoadingStory(false)
-            })
+                    if(s?.data){
+                        markerRef.current?.setPopupContent(s.data.content)
+                        markerRef.current?.setIcon(redIcon)
+                        saveStory.mutate({
+                            wiki_id: place.wiki_id
+                            , title: s.data.title
+                            , content: s.data.content
+                            , type: promptType
+                            , status: 'complete'
+                        })
+                    }else{
+                        console.error('GET STORY FAILED', {s})
+                        markerRef.current?.setIcon(errorIcon)
+                    }
+                    
+                }).catch((err) => {
+                    console.error('Could got get story', {err: JSON.stringify(err)})
+                }).finally(() =>{
+                    setIsLoadingStory(false)
+                })
+            }
+        }catch(err){
+            console.error(err)
         }
     }
 /*
@@ -166,7 +192,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
   //  }
 
     if(place && !place.summary){
-        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={errorIcon}>
+        return <Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getIcon()}>
              <Popup>
                 {JSON.stringify(place, undefined, 4)}
                 {JSON.stringify(placeTypes, undefined, 4)}
@@ -175,22 +201,25 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
     }
 
     const loadPlace = () => {
+        console.log('loadPlace')
         setIsLoadingStory(true)
+        console.log('loadPlace1')
+
         requestStory()
         setIsLoadingStory(false)
+        console.log('loadPlace2')
+
     }
 
-    if(place.summary && placeTypes.length == 0){
-        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}
-        ><Popup>
-            <button onClick={loadPlace}>Load this place</button>
-            {isLoadingStory ? 'loading' : ''}
+    return (<Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getIcon()}>
+        {place.summary && placeTypes.length == 0 ? 
+        <Popup key={`${place.id}`}>
+            {}
+            <button onClick={() => loadPlace()}>Load this place</button>
+            {isLoadingStory ? 'loading' : JSON.stringify(place.info)}
+            {JSON.stringify(isLoadingStory)}
         </Popup>
-        </Marker>
-    }
-
-    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={isLoadingStory ? loadingIcon : redIcon}>
-        <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        : <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
 
             <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm">
@@ -206,7 +235,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 </div>)}
             [Generated with AI]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
-        </Popup>
+        </Popup>}
 
     </Marker>)
 }
