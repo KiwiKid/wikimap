@@ -101,15 +101,19 @@ export const placeTypeRouter = createTRPCRouter({
 
           const prompt = prompts.ChatPromptTemplate.fromPromptMessages([
             prompts.SystemMessagePromptTemplate.fromTemplate(
-              "You are a helpful assistant that translates {input_language} to {output_language}."
-            ),
-            prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
+              "In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting short story. Include some details from the {place_information} below"
+            )
+            //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
           ]);
 
+          const promptInput = {
+    //        wiki_url: 'http//wikipedia.org/dunedin',
+            place_information:'it has horses and people who like horses'
+          }
           
           const llm = new openaiChat.ChatOpenAI();
           const chain = new chains.LLMChain({ prompt, llm });
-          const response = await chain.call({ input });
+          const response = await chain.call({ input: promptInput });
 
           let res:{text:string};
           if(!response || response?.text !== 'string'){
