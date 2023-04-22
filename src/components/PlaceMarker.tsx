@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Icon  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
-import redIcon from 'src/styles/bang.png'
+import redIconFile from 'src/styles/bang.png'
 import loadingIconFile from 'src/styles/loading.png'
 import errorIconFile from 'src/styles/error.png'
 
@@ -16,6 +16,12 @@ const locIcon = new Icon({
     iconSize: [25, 41],
     iconAnchor: [12, 41],
   });
+
+  const redIcon = new Icon({
+    iconUrl: redIconFile.src,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  })
 
 
   const loadingIcon = new Icon({
@@ -155,8 +161,12 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         return (<div>No place?</div>)
     }
 
+    if(isLoadingStory || saveStory.isLoading){
+        <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}/>
+    }
+
     if(place && !place.summary){
-        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}>
+        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={errorIcon}>
              <Popup>
                 {JSON.stringify(place, undefined, 4)}
                 {JSON.stringify(placeTypes, undefined, 4)}
@@ -174,7 +184,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         />
     }
 
-    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={isLoadingStory ? loadingIcon : locIcon}>
+    return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={redIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
 
             <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>

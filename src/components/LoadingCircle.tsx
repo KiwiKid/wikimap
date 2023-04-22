@@ -12,6 +12,8 @@ interface WikiSearchResult {
   lng: number,
   pageNames: string[]
 }
+
+type CircleState = 'ready-to-gen'|'loading'|'loading-story'
 interface LoadingCircleProps {
   lat:number
   , lng:number
@@ -19,6 +21,33 @@ interface LoadingCircleProps {
   , onFailure:((lat:number, lng: number)=>void)
   , onPlaceSuccess:((wikiPlace:Place)=>void)
   , onFinished:((lat:number, lng:number)=>void)
+}
+
+const getStatusPathOptions = (circleStatus:CircleState) => {
+  switch(circleStatus){
+    case 'loading': 
+    return {
+      color: 'red',
+      fillColor: 'red',
+      fillOpacity: 0.2,
+    };
+    // TODO: should not display...
+    case 'ready-to-gen': {
+      return {
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 0.2,
+      };
+    }
+    default:
+    case 'loading-story': {
+      return {
+        color: 'yellow',
+        fillColor: 'yellow',
+        fillOpacity: 0.2,
+      };
+    }
+  }
 }
 
 export default function LoadingCircle({
@@ -29,6 +58,8 @@ export default function LoadingCircle({
   , onPlaceSuccess
   , onFinished
 }:LoadingCircleProps) {
+
+  const [circleState, setCircleState] = useState<CircleState>('loading')
 
   const processPageName = api.placeType.processPageName.useMutation({
     onSuccess: (newPlace) => {
@@ -47,12 +78,16 @@ export default function LoadingCircle({
   const getPageNames = api.latLng.getPageNames.useMutation({
     onSuccess: (res:WikiSearchResult) => {
       console.log('latLng.getPageNames - succes - getPlace names for ')
+      onPageNames(lat, lng, res.pageNames)
+      setCircleState('loading-story')
       res.pageNames.forEach((pn) => {
         console.log(`latLng.getPageNames - ${pn}`)
         processPageName.mutate({
           pageName: pn
         })
       })
+      setCircleState('ready-to-gen')
+      onFinished(lat, lng);
     },
     onError: (err) => {
       console.log('latLng.getPageNames - succes - getPlace names fail')
@@ -77,9 +112,13 @@ export default function LoadingCircle({
     }, [lat, lng])
 
 
+    if(circleState == 'read-to-gen'){
+      return null;
+    }
     return (<Circle
         key={`${lat}_${lng}`} 
-        center={[lat, lng]} 
+        center={[lat, lng]}
+        pathOptions={getStatusPathOptions(circleState)}
         radius={RADIUS}
     />)
 }
