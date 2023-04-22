@@ -91,7 +91,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
-      bottomRightLng: bottomRight.lng
+      bottomRightLng: bottomRight.lng,
     },{
       cacheTime: Infinity,
       refetchInterval: 20000,

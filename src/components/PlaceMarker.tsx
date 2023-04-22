@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { Icon  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
+import loadingIconFile from 'src/styles/bang.png'
+import errorIconFile from 'src/styles/error.png'
+
+
 import { api } from '~/utils/api'
 import { type Place } from "@prisma/client";
 
@@ -12,8 +16,24 @@ const locIcon = new Icon({
     iconAnchor: [12, 41],
   });
 
+
+  const loadingIcon = new Icon({
+    iconUrl: loadingIconFile.src,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+
+
+  const errorIcon = new Icon({
+    iconUrl: errorIconFile.src,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+
+
 import WikiJS from 'wikijs'
 import { type RouterOutputs } from '~/utils/api'
+import { getStory } from '~/utils/getStory';
 const RADIUS = 1000;
 
 export interface PublicPlaceType {
@@ -29,10 +49,29 @@ export interface PlaceResult {
     place: Place, 
     placeTypes: PublicPlaceType[]
   }
+  
+
 
 export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
-    const [hasRun, setHasRun] = useState<boolean>(false)
+    const promptType = 'oldLegend'
+/*
+
+  const saveStory = api.placeType.saveStory.useMutation({
+    onSuccess: (newPlace) => {
+      if(!!newPlace){
+     //   onPlaceSuccess(newPlace);
+      }else{
+     //   onFailure(lat, lng);  
+      }
+      console.log(' api.placeType.saveStory')
+      console.log(newPlace)
+    },
+    onError: (err) => {
+      console.error(err)
+   //   onFailure(lat, lng);
+    }
+  })
 
     const getAndPopulateStory = api.placeType.getAndPopulateStory.useMutation({
         onSuccess: (newPlace) => {
@@ -47,35 +86,91 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
             console.error(err)
            // onFailure(lat, lng);
         }
-    })
-
-    const populate = (wiki_id:string) => {
-        if(!getAndPopulateStory.isLoading 
-        && !getAndPopulateStory.isError
-        && !getAndPopulateStory?.data 
-        && !hasRun
-        ){
-            if(!hasRun){
-                setHasRun(true)
-                getAndPopulateStory.mutate({ wiki_id: wiki_id, promptType: 'oldLegend'})
-            }
+    })*/
+    /*
+    const { refetch, data, isLoading, isError } = api.placeType.getSingle.useQuery({
+        placeId: place.id
+    },{
+        cacheTime: Infinity,
+        refetchInterval: 20000,
+        retry: false,
+    /*   initialData: {
+            place,
+            placeTypes
         }
-    }
+    })*/
 
+
+    // If we don't have a placeType for this place yet, create one
+    // TODO: add check for promptType and old record
+
+    const requestStory = () => {
+        getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
+        .then((s) => {
+            console.log('GET STORY FINISHED')
+            console.log(s)
+
+          /*  saveStory.mutate({
+                wiki_id: place.wiki_id
+                , title: 'title'
+                , content: JSON.stringify(s)
+                , type: promptType
+                , status: 'complete'
+            })*/
+        }).catch((err) => {
+            console.error('Could got get story', {err: JSON.stringify(err)})
+        })
+    }
+/*
+    useEffect(() => {
+        if(!hasStory && data && data.place.wiki_id && data.placeTypes.length == 0 && !isError){
+            getStory(place.wiki_id, place.wiki_url, place.summary, promptType).then(function() {
+                refetch().catch((err) =>{
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    console.error('Could not refetch single', {err})
+                })
+            }).catch((err) => {
+                console.error(err)
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                console.error('Could not get story', {err})
+            })
+    
+        }
+    }, [])
+  */  
     if(!place){
         return (<div>No place?</div>)
     }
 
+    if(place && !place.summary){
+        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={errorIcon}>
+             <Popup>
+                {JSON.stringify(place, undefined, 4)}
+                {JSON.stringify(placeTypes, undefined, 4)}
+             </Popup>
+            </Marker>
+    }
+
+    if(place.summary && placeTypes.length == 0){
+        return <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}
+        eventHandlers={{
+            click: (e) => {
+                requestStory()
+            },
+          }}
+        />
+    }
+
     return (<Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
-       <button 
-            className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
-            onClick={() => populate(place.wiki_id)}>generate</button>
 
             <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeTypes.map((g) => <div key={g.title} className="font-ltor text-sm">
                 <h1 className="max-h-24 text-1xl font-bold underline ">{g.title}</h1>
                 {g.content}
+                {/*<button 
+            className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
+        onClick={() => requestStory()}>request story</button>}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}

@@ -107,6 +107,23 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
           ),
+
+          saveStory: publicProcedure
+            .input(z.object({ 
+              wiki_id: z.string(),
+              title: z.string(),
+              content: z.string(),
+              type: z.string(),
+              status: z.string(),
+            })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({data: {
+              wiki_id: input.wiki_id.toString(),
+              title: input.title,
+              content: input.content,
+              type: input.type,
+              upvotes: 0,
+              downvotes: 0,
+              status: 'success'
+            }})),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -280,10 +297,54 @@ export const placeTypeRouter = createTRPCRouter({
           }
         })
       }),*/
+
+      getSingle: publicProcedure
+        .input(z.object({ placeId: z.string() }))
+        .query(async ({ ctx, input}) => {
+
+          const place = await ctx.prisma.place.findFirst({
+            select: {
+              id: true,
+              wiki_url: true,
+              lat: true,
+              lng: true,
+              status:true,
+              summary: true,
+              info:true,
+              main_image_url: true,
+              wiki_id: true
+            },
+            where: {
+              id: {
+                equals: input.placeId
+              }
+            }
+          });
+          if(!place || !place.wiki_id){
+            throw new Error("no place or wiki_id?")
+          }
+
+          const getPlaceTypes = async (wiki_id:string) => 
+                ctx.prisma.placeType.findMany({
+                    select: defaultPlaceTypeSelect,
+                    where: {
+                      wiki_id: wiki_id,
+                      NOT: {
+                        content: 'failed'
+                      }
+                    }
+                  })
+
+          const placeTypes = await getPlaceTypes(place?.wiki_id);
+          return {
+            place: place,
+            placeTypes
+          }
+        }),
       getInside: publicProcedure
         .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
         .query(async ({ ctx, input}) => {
-          
+
           const places = await ctx.prisma.place.findMany({
             select: {
               id: true,

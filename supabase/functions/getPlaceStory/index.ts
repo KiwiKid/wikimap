@@ -19,6 +19,22 @@ interface Request {
   prompt_type:string
 }
 
+
+interface Response {
+  data: {
+    wiki_id:string
+    title:string
+    content:string
+    type:string
+    upvotes:int
+    downvotes:int
+    status:string
+  },
+  error?:{
+    message:string
+  }
+}
+
 serve(async (req) => {
   try{
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -29,9 +45,9 @@ serve(async (req) => {
       prompt_type
     } = await req.json() as Request
 
-    const data = {
-      message: `Hello ${wiki_id} ${wiki_url} ${summary}!`,
-    }
+   // const data = {
+   //   message: `Hello ${wiki_id} ${wiki_url} ${summary}!`,
+   // }
 
     const prompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
@@ -49,9 +65,12 @@ serve(async (req) => {
     let res:{text:string};
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if(!response || (response.text && response.text.length == 0)){
-      res = {
-        text: 'failed',
-      }
+      return new Response(
+        JSON.stringify({error: {
+          message: 'No text repsonse'
+        }}),
+        { headers: { "Content-Type": "application/json" } },
+      )
     }else{
       res = {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -61,27 +80,23 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({
-      wiki_id: wiki_id,
-      title: 'Placeholder title',
-      content: res.text || 'No content',
-      type: prompt_type,
-      upvotes: 0,
-      downvotes: 0,
-      status: 'success'
-    }),
+        data: {
+          wiki_id: wiki_id,
+          title: 'Placeholder title',
+          content: res.text || 'No content',
+          type: prompt_type,
+          status: 'success'
+        }
+      }),
     { headers: { "Content-Type": "application/json" } }
     )
 
-
-
-
-    return new Response(
-      JSON.stringify(data),
-      { headers: { "Content-Type": "application/json" } },
-    )
   }catch(err){
+    console.error(err)
     return new Response(
-      JSON.stringify(err),
+      JSON.stringify({error: {
+        message: 'Invalid Call'
+      }}),
       { headers: { "Content-Type": "application/json" } },
     )
   }

@@ -19,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^4.11.0",
     "@supabase/postgrest-js": "github:supabase/postgrest-js",
+    "@supabase/supabase-js": "^2.21.0",
     "@tanstack/react-query": "^4.28.0",
     "@trpc/client": "^10.18.0",
     "@trpc/next": "^10.18.0",
@@ -26,6 +27,7 @@
     "@trpc/server": "^10.18.0",
     "@types/leaflet": "^1.9.3",
     "@vercel/analytics": "^1.0.0",
+    "axios": "^1.3.6",
     "langchain": "^0.0.61",
     "leaflet": "^1.9.3",
     "next": "^13.2.4",
