@@ -55,7 +55,7 @@ export interface PlaceResult {
 export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     const promptType = 'oldLegend'
-/*
+
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
@@ -72,7 +72,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
    //   onFailure(lat, lng);
     }
   })
-
+/*
     const getAndPopulateStory = api.placeType.getAndPopulateStory.useMutation({
         onSuccess: (newPlace) => {
             if(!!newPlace){
@@ -110,13 +110,18 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
             console.log('GET STORY FINISHED')
             console.log(s)
 
-          /*  saveStory.mutate({
-                wiki_id: place.wiki_id
-                , title: 'title'
-                , content: JSON.stringify(s)
-                , type: promptType
-                , status: 'complete'
-            })*/
+            if(s?.data){
+                saveStory.mutate({
+                    wiki_id: place.wiki_id
+                    , title: s.data.title
+                    , content: s.data.content
+                    , type: promptType
+                    , status: 'complete'
+                })
+            }else{
+                console.error('GET STORY FAILED', {s})
+            }
+            
         }).catch((err) => {
             console.error('Could got get story', {err: JSON.stringify(err)})
         })

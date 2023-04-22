@@ -20,7 +20,7 @@ interface Response {
         message:string
     }
   }
-
+/*
 const getClient = () => {
     if(!process.env.NEXT_PUBLIC_SBASE_URL){
         throw new Error("no SUPABASE_URL")
@@ -29,22 +29,39 @@ const getClient = () => {
         throw new Error("no SUPABASE_ANON_KEY")
     }
     return createClient(process.env.NEXT_PUBLIC_SBASE_URL, process.env.NEXT_PUBLIC_SBASE_ANON_KEY);
-}
+}*/
 
 
 const getStory = async (wiki_id:string, wiki_url:string, summary:string, prompt_type:string) => {
-    const supabase = getClient();
-    const res = await supabase.rpc<'getPlaceStory', Response>('getPlaceStory', { wiki_url: wiki_url, wiki_id: wiki_id, summary: summary, prompt_type: prompt_type })
-    
-    if(res.error){
+   // const supabase = getClient();
 
-        return {
-            text: res.error
-        }
+
+    if(!process.env.NEXT_PUBLIC_SBASE_URL || !process.env.NEXT_PUBLIC_SBASE_ANON_KEY){
+        throw new Error('could not get story')
     }
-    return res.data
-}
+    const payload = { wiki_url: wiki_url, wiki_id: wiki_id, summary: summary, prompt_type: prompt_type }
+    
+    return axios.post(`${process.env.NEXT_PUBLIC_SBASE_URL}getPlaceStory`, payload, {
+        headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SBASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+        }
+    })
+  .then((response: AxiosResponse<Response>) => {
+    if(response.data){
+        return response.data;
+    }else{
+        console.error('oculd not get story response.data')
+    }
+    
+    // handle successful response here
+  })
+  .catch((error: Error) => {
+    console.error(error)
+    // handle error here
+  });
 
+}
 
 export {
     getStory

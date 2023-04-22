@@ -40,7 +40,7 @@ serve(async (req) => {
 
   if (req.method === 'OPTIONS') {
     console.log('CORS request')
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(JSON.stringify('ok'), { headers: corsHeaders })
   }
 
   console.log('non-CORS request')
