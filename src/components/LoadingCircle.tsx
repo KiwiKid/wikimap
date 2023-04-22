@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { type MappedPage } from "~/utils/mapWikiPage";
 import { api } from "../utils/api"
 import WikiJS from 'wikijs'
+import { type Place } from "@prisma/client";
 const RADIUS = 1000;
 
 
@@ -16,7 +17,7 @@ interface LoadingCircleProps {
   , lng:number
   , onPageNames:((lat:number, lng: number, pageNames:string[])=>void)
   , onFailure:((lat:number, lng: number)=>void)
-  , onPlaceSuccess:((mappedPage:MappedPage)=>void)
+  , onPlaceSuccess:((wikiPlace:Place)=>void)
   , onFinished:((lat:number, lng:number)=>void)
 }
 
@@ -29,8 +30,19 @@ export default function LoadingCircle({
   , onFinished
 }:LoadingCircleProps) {
 
-  const processPageName = api.latLng.processPageName.useMutation()
-  console.log(processPageName);
+  const processPageName = api.placeType.processPageName.useMutation({
+    onSuccess: (newPlace) => {
+      if(!!newPlace){
+        onPlaceSuccess(newPlace);
+      }else{
+        onFailure(lat, lng);  
+      }
+    },
+    onError: (err) => {
+      console.error(err)
+      onFailure(lat, lng);
+    }
+  })
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const getPageNames = api.latLng.getPageNames.useMutation({
     onSuccess: (res:WikiSearchResult) => {
@@ -39,7 +51,10 @@ export default function LoadingCircle({
           pageName: pn
         })
       })
-      
+    },
+    onError: (err) => {
+      onFailure(lat, lng)
+      console.error(err)
     }
   })
   

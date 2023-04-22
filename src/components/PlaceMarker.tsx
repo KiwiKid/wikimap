@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Icon  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
+import { api } from '~/utils/api'
+
 
 const locIcon = new Icon({
     iconUrl: locIconFile.src,
@@ -13,14 +15,39 @@ const locIcon = new Icon({
 import WikiJS from 'wikijs'
 const RADIUS = 1000;
 
-interface PlaceMarker {
-    mappedPlace:MappedPage
+interface PlaceMarkerProps {
+    wiki_id:string
+    wikiPlace:{
+        id:string
+        url:string
+        lat:number
+        lng:number
+    }
 }
 
-export default function PlaceMarker({mappedPlace}:PlaceMarker) {
+export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
+
+    const getAndPopulateStory = api.placeType.getAndPopulateStory.useMutation({
+        onSuccess: (newPlace) => {
+            if(!!newPlace){
+                console.log(newPlace)
+              //  onPlaceSuccess(newPlace);
+            }else{
+              //  onFailure(lat, lng);  
+            }
+        },
+        onError: (err) => {
+            console.error(err)
+           // onFailure(lat, lng);
+        }
+    })
+
+    useEffect(() => {
+        getAndPopulateStory.mutate({ wiki_id: wiki_id, promptType: 'oldLegend'})
+    })
 
 
-    return (<Marker key={`${mappedPlace.id} ${mappedPlace.url}`} position={[mappedPlace.lat, mappedPlace.lng]} icon={locIcon}>
+    return (<Marker key={`${wikiPlace.id} ${wikiPlace.url}`} position={[wikiPlace.lat, wikiPlace.lng]} icon={locIcon}>
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
        {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex" 
@@ -36,7 +63,7 @@ export default function PlaceMarker({mappedPlace}:PlaceMarker) {
                 
 </div>)
             [Generated with AI]*/}
-            <details><summary></summary>{mappedPlace.summary}</details>
+            <details>{wikiPlace.title}<summary></summary>{wikiPlace.summary}</details>
         </Popup>
 
     </Marker>)

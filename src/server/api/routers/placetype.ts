@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-//import WikiJS from "wikijs";
-//import mapWikiPage from "~/utils/mapWikiPage";
+import WikiJS from "wikijs";
+import mapWikiPage, { type MappedPage} from "~/utils/mapWikiPage";
 //import { Configuration, OpenAIApi } from "openai";
 //import { prisma } from "~/server/db";
 
@@ -64,6 +64,36 @@ export const placeTypeRouter = createTRPCRouter({
           id: m.input.id
         }
       })),
+      processPageName: publicProcedure
+        .input(z.object({ pageName: z.string()}))
+        .mutation(({input, ctx}) => WikiJS().page(input.pageName)
+            .then(mapWikiPage)
+            .then(async (fp:MappedPage) => {
+
+              const newItem = {
+                  lat: fp.lat,
+                  lng: fp.lng,
+                  wiki_id: fp.wiki_id.toString(),
+                  wiki_url: fp.url,
+                  status: 'pending',
+                  info: JSON.stringify(fp.info),
+                  summary: fp.summary,
+                  main_image_url: fp.mainImage || '',
+                }
+              console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
+
+              return await ctx.prisma.place.create({data: newItem})
+              .catch((err:PrismaClientValidationError) => {
+                console.error('failed to create place (could already exist?', err)
+              })
+            }).catch((err) => {
+              console.error('failed to create place (could already exist?', {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                err: err
+              })
+            })
+
+          ),
     setAIResults: publicProcedure
       .input(z.object({
         title: z.string(),

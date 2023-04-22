@@ -35,45 +35,6 @@ export const latLngRouter = createTRPCRouter({
               }
           })
         }),
-      processPageName: publicProcedure
-        .input(z.object({ pageName: z.string()}))
-        .mutation(({input}) => {
-          WikiJS().page(input.pageName)
-            .then(mapWikiPage)
-            .then(async (fp:MappedPage) => {
-
-              const newItem = {
-                  lat: fp.lat,
-                  lng: fp.lng,
-                  wiki_id: fp.wiki_id.toString(),
-                  wiki_url: fp.url,
-                  status: 'pending',
-                  info: JSON.stringify(fp.info),
-                  summary: fp.summary,
-                  main_image_url: fp.mainImage || '',
-                }
-              console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lat}`)
-
-              return await prisma.place.create({data: newItem})
-              .catch((err:PrismaClientValidationError) => {
-                console.error('failed to create place (could already exist?', {
-                  err: err?.message,
-                  stack: err?.stack
-                })
-                return {
-                  error: 'failed'
-                }
-              })
-            }).catch((err) => {
-              console.error('failed to create place (could already exist?', {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                err: err
-              })
-              return {
-                error: 'failed'
-              }
-            })
-          }),
   /*  getSummary: publicProcedure
       .query(({ ctx}) => ctx.prisma.latLngToProcess.count({
         select: {
