@@ -101,6 +101,10 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
         //if(setVisiblePlaces){
           //setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
        // }
+      },
+      onError: (err) => {
+        console.error('Could not get existing places')
+        console.error(err)
       }
     })
 
