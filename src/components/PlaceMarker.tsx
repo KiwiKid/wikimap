@@ -22,6 +22,7 @@ interface PlaceMarkerProps {
         url:string
         lat:number
         lng:number
+        summary:string
     }
 }
 
@@ -63,7 +64,7 @@ export default function PlaceMarker({wiki_id, wikiPlace}:PlaceMarkerProps) {
                 
 </div>)
             [Generated with AI]*/}
-            <details>{wikiPlace.wiki_id}<summary></summary>{JSON.stringify(wikiPlace.summary)}</details>
+            <details>{wikiPlace.url}<summary></summary>{JSON.stringify(wikiPlace.summary)}</details>
         </Popup>
 
     </Marker>)

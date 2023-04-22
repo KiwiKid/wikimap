@@ -139,8 +139,9 @@ return (<>
                 onFinished={onFinished}
             /></>) : null}
 
-            {existingPlaces.isError && existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces.data)}</div>            : !existingPlaces.isFetched ? <div>Loading</div> 
-            : <div>{existingPlaces.data.map((ep) => <>{ep}</>)}</div>
+            {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces.data)}</div>            
+              : !existingPlaces.isFetched ? <div>Loading..</div> 
+              : <div>{existingPlaces.data.map((ep) => <>{ep}</>)}</div>
           }
         </>
     )
