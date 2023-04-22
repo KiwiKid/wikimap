@@ -136,11 +136,12 @@ export const placeTypeRouter = createTRPCRouter({
 
           const llm = new openaiChat.ChatOpenAI();
           const chain = new chains.LLMChain({ prompt, llm });
-          const response:OpenAIRes = await chain.call({ 
+          const response = await chain.call({ 
             place_information: place.summary
           });
 
           let res:{text:string};
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if(!response || (response.text && response.text.length == 0)){
             res = {
               text: 'failed',
