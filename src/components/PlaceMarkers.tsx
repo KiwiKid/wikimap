@@ -115,7 +115,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     const topLeft = bounds.getNorthWest()
     const bottomRight = bounds.getSouthEast()
 
-    const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(null);
+    const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(getLoadPoints(map));
 
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
