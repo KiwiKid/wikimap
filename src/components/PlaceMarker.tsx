@@ -1,6 +1,6 @@
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup, MarkerProps } from 'react-leaflet';
 import { Ref, useEffect, useRef, useState } from "react";
-import { Icon, Marker as MakerType  } from 'leaflet';
+import { Icon, Marker as MakerType, marker  } from 'leaflet';
 import { type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
 import redIconFile from 'src/styles/bang.png'
@@ -80,6 +80,8 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         }
     }
 
+    const [icon, setIcon] = useState(getIcon())
+
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
@@ -132,18 +134,26 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         try{
             console.log('requestStorys')
             console.log(markerRef)
-            if(!isLoadingStory){
+            if(!isLoadingStory && markerRef && markerRef.current){
                 markerRef.current?.setPopupContent("Loading...")
-                markerRef.current?.setIcon(loadingIcon)
+                setIcon(loadingIcon)
+               // markerRef.current?.setIcon()
                 setIsLoadingStory(true)
                 getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
                 .then((s) => {
+                    //if(markerRef && markerRef.current){
+                        setIcon(locIcon)
+                    //    markerRef.current?.setIcon(locIcon)
+                   // }
                     console.log('GET STORY FINISHED')
                     console.log(s)
 
                     if(s?.data){
-                        markerRef.current?.setPopupContent(s.data.content)
-                        markerRef.current?.setIcon(redIcon)
+                    //    if(markerRef && markerRef.current){
+                         //   markerRef.current?.setPopupContent(s.data.content)
+                           // markerRef.current?.setIcon(redIcon)
+                   //     }
+
                         saveStory.mutate({
                             wiki_id: place.wiki_id
                             , title: s.data.title
@@ -153,7 +163,12 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
                         })
                     }else{
                         console.error('GET STORY FAILED', {s})
-                        markerRef.current?.setIcon(errorIcon)
+                 //       if(markerRef && markerRef.current){
+                            setIcon(errorIcon)
+
+                          //  markerRef.current?.setIcon(errorIcon)
+                 //       }
+                        
                     }
                     
                 }).catch((err) => {
@@ -191,16 +206,17 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
   //      <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}/>
   //  }
 
-    if(place && !place.summary){
+    /*if(place && !place.summary){
         return <Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getIcon()}>
              <Popup>
                 {JSON.stringify(place, undefined, 4)}
                 {JSON.stringify(placeTypes, undefined, 4)}
              </Popup>
             </Marker>
-    }
+    }*/
 
-    const loadPlace = () => {
+    const loadPlace = (evt:React.MouseEvent<HTMLElement>) => {
+        evt.preventDefault();
         console.log('loadPlace')
         setIsLoadingStory(true)
         console.log('loadPlace1')
@@ -211,11 +227,11 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     }
 
-    return (<Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getIcon()}>
+    return (<Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {place.summary && placeTypes.length == 0 ? 
         <Popup key={`${place.id}`}>
             {}
-            <button onClick={() => loadPlace()}>Load this place</button>
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>Load this place</button>
             {isLoadingStory ? 'loading' : JSON.stringify(place.info)}
             {JSON.stringify(isLoadingStory)}
         </Popup>

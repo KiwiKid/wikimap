@@ -80,32 +80,48 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     
     const map = useMapEvents({
       click: (e) => {
+        console.log('useMapEvents - click')
+        console.log(e.sourceTarget)
         if(e.latlng){
             console.log('CLICK')
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);
             // L.marker([lat, lng], { icon }).addTo(map);
-            setIsLoadingAreas(loadingAreas.concat(newPoint))
+            // setIsLoadingAreas(loadingAreas.concat(newPoint))
             console.log('CLICK-newlatlng')
         }else{
             console.error('e.latlng is nulll')
         }
       },
       zoomend: (e) => {
+        try{
+
+          console.log('CLICK-zoomend')
+
         const handler = setTimeout(() => {
           setDelayedMapPosition(getLoadPoints(map))
         }, 400)
         return () => {
           clearTimeout(handler);
         };
+      }catch(err){
+        console.error(err)
+      }
       },
       dragend: (e) => {
-        const handler = setTimeout(() => {
-          setDelayedMapPosition(getLoadPoints(map))
-        }, 400)
-        return () => {
-          clearTimeout(handler);
-        };
+        console.log('CLICK-dragend')
+
+        try{
+
+          const handler = setTimeout(() => {
+            setDelayedMapPosition(getLoadPoints(map))
+          }, 400)
+          return () => {
+            clearTimeout(handler);
+          };
+        }catch(err){
+          console.error(err)
+        }
       }
     });
 
@@ -146,7 +162,12 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     }, [delayedMapPosition])
 
     const removePoint = (lat:number,lng:number) => {
-      setIsLoadingAreas(loadingAreas.filter((la) => la.lat == lat && la.lng == lng))
+      try{
+        setIsLoadingAreas(loadingAreas.filter((la) => la.lat == lat && la.lng == lng))
+      }catch(err){
+        console.error('failed set loading error ')
+      }
+      
     }
 
     const onPageNames = useCallback((lat:number, lng: number, pageNames:string[]) => {
@@ -170,8 +191,8 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     }, [])
 
 
-return (<>  
-            {loadingAreas?.length > 0 ? loadingAreas.map((la) => <><LoadingCircle 
+return (<div>  
+            {loadingAreas?.length > 0 ? loadingAreas.map((la) => <LoadingCircle 
                 key={`${la.lat}_${la.lng}`} 
                 lat={la.lat} 
                 lng={la.lng} 
@@ -179,12 +200,12 @@ return (<>
                 onFailure={onFailure}
                 onPlaceSuccess={onPlaceSuccess}
                 onFinished={onFinished}
-            /></>) : null}
+            />) : null}
 
             {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 
               : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`}  place={ep.place} placeTypes={ep.placeTypes} />)}</div>
           }
-        </>
+        </div>
     )
             }

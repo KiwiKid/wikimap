@@ -19,12 +19,12 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
       return <div>Loading...{promptType}</div>;
     }
 
-    return <>
+    return <div>
     <Map setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
     <MapDrawerContainer visiblePlaces={visiblePlaces}>
       <>{promptType}</>
     </MapDrawerContainer>
-</>
+</div>
 }
 
 interface PagePropsIn extends ParsedUrlQuery {

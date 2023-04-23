@@ -366,7 +366,8 @@ export const placeTypeRouter = createTRPCRouter({
                 lt: input.bottomRightLng,
                 gt: input.topLeftLng
               }
-            }
+            },
+            take: 400
           });
 
           const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
