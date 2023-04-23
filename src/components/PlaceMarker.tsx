@@ -63,12 +63,7 @@ export default function PlaceMarker(props:PlaceResult) {
 
     const {place, placeTypes} = props;
     const promptType = 'oldLegend'
-
-
-
     const [isLoadingStory, setIsLoadingStory] = useState(false)
-    const [loadedStory, setLoadedStory] = useState<string>("")
-
 
 
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
@@ -92,10 +87,13 @@ export default function PlaceMarker(props:PlaceResult) {
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
       if(!!newPlace){
+            setIcon(getIcon())
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  
       }
+      setIcon(getIcon())
+
       console.log(' api.placeType.saveStory')
       console.log(newPlace)
     },
@@ -147,10 +145,6 @@ export default function PlaceMarker(props:PlaceResult) {
                 setIsLoadingStory(true)
                 getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
                 .then((s) => {
-                    //if(markerRef && markerRef.current){
-                        setIcon(locIcon)
-                    //    markerRef.current?.setIcon(locIcon)
-                   // }
                     console.log('GET STORY FINISHED')
                     console.log(s)
 
@@ -159,7 +153,7 @@ export default function PlaceMarker(props:PlaceResult) {
                          //   markerRef.current?.setPopupContent(s.data.content)
                            // markerRef.current?.setIcon(redIcon)
                    //     }
-
+                        setIcon(redIcon)
                         saveStory.mutate({
                             wiki_id: place.wiki_id
                             , title: s.data.title
@@ -176,10 +170,10 @@ export default function PlaceMarker(props:PlaceResult) {
                  //       }
                         
                     }
-                    
+                    setIsLoadingStory(false)
+
                 }).catch((err) => {
                     console.error('Could got get story', {err: JSON.stringify(err)})
-                }).finally(() =>{
                     setIsLoadingStory(false)
                 })
             }
@@ -222,17 +216,18 @@ export default function PlaceMarker(props:PlaceResult) {
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {place.summary && placeTypes.length == 0 ? 
-        <Popup key={`${place.id}`}>
+        <Popup key={`${place.id}`} className='flex'>
             {}
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>Load this place</button>
+            <button disabled={isLoadingStory} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{isLoadingStory ? 'Loading' : 'Load this place'}</button>
             {isLoadingStory ? 'loading' : JSON.stringify(place.info)}
             {JSON.stringify(isLoadingStory)}
         </Popup>
         : <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+                <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
 
-            <img className='rounded-lg' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm">
-                <h1 className="max-h-24 font-bold underline ">{g.title}</h1>
+            {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm flex">
+                {/*<h1 className="max-h-24 font-bold underline ">{g.title}</h1>*/}
+
                 {g.content}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"

@@ -140,7 +140,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
       placeResults.forEach((pl) => {
         const existingMarker = renderedPlaces.get(pl.place.id)
-        if(!existingMarker || (existingMarker?.placeTypes?.length == 0 && pl.placeTypes.length > 0)){
+        if(!existingMarker || (existingMarker?.placeTypes?.length !== pl.placeTypes.length)){
           renderedPlaces.set(pl.place.id, pl)
         }else{
           // TODO: if we are really far away, unload the object?
