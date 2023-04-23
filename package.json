@@ -8,11 +8,11 @@
     "dev:db:migrate": "pnpm prisma migrate dev",
     "dev:superbase": "yarn supabase:dev",
     "postinstall": "pnpm prisma generate",
-    "build:db": "docker-compose up",
     "db:m:prod": "pnpm prisma db push",
     "db:m:dev": "pnpm prisma migrate dev",
     "lint": "next lint",
     "start": "next start",
+    "start:db": "docker-compose up",
     "start:ai": "npx ./node_modules/supabase functions serve getPlaceStory",
     "deploy:ai": "npx ./node_modules/supabase secrets set --env-file ./supabase/.env && supabase functions deploy getPlaceStory --import-map supabase/functions/import_map_deploy.json --debug"
   },

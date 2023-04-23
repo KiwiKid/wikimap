@@ -59,13 +59,19 @@ export interface PlaceResult {
   
 
 
-export default function PlaceMarker({place, placeTypes}:PlaceResult) {
+export default function PlaceMarker(props:PlaceResult) {
 
+    const {place, placeTypes} = props;
     const promptType = 'oldLegend'
 
-    const [isLoadingStory, setIsLoadingStory] = useState(false)
 
-    const markerRef = useRef<MakerType<MarkerProps>>(null);
+
+    const [isLoadingStory, setIsLoadingStory] = useState(false)
+    const [loadedStory, setLoadedStory] = useState<string>("")
+
+
+
+    const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getIcon = () => {
         if(place && !place.summary) {
@@ -132,10 +138,10 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     const requestStory = () => {
         try{
-            console.log('requestStorys')
-            console.log(markerRef)
-            if(!isLoadingStory && markerRef && markerRef.current){
-                markerRef.current?.setPopupContent("Loading...")
+          //  console.log('requestStorys')
+            //console.log(markerRef)
+            if(!isLoadingStory){
+               // markerRef.current?.setPopupContent("Loading...")
                 setIcon(loadingIcon)
                // markerRef.current?.setIcon()
                 setIsLoadingStory(true)
@@ -202,19 +208,6 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
         return (<div>No place?</div>)
     }
 
-    //if(isLoadingStory || saveStory.isLoading){
-  //      <Marker key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={loadingIcon}/>
-  //  }
-
-    /*if(place && !place.summary){
-        return <Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getIcon()}>
-             <Popup>
-                {JSON.stringify(place, undefined, 4)}
-                {JSON.stringify(placeTypes, undefined, 4)}
-             </Popup>
-            </Marker>
-    }*/
-
     const loadPlace = (evt:React.MouseEvent<HTMLElement>) => {
         evt.preventDefault();
         console.log('loadPlace')
@@ -227,7 +220,7 @@ export default function PlaceMarker({place, placeTypes}:PlaceResult) {
 
     }
 
-    return (<Marker ref={markerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
+    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {place.summary && placeTypes.length == 0 ? 
         <Popup key={`${place.id}`}>
             {}

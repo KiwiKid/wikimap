@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import L, { Icon, LatLng, Map } from 'leaflet';
+import L, { Icon, LatLng, Map as LMap } from 'leaflet';
 import { useCallback, useEffect, useState } from 'react';
 import { Circle, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
@@ -61,7 +61,7 @@ interface MapPosition {
 
 const loadingCircleSizeMeters = 1000;
 
-const getLoadPoints = (map:Map) => {
+const getLoadPoints = (map:LMap) => {
   const bounds = map.getBounds()
     const topLeft = bounds.getNorthWest()
     const bottomRight = bounds.getSouthEast()
@@ -73,10 +73,14 @@ const getLoadPoints = (map:Map) => {
   }
 }
 
+interface Dictionary {
+  [key: string]: PlaceResult
+}
+
 export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
-
+    const [renderedPlaces, setRenderedPlaces] = useState(new Map<string,PlaceResult>());
     
     const map = useMapEvents({
       click: (e) => {
@@ -87,7 +91,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);
             // L.marker([lat, lng], { icon }).addTo(map);
-            // setIsLoadingAreas(loadingAreas.concat(newPoint))
+            setIsLoadingAreas(loadingAreas.concat(newPoint))
             console.log('CLICK-newlatlng')
         }else{
             console.error('e.latlng is nulll')
@@ -133,6 +137,17 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
     const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(getLoadPoints(map));
 
+    const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
+      placeResults.forEach((pl) => {
+        const existingMarker = renderedPlaces.get(pl.place.id)
+        if(!existingMarker || (existingMarker?.placeTypes?.length == 0 && pl.placeTypes.length > 0)){
+          renderedPlaces.set(pl.place.id, pl)
+        }else{
+          // TODO: if we are really far away, unload the object?
+        }
+      })
+    }
+
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
@@ -145,6 +160,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
       onSuccess: (data) => {
         console.log('existingPlaces')
         console.log(data)
+        updateRenderedPlaces(data)
         //if(setVisiblePlaces){
           //setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
        // }
@@ -182,11 +198,13 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
     }, [])
 
     const onFailure = useCallback((lat:number, lng:number) => {
-      console.error(`Failed lng:'+${lat}+'lng: '+${lng}`)
+      console.error(`onFailure lng:'+${lat}+'lng: '+${lng}`)
       removePoint(lat, lng)
     }, [])
     
     const onFinished = useCallback((lat:number, lng:number) => {
+      console.error(`onFinished lng:'+${lat}+'lng: '+${lng}`)
+
       removePoint(lat, lng)
     }, [])
 
@@ -201,11 +219,11 @@ return (<div>
                 onPlaceSuccess={onPlaceSuccess}
                 onFinished={onFinished}
             />) : null}
-
-            {existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
+            {renderedPlaces && Array.from(renderedPlaces).map((ep) => <PlaceMarker key={`${ep[1].place.wiki_id}`}  place={ep[1].place} placeTypes={ep[1].placeTypes} />)}
+            {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 
-              : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`}  place={ep.place} placeTypes={ep.placeTypes} />)}</div>
-          }
+            : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`}  place={ep.place} placeTypes={ep.placeTypes} />)}</div>
+            */}
         </div>
     )
             }
