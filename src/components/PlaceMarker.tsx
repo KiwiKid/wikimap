@@ -6,7 +6,7 @@ import locIconFile from 'src/styles/loc.png'
 import redIconFile from 'src/styles/bang.png'
 import loadingIconFile from 'src/styles/loading.png'
 import errorIconFile from 'src/styles/error.png'
-
+import { useMutation  } from '@tanstack/react-query';
 
 import { api } from '~/utils/api'
 import { type Place } from "@prisma/client";
@@ -41,6 +41,7 @@ const locIcon = new Icon({
 import WikiJS from 'wikijs'
 import { type RouterOutputs } from '~/utils/api'
 import { getStory } from '~/utils/getStory';
+import Counter from './Counter';
 const RADIUS = 1000;
 
 export interface PublicPlaceType {
@@ -55,17 +56,46 @@ export interface PublicPlaceType {
 export interface PlaceResult {
     place: Place, 
     placeTypes: PublicPlaceType[]
+    updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
   }
   
 
 
 export default function PlaceMarker(props:PlaceResult) {
 
-    const {place, placeTypes} = props;
+    const {place, placeTypes, updateRenderedPlaces} = props;
     const promptType = 'oldLegend'
-    const [isLoadingStory, setIsLoadingStory] = useState(false)
+    const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
+    const loadButtonRef = useRef<HTMLButtonElement>(null);
 
+
+    const [timeDiff, setTimeDiff] = useState(0);
+    useEffect(() => {
+        if(startLoadingTime){
+
+            const intervalId = setInterval(() => {
+                const currentTime = new Date();
+                const diff = currentTime.getTime() - startLoadingTime.getTime();
+                if(loadButtonRef.current){
+                    let dots = '.'
+                    if(diff % 3 == 0){
+                        dots = '...'
+                    }else if(diff % 2 == 0){
+                        dots = '..'
+                    }
+                    loadButtonRef.current.textContent = `Imaginering${dots} ${(diff/1000).toFixed(0)}`
+                    loadButtonRef.current.disabled = true
+                    loadButtonRef.current.style.backgroundColor = 'gray'
+                }
+            }, 1000);
+        
+            return () => {
+                clearInterval(intervalId);
+            };
+                        
+        }
+    }, [startLoadingTime]);
 
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
@@ -87,14 +117,28 @@ export default function PlaceMarker(props:PlaceResult) {
 
     const [icon, setIcon] = useState(getInitIcon())
 
+    const refreshMarker = api.placeType.getSingle.useQuery({
+        placeId: place.id
+    },{
+        enabled: false,
+        onSuccess: (placeResult:PlaceResult) => {
+            updateRenderedPlaces([placeResult])
+        },
+        onError: () => {
+            console.error('Could not refresh marker')
+        }
+    })
+
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
       if(!!newPlace){
-        
+        setIcon(loadingIcon)
         console.log('setIcon(redIcon)')
-
-            setIcon(redIcon)
+        refreshMarker.refetch().catch((err) => {
+            console.error('Could not refreshMarker', err)
+        })
+            
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  
@@ -145,14 +189,14 @@ export default function PlaceMarker(props:PlaceResult) {
         try{
           //  console.log('requestStorys')
             //console.log(markerRef)
-            if(!isLoadingStory){
+            if(!startLoadingTime){
                // markerRef.current?.setPopupContent("Loading...")
 
                console.log('setIcon(loadingIcon)')
 
                 setIcon(loadingIcon)
                // markerRef.current?.setIcon()
-                setIsLoadingStory(true)
+                setStartLoadingTime(new Date())
                 getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
                 .then((s) => {
                     console.log('GET STORY FINISHED')
@@ -165,6 +209,7 @@ export default function PlaceMarker(props:PlaceResult) {
                    //     }
                         console.log('setIcon(redIcon)')
                         setIcon(redIcon)
+                        setLoadedStory(s.data.content)
                         saveStory.mutate({
                             wiki_id: place.wiki_id
                             , title: s.data.title
@@ -183,11 +228,11 @@ export default function PlaceMarker(props:PlaceResult) {
                  //       }
                         
                     }
-                    setIsLoadingStory(false)
+                    setStartLoadingTime(null)
 
                 }).catch((err) => {
                     console.error('Could got get story', {err: JSON.stringify(err)})
-                    setIsLoadingStory(false)
+                    setStartLoadingTime(null)
                 })
             }
         }catch(err){
@@ -218,27 +263,26 @@ export default function PlaceMarker(props:PlaceResult) {
     const loadPlace = (evt:React.MouseEvent<HTMLElement>) => {
         evt.preventDefault();
         console.log('loadPlace')
-        setIsLoadingStory(true)
+       // setIsLoadingStory(true)
         console.log('loadPlace1')
-        placeMarkerRef.current?.closePopup();
+       // placeMarkerRef.current?
         requestStory()
-        setIsLoadingStory(false)
+       // setIsLoadingStory(false)
         console.log('loadPlace2')
 
     }
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
-        {place.summary && placeTypes.length == 0 || loadedStory ? 
-        <Popup key={`${place.id}`} className='flex'>
-            <button disabled={isLoadingStory} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{isLoadingStory ? 'Loading' : 'Load this place'}</button>
-        </Popup>
-        : <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
+        {place.summary && placeTypes.length == 0 ? <Popup key={`${place.id}`} className='flex'>
+            <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
+        </Popup> :
+        <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm flex">
                 {/*<h1 className="max-h-24 font-bold underline ">{g.title}</h1>*/}
 
                 {placeTypes.length == 0 && loadedStory ? loadedStory : g.content}
-                {loadedStory}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => requestStory()}>request story</button>}

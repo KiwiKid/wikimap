@@ -219,7 +219,12 @@ return (<div>
                 onPlaceSuccess={onPlaceSuccess}
                 onFinished={onFinished}
             />) : null}
-            {renderedPlaces && Array.from(renderedPlaces).map((ep) => <PlaceMarker key={`${ep[1].place.wiki_id}`}  place={ep[1].place} placeTypes={ep[1].placeTypes} />)}
+            {renderedPlaces && Array.from(renderedPlaces).map((ep) => <PlaceMarker 
+            key={`${ep[1].place.wiki_id}`}  
+            place={ep[1].place} 
+            placeTypes={ep[1].placeTypes} 
+            updateRenderedPlaces={updateRenderedPlaces}
+            />)}
             {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 
             : <div>{existingPlaces.data.map((ep) => <PlaceMarker key={`${ep.place.wiki_id}`}  place={ep.place} placeTypes={ep.placeTypes} />)}</div>
