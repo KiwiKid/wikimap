@@ -68,7 +68,7 @@ export default function PlaceMarker(props:PlaceResult) {
 
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
-    const getIcon = () => {
+    const getInitIcon = () => {
         if(place && !place.summary) {
             return errorIcon
         }
@@ -81,18 +81,18 @@ export default function PlaceMarker(props:PlaceResult) {
         }
     }
 
-    const [icon, setIcon] = useState(getIcon())
+    const [icon, setIcon] = useState(getInitIcon())
 
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
       if(!!newPlace){
-            setIcon(getIcon())
+            setIcon(redIcon)
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  
       }
-      setIcon(getIcon())
+      setIcon(locIcon)
 
       console.log(' api.placeType.saveStory')
       console.log(newPlace)
@@ -207,7 +207,7 @@ export default function PlaceMarker(props:PlaceResult) {
         console.log('loadPlace')
         setIsLoadingStory(true)
         console.log('loadPlace1')
-
+        placeMarkerRef.current?.closePopup();
         requestStory()
         setIsLoadingStory(false)
         console.log('loadPlace2')
@@ -217,10 +217,7 @@ export default function PlaceMarker(props:PlaceResult) {
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {place.summary && placeTypes.length == 0 ? 
         <Popup key={`${place.id}`} className='flex'>
-            {}
             <button disabled={isLoadingStory} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{isLoadingStory ? 'Loading' : 'Load this place'}</button>
-            {isLoadingStory ? 'loading' : JSON.stringify(place.info)}
-            {JSON.stringify(isLoadingStory)}
         </Popup>
         : <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
