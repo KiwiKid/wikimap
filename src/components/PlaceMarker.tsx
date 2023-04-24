@@ -64,19 +64,23 @@ export default function PlaceMarker(props:PlaceResult) {
     const {place, placeTypes} = props;
     const promptType = 'oldLegend'
     const [isLoadingStory, setIsLoadingStory] = useState(false)
+    const [loadedStory, setLoadedStory] = useState<string|null>(null)
 
 
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getInitIcon = () => {
         if(place && !place.summary) {
+            console.log('setIcon(getInitIcon - errorIcon)')
             return errorIcon
         }
         if(place.summary && placeTypes.length == 0){
+            console.log('setIcon(getInitIcon - locIcon)')
             return locIcon
         }
 
         if(place.summary && placeTypes.length > 0){
+            console.log('setIcon(getInitIcon - redIcon)')
             return redIcon
         }
     }
@@ -87,15 +91,18 @@ export default function PlaceMarker(props:PlaceResult) {
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
       if(!!newPlace){
+        
+        console.log('setIcon(redIcon)')
+
             setIcon(redIcon)
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  
-      }
-      setIcon(locIcon)
+     console.log('setIcon(errorIcon)')
 
-      console.log(' api.placeType.saveStory')
-      console.log(newPlace)
+        setIcon(errorIcon)
+
+      }
     },
     onError: (err) => {
       console.error(err)
@@ -140,6 +147,9 @@ export default function PlaceMarker(props:PlaceResult) {
             //console.log(markerRef)
             if(!isLoadingStory){
                // markerRef.current?.setPopupContent("Loading...")
+
+               console.log('setIcon(loadingIcon)')
+
                 setIcon(loadingIcon)
                // markerRef.current?.setIcon()
                 setIsLoadingStory(true)
@@ -153,6 +163,7 @@ export default function PlaceMarker(props:PlaceResult) {
                          //   markerRef.current?.setPopupContent(s.data.content)
                            // markerRef.current?.setIcon(redIcon)
                    //     }
+                        console.log('setIcon(redIcon)')
                         setIcon(redIcon)
                         saveStory.mutate({
                             wiki_id: place.wiki_id
@@ -164,6 +175,8 @@ export default function PlaceMarker(props:PlaceResult) {
                     }else{
                         console.error('GET STORY FAILED', {s})
                  //       if(markerRef && markerRef.current){
+                    console.log('setIcon(errorIcon)')
+
                             setIcon(errorIcon)
 
                           //  markerRef.current?.setIcon(errorIcon)
@@ -215,17 +228,17 @@ export default function PlaceMarker(props:PlaceResult) {
     }
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
-        {place.summary && placeTypes.length == 0 ? 
+        {place.summary && placeTypes.length == 0 || loadedStory ? 
         <Popup key={`${place.id}`} className='flex'>
             <button disabled={isLoadingStory} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{isLoadingStory ? 'Loading' : 'Load this place'}</button>
         </Popup>
         : <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-
             {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm flex">
                 {/*<h1 className="max-h-24 font-bold underline ">{g.title}</h1>*/}
 
-                {g.content}
+                {placeTypes.length == 0 && loadedStory ? loadedStory : g.content}
+                {loadedStory}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => requestStory()}>request story</button>}
