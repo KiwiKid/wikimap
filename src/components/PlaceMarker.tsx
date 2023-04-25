@@ -75,15 +75,21 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
 
     const convertToDots = (num:number) =>
-            Array.from({ length: num }, () => '.').join(' Woah');
+            Array.from({ length: num }, () => '.').join('');
   
             const updateLoading = (dotCount:number, startLoadingTime:Date) => {
                 const currentTime = new Date();
                 const diff = currentTime.getTime() - startLoadingTime.getTime();
                 if(loadButtonRef.current){
+                    const extraMessage = diff > 50*1000 ?
+                                `I'm impressed your still waiting`
+                            : diff > 40*1000 ? 
+                                'This is taking ages' :
+                            diff > 33*1000 
+                            ?   'Oh no! Thats too long'
+                             : ''
 
-                    
-                    loadButtonRef.current.textContent = `Imaginering${convertToDots(dotCount)} ${(diff/1000).toFixed(0)} [Estimate: 30 seconds]`
+                    loadButtonRef.current.textContent = `(${(diff/1000).toFixed(0)}) Imaginering${convertToDots(dotCount)}\r\n${extraMessage}`
                     loadButtonRef.current.disabled = true
                     loadButtonRef.current.style.backgroundColor = 'gray'
                 }
@@ -98,12 +104,12 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             // Run it first time straight away
             if(!hasLoadedStory){
                 setHasLoadedStory(true)
-                updateLoading(dotCount, startLoadingTime)
+                updateLoading(dotCount++, startLoadingTime)
             }
             
 
             const intervalId = setInterval(() => {
-                updateLoading(dotCount, startLoadingTime)
+                updateLoading(dotCount++, startLoadingTime)
                 if(dotCount > 3){
                     dotCount = 0;
                 }
@@ -266,14 +272,15 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {place.summary && placeTypes.length == 0 ? <Popup key={`${place.id}`} className='flex'>
-            <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
+        {place.summary && placeTypes.length == 0 ? <Popup key={`${place.id}`} className='flex text-center align-middle'>
+            <button ref={loadButtonRef} className=" whitespace-nowrap bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
+            <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
         </Popup> :
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
                 
             {placeTypes.map((g) => <div key={g.id}>
-                {g.title && <h1 className="max-h-24 font-bold underline ">{g.title}</h1>}
+                {g.title && <h1 className="text-xl font-bold underline text-center p-2">{g.title}</h1>}
 <div  className="font-ltor text-sm flex">
 
                 {placeTypes.length == 0 && loadedStory ? loadedStory : g.content}
