@@ -8,14 +8,15 @@ interface GetStoryRequest {
     prompt_type:string
 }
 
+interface StoryResponse {
+  wiki_id:string
+  title?:string
+  content?:string
+  type:string
+  status:string
+}
 interface Response {
-    data?: {
-      wiki_id:string
-      title:string
-      content:string
-      type:string
-      status:string
-    },
+    data?: StoryResponse,
     error?:{
         message:string
     }
@@ -32,7 +33,24 @@ const getClient = () => {
 }*/
 
 
-const getStory = async (wiki_id:string, wiki_url:string, summary:string, prompt_type:string) => {
+interface AIResponse {
+    title?:string
+    content?:string
+  }
+  
+function parseAIResponse(input: string): AIResponse {
+    const trimedInput = input.replace(/^\n+/, '').trim();
+    const startIndex = (trimedInput.indexOf("TITLE: ") || trimedInput.indexOf('Title:')) + 7;
+    const endIndex = (trimedInput.indexOf("CONTENT: ")|| trimedInput.indexOf('Content: ')) - 1;
+    const title = trimedInput.substring(startIndex, endIndex).trim();
+  
+    const contentIndex = trimedInput.indexOf("CONTENT:") + 9;
+    const content = trimedInput.substring(contentIndex).replaceAll(/\[(\d+)\]/g, ' ').trim();
+    
+    return { title, content };
+  }
+
+const getStory = async (wiki_id:string, wiki_url:string, summary:string, prompt_type:string):Promise<StoryResponse|void|null> => {
    // const supabase = getClient();
 
 
@@ -49,7 +67,16 @@ const getStory = async (wiki_id:string, wiki_url:string, summary:string, prompt_
     })
   .then((response: AxiosResponse<Response>) => {
     if(response.data){
-        return response.data;
+        const { title, content } = parseAIResponse(response.data.data?.content ?? '');
+        if(!response.data.data?.wiki_id){
+          return;
+        }
+
+        return {
+            ...response.data.data,
+            title: title,
+            content: content,
+        }
     }else{
         console.error('oculd not get story response.data')
     }

@@ -56,37 +56,55 @@ export interface PublicPlaceType {
 export interface PlaceResult {
     place: Place, 
     placeTypes: PublicPlaceType[]
-    updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
   }
   
+interface PlaceMarkerProps {
+    placeResult:PlaceResult
+    updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
+}
 
+export default function PlaceMarker(props:PlaceMarkerProps) {
 
-export default function PlaceMarker(props:PlaceResult) {
-
-    const {place, placeTypes, updateRenderedPlaces} = props;
+    const {placeResult, updateRenderedPlaces} = props;
+    const {place, placeTypes } = placeResult;
     const promptType = 'oldLegend'
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
+    const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
 
-
-    const [timeDiff, setTimeDiff] = useState(0);
-    useEffect(() => {
-        if(startLoadingTime){
-
-            const intervalId = setInterval(() => {
+    const convertToDots = (num:number) =>
+            Array.from({ length: num }, () => '.').join(' Woah');
+  
+            const updateLoading = (dotCount:number, startLoadingTime:Date) => {
                 const currentTime = new Date();
                 const diff = currentTime.getTime() - startLoadingTime.getTime();
                 if(loadButtonRef.current){
-                    let dots = '.'
-                    if(diff % 3 == 0){
-                        dots = '...'
-                    }else if(diff % 2 == 0){
-                        dots = '..'
-                    }
-                    loadButtonRef.current.textContent = `Imaginering${dots} ${(diff/1000).toFixed(0)}`
+
+                    
+                    loadButtonRef.current.textContent = `Imaginering${convertToDots(dotCount)} ${(diff/1000).toFixed(0)} [Estimate: 30 seconds]`
                     loadButtonRef.current.disabled = true
                     loadButtonRef.current.style.backgroundColor = 'gray'
+                }
+            }
+   
+    useEffect(() => {
+
+        let dotCount = 0
+        
+
+        if(startLoadingTime){
+            // Run it first time straight away
+            if(!hasLoadedStory){
+                setHasLoadedStory(true)
+                updateLoading(dotCount, startLoadingTime)
+            }
+            
+
+            const intervalId = setInterval(() => {
+                updateLoading(dotCount, startLoadingTime)
+                if(dotCount > 3){
+                    dotCount = 0;
                 }
             }, 1000);
         
@@ -94,6 +112,10 @@ export default function PlaceMarker(props:PlaceResult) {
                 clearInterval(intervalId);
             };
                         
+        }else{
+            if(placeMarkerRef && placeMarkerRef.current){
+                placeMarkerRef.current.closePopup();
+            }
         }
     }, [startLoadingTime]);
 
@@ -101,16 +123,13 @@ export default function PlaceMarker(props:PlaceResult) {
 
     const getInitIcon = () => {
         if(place && !place.summary) {
-            console.log('setIcon(getInitIcon - errorIcon)')
             return errorIcon
         }
         if(place.summary && placeTypes.length == 0){
-            console.log('setIcon(getInitIcon - locIcon)')
             return locIcon
         }
 
         if(place.summary && placeTypes.length > 0){
-            console.log('setIcon(getInitIcon - redIcon)')
             return redIcon
         }
     }
@@ -123,6 +142,7 @@ export default function PlaceMarker(props:PlaceResult) {
         enabled: false,
         onSuccess: (placeResult:PlaceResult) => {
             updateRenderedPlaces([placeResult])
+            placeMarkerRef.current?.setIcon(redIcon)
         },
         onError: () => {
             console.error('Could not refresh marker')
@@ -134,7 +154,6 @@ export default function PlaceMarker(props:PlaceResult) {
     onSuccess: (newPlace) => {
       if(!!newPlace){
         setIcon(loadingIcon)
-        console.log('setIcon(redIcon)')
         refreshMarker.refetch().catch((err) => {
             console.error('Could not refreshMarker', err)
         })
@@ -142,7 +161,6 @@ export default function PlaceMarker(props:PlaceResult) {
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  
-     console.log('setIcon(errorIcon)')
 
         setIcon(errorIcon)
 
@@ -153,33 +171,6 @@ export default function PlaceMarker(props:PlaceResult) {
    //   onFailure(lat, lng);
     }
   })
-/*
-    const getAndPopulateStory = api.placeType.getAndPopulateStory.useMutation({
-        onSuccess: (newPlace) => {
-            if(!!newPlace){
-                console.log(newPlace)
-              //  onPlaceSuccess(newPlace);
-            }else{
-              //  onFailure(lat, lng);  
-            }
-        },
-        onError: (err) => {
-            console.error(err)
-           // onFailure(lat, lng);
-        }
-    })*/
-    /*
-    const { refetch, data, isLoading, isError } = api.placeType.getSingle.useQuery({
-        placeId: place.id
-    },{
-        cacheTime: Infinity,
-        refetchInterval: 20000,
-        retry: false,
-    /*   initialData: {
-            place,
-            placeTypes
-        }
-    })*/
 
 
     // If we don't have a placeType for this place yet, create one
@@ -202,18 +193,18 @@ export default function PlaceMarker(props:PlaceResult) {
                     console.log('GET STORY FINISHED')
                     console.log(s)
 
-                    if(s?.data){
+                    if(s?.wiki_id && s?.content){
                     //    if(markerRef && markerRef.current){
                          //   markerRef.current?.setPopupContent(s.data.content)
                            // markerRef.current?.setIcon(redIcon)
                    //     }
                         console.log('setIcon(redIcon)')
-                        setIcon(redIcon)
-                        setLoadedStory(s.data.content)
+                      //  setIcon(redIcon)
+                        setLoadedStory(s.content)
                         saveStory.mutate({
                             wiki_id: place.wiki_id
-                            , title: s.data.title
-                            , content: s.data.content
+                            , title: s.title || ''
+                            , content: s.content
                             , type: promptType
                             , status: 'complete'
                         })
@@ -279,8 +270,10 @@ export default function PlaceMarker(props:PlaceResult) {
         </Popup> :
         <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {placeTypes.map((g) => <div key={g.id} className="font-ltor text-sm flex">
-                {/*<h1 className="max-h-24 font-bold underline ">{g.title}</h1>*/}
+                
+            {placeTypes.map((g) => <div key={g.id}>
+                {g.title && <h1 className="max-h-24 font-bold underline ">{g.title}</h1>}
+<div  className="font-ltor text-sm flex">
 
                 {placeTypes.length == 0 && loadedStory ? loadedStory : g.content}
                 {/*<button 
@@ -290,7 +283,7 @@ export default function PlaceMarker(props:PlaceResult) {
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
-</div>)}
+                </div></div>)}
             [Generated with AI]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>}

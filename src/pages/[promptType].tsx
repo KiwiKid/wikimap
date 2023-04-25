@@ -12,7 +12,8 @@ const Map = dynamic(() => import('../components/MapView'), {
   });
 
 const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
-    const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
+   // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
+   const [renderedPlaces, setRenderedPlaces] = useState<PlaceResult[]>([]);
 
     const router = useRouter();
     if (router.isFallback) {
@@ -20,8 +21,8 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
     }
 
     return <div>
-    <Map setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
-    <MapDrawerContainer visiblePlaces={visiblePlaces}>
+    <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
+    <MapDrawerContainer renderedPlaces={renderedPlaces}>
       <>{promptType}</>
     </MapDrawerContainer>
 </div>

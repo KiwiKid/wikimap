@@ -47,10 +47,7 @@ export interface PlaceResult {
   place: Place, 
   placeTypes: PublicPlaceType[]
 }
-interface DebugMarkersProps {
-  setVisiblePlaces?:React.Dispatch<React.SetStateAction<PlaceResult[]>>
-  promptType:string
-}
+
 
 interface MapPosition {
   topLeftLat:number
@@ -77,10 +74,20 @@ interface Dictionary {
   [key: string]: PlaceResult
 }
 
-export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkersProps) {
+interface DebugMarkersProps {
+  setRenderedPlaces:React.Dispatch<React.SetStateAction<PlaceResult[]>>
+  renderedPlaces:PlaceResult[]
+  promptType:string
+}
+export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
-    const [renderedPlaces, setRenderedPlaces] = useState(new Map<string,PlaceResult>());
+    
+
+    const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
+      renderedPlaces.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map())
+    )
+      
     
     const map = useMapEvents({
       click: (e) => {
@@ -137,26 +144,48 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
     const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(getLoadPoints(map));
 
+    const LOADING_NEARBY_BUFFER = 0
     const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
-      placeResults.forEach((pl) => {
-        const existingMarker = renderedPlaces.get(pl.place.id)
-        if(!existingMarker || (existingMarker?.placeTypes?.length !== pl.placeTypes.length)){
-          renderedPlaces.set(pl.place.id, pl)
-        }else{
-          // TODO: if we are really far away, unload the object?
-        }
+      const onScreen = placeResults.filter((pl) => {
+        return pl.place.lat < topLeft.lat+LOADING_NEARBY_BUFFER && pl.place.lat > bottomRight.lat-LOADING_NEARBY_BUFFER &&
+        pl.place.lng > topLeft.lng-LOADING_NEARBY_BUFFER && pl.place.lng < bottomRight.lng-LOADING_NEARBY_BUFFER
       })
-    }
 
+      const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
+
+
+      setRenderedPlaces(onScreen)
+
+      setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
+
+     /* placeResults.forEach((pl) => {
+        const existingMarker = renderedPlaceIds.get(pl.place.id)
+
+          if((
+      //  (existingMarker == null)
+          )){
+            console.log('updateRenderedPlacespoint on screen')
+           
+              renderedPlaceIds.set(pl.place.id, pl.placeTypes.length)
+              console.log(`updateRenderedPlaces\n\nAdded ${pl.place.id}`)
+              setRenderedPlaces(renderedPlaces.concat(pl))
+          }else{
+            console.log(`updateRenderedPlaces\n\Removed ${pl.place.id}`)
+            setRenderedPlaces(renderedPlaces.filter((rp) => rp.place.id == rp.place.id))
+            renderedPlaceIds.delete(pl.place.id);
+            setRenderedPlaceIds(renderedPlaceIds)
+
+            // TODO: if we are really far away, unload the object?
+          }
+        })*/
+    }
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng,
     },{
-      cacheTime: Infinity,
-      refetchInterval: 20000,
-      
+      cacheTime: Infinity,     
       onSuccess: (data) => {
         console.log('existingPlaces')
         console.log(data)
@@ -170,6 +199,7 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
         console.error(err)
       }
     })
+
 
     useEffect(() => {
       existingPlaces.refetch().catch((err) => {
@@ -188,7 +218,9 @@ export default function PlaceMarkers({setVisiblePlaces, promptType}:DebugMarkers
 
     const onPageNames = useCallback((lat:number, lng: number, pageNames:string[]) => {
       // Change circle to "found" loading
-      console.log('page found')
+      existingPlaces.refetch().catch((err) => {
+        console.error(err)
+      })
     }, [])
 
     const onPlaceSuccess = useCallback((wikiPlace:Place) => {
@@ -219,10 +251,9 @@ return (<div>
                 onPlaceSuccess={onPlaceSuccess}
                 onFinished={onFinished}
             />) : null}
-            {renderedPlaces && Array.from(renderedPlaces).map((ep) => <PlaceMarker 
-            key={`${ep[1].place.wiki_id}`}  
-            place={ep[1].place} 
-            placeTypes={ep[1].placeTypes} 
+            {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
+            key={`${ep.place.wiki_id}`}  
+            placeResult={ep}
             updateRenderedPlaces={updateRenderedPlaces}
             />)}
             {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            

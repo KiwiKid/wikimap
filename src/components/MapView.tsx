@@ -1,25 +1,27 @@
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
-import { type Map } from 'leaflet'
+import { type Map as LMap } from 'leaflet'
 import { type LatLngExpression } from 'leaflet';
 import { Place } from '@prisma/client';
 import { useRouter } from 'next/router'
 import PlaceMarkers from './PlaceMarkers'
 import { type PlaceResult } from './PlaceMarker'
+import { Dispatch, SetStateAction } from 'react';
 
 export function ChangeView({ coords }:{ coords: LatLngExpression }) {
-  const mapp:Map = useMap();
+  const mapp:LMap = useMap();
   mapp.setView(coords, 12);
   return null;
 }
 
 export interface MapViewProps {
-  setVisiblePlaces:React.Dispatch<React.SetStateAction<PlaceResult[]>>
-  promptType:string
+  setRenderedPlaces:Dispatch<SetStateAction<PlaceResult[]>>
+  promptType:string,
+  renderedPlaces:PlaceResult[]
 }
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 
-export default function MapView({setVisiblePlaces, promptType}:MapViewProps) {
+export default function MapView({setRenderedPlaces, promptType, renderedPlaces}:MapViewProps) {
 
   const router = useRouter()
   const { lat, lng } = router.query;
@@ -34,7 +36,7 @@ export default function MapView({setVisiblePlaces, promptType}:MapViewProps) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <PlaceMarkers setVisiblePlaces={setVisiblePlaces} promptType={promptType}/>
+      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
     </MapContainer>
   );
 }

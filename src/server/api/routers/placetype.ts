@@ -11,22 +11,6 @@ import * as chains from "langchain/chains";
 import * as prompts from "langchain/prompts";
 import { type PrismaClientValidationError } from "@prisma/client/runtime";
 
-interface AIResponse {
-  title?:string
-  content?:string
-}
-
-function parseAIResponse(input: string): AIResponse {
-  const trimedInput = input.replace(/^\n+/, '').trim();
-  const startIndex = (trimedInput.indexOf("TITLE: ") || trimedInput.indexOf('Title:')) + 7;
-  const endIndex = (trimedInput.indexOf("CONTENT: ")|| trimedInput.indexOf('Content: ')) - 1;
-  const title = trimedInput.substring(startIndex, endIndex).trim();
-
-  const contentIndex = trimedInput.indexOf("CONTENT:") + 9;
-  const content = trimedInput.substring(contentIndex).replaceAll(/\[(\d+)\]/g, ' ').trim();
-  
-  return { title, content };
-}
 
 export const defaultPlaceTypeSelect = {
   id: true,

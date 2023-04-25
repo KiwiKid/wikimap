@@ -35,9 +35,11 @@ interface Response {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 serve(async (req) => {
   console.log('request')
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (req.method === 'OPTIONS') {
     console.log('CORS request')
     return new Response(JSON.stringify('ok'), { headers: corsHeaders })
@@ -52,6 +54,7 @@ serve(async (req) => {
       wiki_url,
       summary,
       prompt_type
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     } = await req.json() as Request
 
    // const data = {
@@ -60,7 +63,8 @@ serve(async (req) => {
 
     const prompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
-        "In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting short story. Include some details from the {place_information} below"
+        `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting short story and story title. Include some details from the {place_information} below.
+        Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
       )
       //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
     ]);
@@ -113,8 +117,3 @@ serve(async (req) => {
   }
 })
 
-// To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/' \
-//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-//   --header 'Content-Type: application/json' \
-//   --data '{"name":"Functions"}'
