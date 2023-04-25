@@ -86,12 +86,10 @@ export default function LoadingCircle({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const getPageNames = api.latLng.getPageNames.useMutation({
     onSuccess: (res:WikiSearchResult) => {
-      console.log('latLng.getPageNames - succes - getPlace names for ')
       onPageNames(lat, lng, res.pageNames)
       setCircleState('loading-story')
       setPageFoundCount(res.pageNames.length || 0)
       res.pageNames.forEach((pn) => {
-        console.log(`latLng.getPageNames - ${pn}`)
         processPageName.mutate({
           pageName: pn
         })
@@ -100,7 +98,6 @@ export default function LoadingCircle({
       setCircleState('ready-to-gen')
     },
     onError: (err) => {
-      console.log('latLng.getPageNames - succes - getPlace names fail')
       onFailure(lat, lng)
       console.error(err)
     }
