@@ -146,11 +146,12 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const buffer = 1
 
-    const addRenderedPlace = (placeResult:PlaceResult) => {
+    const addRenderedPlace = useCallback((placeResult:PlaceResult) => {
       setRenderedPlaces(renderedPlaces.concat(placeResult))
-    }
+    }, [])
 
     const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
+      console.log('updateRenderedPlaces')
       const onScreen = placeResults.filter((pl) => {
         return pl.place.lat < (topLeft.lat + buffer) && pl.place.lat > (bottomRight.lat - buffer) &&
         pl.place.lng > (topLeft.lng - buffer) && pl.place.lng < (bottomRight.lng + buffer)
@@ -213,38 +214,39 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       })
     }, [delayedMapPosition])
 
-    const removePoint = (lat:number,lng:number) => {
+    const removePoint = useCallback((lat:number,lng:number) => {
       try{
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == lat && la.lng == lng))
       }catch(err){
         console.error('failed set loading error ')
       }
-      
-    }
+    }, [setIsLoadingAreas])
 
     const onPageNames = useCallback((lat:number, lng: number, pageNames:string[]) => {
       // Change circle to "found" loading
-      existingPlaces.refetch().catch((err) => {
-        console.error(err)
-      })
+      //existingPlaces.refetch().catch((err) => {
+      //  console.error(err)
+      //})
     }, [])
 
     const onPlaceSuccess = useCallback((wikiPlace:Place) => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
       console.log(`new page ${wikiPlace?.wiki_url}`)
-     // setPlaces(places.concat(wikiPlace))
     }, [])
 
     const onFailure = useCallback((lat:number, lng:number) => {
       console.error(`onFailure lng:'+${lat}+'lng: '+${lng}`)
       removePoint(lat, lng)
-    }, [])
+    }, [removePoint])
     
     const onFinished = useCallback((lat:number, lng:number) => {
       console.log(`onFinished lng:'+${lat}+'lng: '+${lng}`)
 
       removePoint(lat, lng)
-    }, [])
+      existingPlaces.refetch().catch((err) => {
+        console.error(err)
+      })
+    }, [removePoint])
 
 
 return (<div>  

@@ -273,6 +273,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {place.summary && placeTypes.length == 0 ? <Popup key={`${place.id}`} className='flex text-center align-middle'>
+            <h1>{place.wiki_url}</h1>
             <button ref={loadButtonRef} className=" whitespace-nowrap bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
             <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
         </Popup> :
