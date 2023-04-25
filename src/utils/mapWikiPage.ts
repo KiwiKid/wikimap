@@ -34,7 +34,7 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
 
   const sortFirstFields = ['History','Content']
   const filterFields = ['References', 'External Links']
-  const summary_string = `SUMMARY:${(await page.summary()).substring(SUMMARY_LENGTH)} ${(await page.content() as unknown as wikiContent[])
+  const summary_string = `SUMMARY:${(await page.summary()).substring(0, SUMMARY_LENGTH)} ${(await page.content() as unknown as wikiContent[])
     .sort((a,b) => {
       if(sortFirstFields.includes(a.title)){
         return -1;
@@ -47,6 +47,9 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
     .filter((wc) => !filterFields.includes(wc.title))
     .map((wc) => `${wc.title.toUpperCase()}:${wc.content}`)
     .join('').substring(0, CONTENT_LENGTH)}`
+
+
+    // TODO: parse page.info here
 
     const pageRes = {
       url: page.url(),
