@@ -60,12 +60,13 @@ export interface PlaceResult {
   
 interface PlaceMarkerProps {
     placeResult:PlaceResult
-    updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
+    // updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
+    addRenderedPlace:(newPlace:PlaceResult) => void;
 }
 
 export default function PlaceMarker(props:PlaceMarkerProps) {
 
-    const {placeResult, updateRenderedPlaces} = props;
+    const {placeResult, addRenderedPlace} = props;
     const {place, placeTypes } = placeResult;
     const promptType = 'oldLegend'
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
@@ -141,7 +142,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     },{
         enabled: false,
         onSuccess: (placeResult:PlaceResult) => {
-            updateRenderedPlaces([placeResult])
+            addRenderedPlace(placeResult)
+            //updateRenderedPlaces(placeResult)
             placeMarkerRef.current?.setIcon(redIcon)
         },
         onError: () => {
@@ -198,7 +200,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                          //   markerRef.current?.setPopupContent(s.data.content)
                            // markerRef.current?.setIcon(redIcon)
                    //     }
-                        console.log('setIcon(redIcon)')
                       //  setIcon(redIcon)
                         setLoadedStory(s.content)
                         saveStory.mutate({

@@ -144,11 +144,16 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const [delayedMapPosition, setDelayedMapPosition] = useState<MapPosition>(getLoadPoints(map));
 
-    const LOADING_NEARBY_BUFFER = 0
+    const buffer = 1
+
+    const addRenderedPlace = (placeResult:PlaceResult) => {
+      setRenderedPlaces(renderedPlaces.concat(placeResult))
+    }
+
     const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
       const onScreen = placeResults.filter((pl) => {
-        return pl.place.lat < topLeft.lat+LOADING_NEARBY_BUFFER && pl.place.lat > bottomRight.lat-LOADING_NEARBY_BUFFER &&
-        pl.place.lng > topLeft.lng-LOADING_NEARBY_BUFFER && pl.place.lng < bottomRight.lng-LOADING_NEARBY_BUFFER
+        return pl.place.lat < (topLeft.lat + buffer) && pl.place.lat > (bottomRight.lat - buffer) &&
+        pl.place.lng > (topLeft.lng - buffer) && pl.place.lng < (bottomRight.lng + buffer)
       })
 
       const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
@@ -226,7 +231,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const onPlaceSuccess = useCallback((wikiPlace:Place) => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
-      console.log(`new page ${wikiPlace?.summary}`)
+      console.log(`new page ${wikiPlace?.wiki_url}`)
      // setPlaces(places.concat(wikiPlace))
     }, [])
 
@@ -236,7 +241,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     }, [])
     
     const onFinished = useCallback((lat:number, lng:number) => {
-      console.error(`onFinished lng:'+${lat}+'lng: '+${lng}`)
+      console.log(`onFinished lng:'+${lat}+'lng: '+${lng}`)
 
       removePoint(lat, lng)
     }, [])
@@ -255,7 +260,8 @@ return (<div>
             {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
             key={`${ep.place.wiki_id}`}  
             placeResult={ep}
-            updateRenderedPlaces={updateRenderedPlaces}
+           // updateRenderedPlaces={updateRenderedPlaces}
+            addRenderedPlace={addRenderedPlace}
             />)}
             {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 

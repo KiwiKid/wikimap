@@ -2,8 +2,7 @@ import { z } from "zod";
 import WikiJS from 'wikijs'
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { type LatLngToProcess, type Place, } from "@prisma/client";
-import { getPointsSquare, RADIUS } from "~/pages/debug/init-latlng";
+import {  RADIUS } from "~/pages/debug/init-latlng";
 import mapWikiPage, { type MappedPage } from "~/utils/mapWikiPage";
 import { prisma } from "~/server/db";
 import { type PrismaClientValidationError } from "@prisma/client/runtime";
