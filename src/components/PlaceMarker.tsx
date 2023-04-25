@@ -205,7 +205,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                             wiki_id: place.wiki_id
                             , title: s.title || ''
                             , content: s.content
-                            , type: promptType
+                            , promptType: promptType
                             , status: 'complete'
                         })
                     }else{

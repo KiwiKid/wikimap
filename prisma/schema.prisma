@@ -47,6 +47,7 @@ model PlaceType {
     downvotes       Int @default(0)
     failed_ai_res   String?
     status          String  @default("active")
+    @@unique([wiki_id, type], name: "LookupUnique")
 }
 
 model Prompt {

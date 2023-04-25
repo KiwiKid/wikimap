@@ -184,6 +184,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng,
+      promptType: promptType
     },{
       cacheTime: Infinity,     
       onSuccess: (data) => {

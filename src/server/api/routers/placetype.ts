@@ -97,13 +97,13 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: z.string(),
               title: z.string(),
               content: z.string(),
-              type: z.string(),
+              promptType: z.string(),
               status: z.string(),
             })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({data: {
               wiki_id: input.wiki_id.toString(),
               title: input.title,
               content: input.content,
-              type: input.type,
+              type: input.promptType,
               upvotes: 0,
               downvotes: 0,
               status: 'success'
@@ -326,7 +326,7 @@ export const placeTypeRouter = createTRPCRouter({
           }
         }),
       getInside: publicProcedure
-        .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number() }))
+        .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number(), promptType: z.string() }))
         .query(async ({ ctx, input}) => {
 
           const places = await ctx.prisma.place.findMany({
@@ -358,9 +358,7 @@ export const placeTypeRouter = createTRPCRouter({
                       select: defaultPlaceTypeSelect,
                       where: {
                         wiki_id: wiki_id,
-                        NOT: {
-                          content: 'failed'
-                        }
+                        type: input.promptType
                       }
                     })
 
