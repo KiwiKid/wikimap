@@ -1,7 +1,7 @@
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup, MarkerProps } from 'react-leaflet';
 import { Ref, useEffect, useRef, useState } from "react";
 import { Icon, Marker as MakerType, marker  } from 'leaflet';
-import { type MappedPage } from "~/utils/mapWikiPage";
+import { wikiInfo, type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
 import redIconFile from 'src/styles/bang.png'
 import loadingIconFile from 'src/styles/loading.png'
@@ -271,13 +271,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         requestStory()
        // setIsLoadingStory(false)
         console.log('loadPlace2')
-
+        placeMarkerRef.current?.closePopup()
     }
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {placeType && <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
-                <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
+        {placeType && <Popup className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+                <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeType && <div key={placeType.id}>
                 {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
 <div  className="font-ltor text-sm flex">
@@ -295,10 +295,18 @@ onClick={() => requestStory()}>request story</button>*/}
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>}
         {place && <Popup key={`${place.id}`} className='flex text-center align-middle'>
-            <h1>{place.wiki_url}</h1>
-            <button ref={loadButtonRef} className=" whitespace-nowrap bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
-            <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
-            <div>{JSON.stringify(placeType)}</div>
+            <div>
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore */}
+                <h1>{place?.info?.name}</h1>
+                <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
+            </div>
+            <div>
+                <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
+                <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
+                <div>{JSON.stringify(placeType)}</div>
+            </div>
         </Popup>}
 
     </Marker>)

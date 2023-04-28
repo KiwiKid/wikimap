@@ -34,6 +34,7 @@ model Place {
   info           Json
   main_image_url String
   PlaceType      PlaceType[]
+  placeTypePopulated String[]
 
   @@unique([lat, lng], name: "OnlyUniquePlaces")
 }

@@ -21,6 +21,7 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
       return <div>Loading...{promptType}</div>;
     }
 
+
     return <div>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
     <MapDrawerContainer renderedPlaces={renderedPlaces}>

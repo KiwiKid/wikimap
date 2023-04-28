@@ -5,7 +5,7 @@ export interface MappedPage {
   wiki_id:number
   url:string
   summary:string
-  info:object
+  info:wikiInfo
   mainImage:string
   images:string[]
   categories:string[]
@@ -14,14 +14,33 @@ export interface MappedPage {
   lng:number
 }
 
+export interface wikiInfo {
+  general: {
+    buildingType?:string // 'House'
+    alternateNames?:string //'First State House'
+    caption?:string  // 'The first state house with its original tenants'
+    completionDate?:string //Fri Jan 01 1937 12:00:00 GMT+1200 (New Zealand Daylight Time)
+    coordinates?:string //'-41.32437|174.81746,title|region:NZ_type:landmark'
+    embedded?:string //'designation list'
+    image?:string // 'First state house in Miramar.jpg'
+    landlord?:string // 'Housing New Zealand Corporation'
+    location:string[] //(2) ['Miramar, New Zealand', 'Wellington']
+    name:string //'12 Fife Lane'
+    owner:string
+    openedDate:{
+      date:string // Sat Sep 18 1937 11:30:00 GMT+1130 (New Zealand Standard Time)}
+    }
+  }
+}
+
 interface wikiContent {
   title:string
   content:string
 }
 
 // These together will be total summary_info prompt length
-const CONTENT_LENGTH = 750
-const SUMMARY_LENGTH = 1500
+const CONTENT_LENGTH = 1500
+const SUMMARY_LENGTH = 750
 
 const mapWikiPage = async (page:Page):Promise<MappedPage> => {
   const coords = await page.coordinates()
@@ -55,8 +74,9 @@ const mapWikiPage = async (page:Page):Promise<MappedPage> => {
       url: page.url(),
       id: id,
       wiki_id: page.raw.pageid,
+     // displayName: page.
       summary: summary_string,
-      info: await page.fullInfo(),
+      info: await page.fullInfo() as wikiInfo,
       mainImage: await page.mainImage(),
       images: await page.images(),
       categories: await page.categories(),

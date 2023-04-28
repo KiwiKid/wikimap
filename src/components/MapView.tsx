@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import PlaceMarkers from './PlaceMarkers'
 import { type PlaceResult } from './PlaceMarker'
 import { Dispatch, SetStateAction } from 'react';
+import useWindowSize from '~/utils/useWindowSize';
 
 export function ChangeView({ coords }:{ coords: LatLngExpression }) {
   const mapp:LMap = useMap();
@@ -29,7 +30,9 @@ export default function MapView({setRenderedPlaces, promptType, renderedPlaces}:
   const startingCenter = !lat || !lng 
     ? WELLINGTON_CENTER
     : [+lat, +lng] as [number, number]
-   
+
+    const [width, windowHeight] = useWindowSize();
+    
   return (
     <MapContainer center={startingCenter} zoom={15} style={{ height: '100vh', width: '100%' }}>
       <TileLayer

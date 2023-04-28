@@ -10,6 +10,7 @@ import * as chains from "langchain/chains";
 //import { CallbackManager } from "langchain/callbacks";
 import * as prompts from "langchain/prompts";
 import { type PrismaClientValidationError } from "@prisma/client/runtime";
+import { Prisma } from "@prisma/client";
 
 
 export const defaultPlaceTypeSelect = {
@@ -80,9 +81,10 @@ export const placeTypeRouter = createTRPCRouter({
                     lng: fp.lng,
                     wiki_id: fp.wiki_id.toString(),
                     wiki_url: fp.url,
-                    info: JSON.stringify(fp.info),
+                    info: fp.info !== null ? fp.info.general as Prisma.JsonObject : Prisma.JsonNull,
                     summary: fp.summary,
-                    status: 'loaded',
+                    status: 'empty',
+
                     main_image_url: fp.mainImage || '',
                   }
                 console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lng}`)
@@ -106,8 +108,22 @@ export const placeTypeRouter = createTRPCRouter({
               type: input.promptType,
               upvotes: 0,
               downvotes: 0,
-              status: 'success'
-            }})),
+              status: 'success',
+            }}).then((pt) => ctx.prisma.place.findFirstOrThrow({
+              where:{
+                wiki_id: pt.wiki_id
+              }
+            }))
+            .then((p) => ctx.prisma.place.update({
+              data: {
+                placeTypePopulated: {
+                  push: input.promptType
+                }
+              },
+              where: {
+                wiki_id: input.wiki_id
+              }
+            }))),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -340,6 +356,7 @@ export const placeTypeRouter = createTRPCRouter({
               info:true,
               main_image_url: true,
               wiki_id: true,
+              placeTypePopulated: true,
             },
             where: {
               lat: {

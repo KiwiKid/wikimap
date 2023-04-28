@@ -10,19 +10,20 @@ interface MapDrawerProps extends React.PropsWithChildren {
 
 const MapDrawer = ({children, header}:MapDrawerProps) => {
    const [isOpen, setIsOpen] = useState(false);
-   const PX_FROM_BOTTOM = -50
+   const PX_FROM_BOTTOM = -40
 
    const [lastDrawPositionY, setLastDrawPositionY] = useState(PX_FROM_BOTTOM)
 
    const [topDrawPosition, setTopDrawPosition] = useState(null);
    const [drawPositionY, setDrawPositionY] = useState(CLOSED_DRAW_POS);
+   const [openDrawPosition, setOpenDrawPosition] = useState(0);
    const [width, windowHeight] = useWindowSize();
 
-   const openDrawPosition = -(windowHeight || 800)*0.79
 
    const handleClickEnd = (e:DraggableEvent, d:DraggableData) => {
     e.stopPropagation();
-
+    const openDrawPosition = -(windowHeight || 600)*0.90
+    
     // Click (or nearly a click)
     if(lastDrawPositionY < d.y+10 && lastDrawPositionY > d.y-10){
       if(-drawPositionY < (windowHeight || 800)*0.4){
@@ -30,6 +31,7 @@ const MapDrawer = ({children, header}:MapDrawerProps) => {
       }else{
         setDrawPositionY(PX_FROM_BOTTOM);
       }
+      setOpenDrawPosition(openDrawPosition)
       return;
     }
 
