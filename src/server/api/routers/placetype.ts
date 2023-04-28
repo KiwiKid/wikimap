@@ -70,6 +70,7 @@ export const placeTypeRouter = createTRPCRouter({
                   info: true,
                   summary: true,
                   main_image_url: true,
+                  placeTypePopulated: true
                 }
               })
 
