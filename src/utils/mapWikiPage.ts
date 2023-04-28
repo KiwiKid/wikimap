@@ -21,7 +21,7 @@ interface wikiContent {
 
 // These together will be total summary_info prompt length
 const CONTENT_LENGTH = 750
-const SUMMARY_LENGTH = 750
+const SUMMARY_LENGTH = 1500
 
 const mapWikiPage = async (page:Page):Promise<MappedPage> => {
   const coords = await page.coordinates()

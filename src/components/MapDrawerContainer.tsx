@@ -17,7 +17,7 @@ const MapDrawerContainer = ({children, renderedPlaces}:MapDrawerContainerProps) 
 
   return (<MapDrawer header={<>{renderedPlaces.length}</>}>
     {children} 
-        <PlaceTable places={renderedPlaces}/>
+        <PlaceTable places={renderedPlaces || []}/>
          <DeleteButton/>
         </MapDrawer>
     )
