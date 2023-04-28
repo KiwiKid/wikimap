@@ -154,12 +154,22 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             onPlaceTypeLoaded(placeResult)
             setPlaceType(placeResult.placeTypes[0])
             //updateRenderedPlaces(placeResult)
-            placeMarkerRef.current?.setIcon(redIcon)
+            placeMarkerRef.current?.setIcon(locIcon)
         },
         onError: () => {
             console.error('Could not refresh marker')
         }
     })
+
+    useEffect(() => {
+        if(!placeType){
+            refreshMarker.refetch().catch((err) => {
+                console.error('Could not refreshMarker', err)
+            })   
+        }else{
+            placeMarkerRef.current?.setIcon(redIcon)
+        }
+    }, [placeType, refreshMarker])
 
 
   const saveStory = api.placeType.saveStory.useMutation({
@@ -276,7 +286,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {placeType && <Popup className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        {placeType && <Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {placeType && <div key={placeType.id}>
                 {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
