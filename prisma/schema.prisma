@@ -2,57 +2,62 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model LatLngToProcess {
-    id          String @id @default(cuid())
-    lat         Float
-    lng         Float
-    /// 'pending' 'processed'
-    status      String 
-    created_at   DateTime @default(now())
-    updated_at   DateTime @updatedAt
-    @@unique([lat(sort: Desc), lng(sort: Desc)], name: "OnlyUniquePoints")
+  id         String   @id @default(cuid())
+  lat        Float
+  lng        Float
+  /// 'pending' 'processed'
+  status     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([lat(sort: Desc), lng(sort: Desc)], name: "OnlyUniquePoints")
 }
 
 model Place {
-    id              String @id @default(cuid())
-    /// 'pending'
-    status          String
-    wiki_url        String
-    wiki_id         String
-    lat             Float
-    lng             Float
-    summary         String
-    info            Json
-    main_image_url  String
-    @@unique([lat, lng], name: "OnlyUniquePlaces")
+  id             String      @id @default(cuid())
+  /// 'pending'
+  status         String
+  wiki_url       String
+  wiki_id        String      @unique
+  lat            Float
+  lng            Float
+  summary        String
+  info           Json
+  main_image_url String
+  PlaceType      PlaceType[]
+
+  @@unique([lat, lng], name: "OnlyUniquePlaces")
 }
 
 model PlaceType {
-    id              String @id @default(cuid())
-    title           String
-    content         String
-    type            String
-    wiki_id         String
-    created_at      DateTime @default(now())
-    updated_at      DateTime @updatedAt
-    upvotes         Int @default(0)
-    downvotes       Int @default(0)
-    failed_ai_res   String?
-    status          String  @default("active")
-    @@unique([wiki_id, type], name: "LookupUnique")
+  id            String   @id @default(cuid())
+  title         String
+  content       String
+  type          String
+  wiki_id       String
+  place         Place    @relation(fields: [wiki_id], references: [wiki_id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  failed_ai_res String?
+  status        String   @default("active")
+
+  @@unique([wiki_id, type], name: "LookupUnique")
 }
 
 model Prompt {
-    id              String @id @default(cuid())
-    text            String
-    type            String
-    active          String
+  id     String @id @default(cuid())
+  text   String
+  type   String
+  active String
 }

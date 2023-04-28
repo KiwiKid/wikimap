@@ -71,12 +71,12 @@ const getLoadPoints = (map:LMap) => {
 }
 
 interface Dictionary {
-  [key: string]: PlaceResult
+  [key: string]: Place
 }
 
 interface DebugMarkersProps {
-  setRenderedPlaces:React.Dispatch<React.SetStateAction<PlaceResult[]>>
-  renderedPlaces:PlaceResult[]
+  setRenderedPlaces:React.Dispatch<React.SetStateAction<Place[]>>
+  renderedPlaces:Place[]
   promptType:string
 }
 export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType}:DebugMarkersProps) {
@@ -85,8 +85,9 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     
 
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
-      renderedPlaces.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map())
+      renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
     )
+    const [loadededTypePlaceIds, setLoadedTypePlaceIds] = useState<string[]>();
       
     
     const map = useMapEvents({
@@ -146,23 +147,25 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const buffer = 1
 
-    const addRenderedPlace = useCallback((placeResult:PlaceResult) => {
-      setRenderedPlaces(renderedPlaces.concat(placeResult))
+    const onPlaceTypeLoaded = useCallback((placeResult:PlaceResult) => {
+      setLoadedTypePlaceIds(loadededTypePlaceIds?.concat([placeResult.place.id]))
+      //setRenderedPlaces(renderedPlaces.concat(placeResult))
     }, [])
 
-    const updateRenderedPlaces = (placeResults:PlaceResult[]) => {
-      console.log('updateRenderedPlaces')
-      const onScreen = placeResults.filter((pl) => {
-        return pl.place.lat < (topLeft.lat + buffer) && pl.place.lat > (bottomRight.lat - buffer) &&
-        pl.place.lng > (topLeft.lng - buffer) && pl.place.lng < (bottomRight.lng + buffer)
+    const updateRenderedPlaces = (rawPlaces:Place[]) => {
+      console.log('updateRenderedPlaces'+JSON.stringify(rawPlaces))
+      const onScreen = rawPlaces.filter((place:Place) => {
+        return place.lat < (topLeft.lat + buffer) && place.lat > (bottomRight.lat - buffer) &&
+        place.lng > (topLeft.lng - buffer) && place.lng < (bottomRight.lng + buffer)
       })
 
-      const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
+      // const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
 
+      const toLoad = onScreen.filter((s) => !loadededTypePlaceIds?.includes(s.id))
 
       setRenderedPlaces(onScreen)
 
-      setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
+   //   setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
 
      /* placeResults.forEach((pl) => {
         const existingMarker = renderedPlaceIds.get(pl.place.id)
@@ -196,7 +199,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       onSuccess: (data) => {
         console.log('existingPlaces')
         console.log(data)
-        updateRenderedPlaces(data)
+        updateRenderedPlaces(data.places)
         //if(setVisiblePlaces){
           //setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
        // }
@@ -260,10 +263,10 @@ return (<div>
                 onFinished={onFinished}
             />) : null}
             {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
-            key={`${ep.place.wiki_id}`}  
-            placeResult={ep}
+            key={`${ep.wiki_id}`}  
+            place={ep}
            // updateRenderedPlaces={updateRenderedPlaces}
-            addRenderedPlace={addRenderedPlace}
+            onPlaceTypeLoaded={onPlaceTypeLoaded}
             />)}
             {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 

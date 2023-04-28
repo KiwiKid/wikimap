@@ -9,7 +9,7 @@ import errorIconFile from 'src/styles/error.png'
 import { useMutation  } from '@tanstack/react-query';
 
 import { api } from '~/utils/api'
-import { type Place } from "@prisma/client";
+import { PlaceType, type Place } from "@prisma/client";
 
 const locIcon = new Icon({
     iconUrl: locIconFile.src,
@@ -59,20 +59,22 @@ export interface PlaceResult {
   }
   
 interface PlaceMarkerProps {
-    placeResult:PlaceResult
+    place:Place
     // updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
-    addRenderedPlace:(newPlace:PlaceResult) => void;
+    onPlaceTypeLoaded:(newPlace:PlaceResult) => void;
 }
 
 export default function PlaceMarker(props:PlaceMarkerProps) {
 
-    const {placeResult, addRenderedPlace} = props;
-    const {place, placeTypes } = placeResult;
+    const {onPlaceTypeLoaded, place} = props;
     const promptType = 'oldLegend'
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
     const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
+
+
+    const [placeType, setPlaceType] = useState<PublicPlaceType>();
 
     const convertToDots = (num:number) =>
             Array.from({ length: num }, () => '.').join('');
@@ -132,13 +134,14 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         if(place && !place.summary) {
             return errorIcon
         }
-        if(place.summary && placeTypes.length == 0){
+        if(place.status == 'empty'){
             return locIcon
         }
 
-        if(place.summary && placeTypes.length > 0){
+        if(place.summary == 'populated'){
             return redIcon
         }
+        return locIcon
     }
 
     const [icon, setIcon] = useState(getInitIcon())
@@ -148,7 +151,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     },{
         enabled: false,
         onSuccess: (placeResult:PlaceResult) => {
-            addRenderedPlace(placeResult)
+            onPlaceTypeLoaded(placeResult)
+            setPlaceType(placeResult.placeTypes[0])
             //updateRenderedPlaces(placeResult)
             placeMarkerRef.current?.setIcon(redIcon)
         },
@@ -207,7 +211,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                            // markerRef.current?.setIcon(redIcon)
                    //     }
                       //  setIcon(redIcon)
-                        setLoadedStory(s.content)
+                        // setLoadedStory(s.content)
                         saveStory.mutate({
                             wiki_id: place.wiki_id
                             , title: s.title || ''
@@ -272,29 +276,29 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {place.summary && placeTypes.length == 0 ? <Popup key={`${place.id}`} className='flex text-center align-middle'>
-            <h1>{place.wiki_url}</h1>
-            <button ref={loadButtonRef} className=" whitespace-nowrap bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
-            <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
-        </Popup> :
-        <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        {placeType && <Popup minWidth={400} maxHeight={400} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg w-64 h-64 mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-                
-            {placeTypes.map((g) => <div key={g.id}>
-                {g.title && <h1 className="text-xl font-bold underline text-center p-2">{g.title}</h1>}
+            {placeType && <div key={placeType.id}>
+                {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
 <div  className="font-ltor text-sm flex">
 
-                {placeTypes.length == 0 && loadedStory ? loadedStory : g.content}
+                {placeType.content}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
-        onClick={() => requestStory()}>request story</button>}
+onClick={() => requestStory()}>request story</button>*/}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
-                </div></div>)}
+                </div></div>}
             [Generated with AI]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
+        </Popup>}
+        {place && <Popup key={`${place.id}`} className='flex text-center align-middle'>
+            <h1>{place.wiki_url}</h1>
+            <button ref={loadButtonRef} className=" whitespace-nowrap bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={loadPlace}>{'Load this place'}</button>
+            <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
+            <div>{JSON.stringify(placeType)}</div>
         </Popup>}
 
     </Marker>)

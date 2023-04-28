@@ -10,14 +10,14 @@ export interface PlaceResult {
 }
 interface MapDrawerContainerProps {
   children:React.ReactElement
-  renderedPlaces:PlaceResult[]
+  renderedPlaces:Place[]
 }
 
 const MapDrawerContainer = ({children, renderedPlaces}:MapDrawerContainerProps) => {
 
   return (<MapDrawer header={<>{renderedPlaces.length}</>}>
     {children} 
-        <PlaceTable placeResults={renderedPlaces}/>
+        <PlaceTable places={renderedPlaces}/>
          <DeleteButton/>
         </MapDrawer>
     )

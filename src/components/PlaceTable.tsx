@@ -1,9 +1,10 @@
 import React from "react";
 import { PlaceResult } from "./PlaceMarker";
 import PlaceRow from "./PlaceRow";
+import { Place } from "@prisma/client";
 
 interface Props {
-  placeResults:PlaceResult[]
+  places:Place[]
 }
 
 const Row = ({ label, value }: { label: string; value: string }) => (
@@ -13,11 +14,11 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-const PlaceTable = ({ placeResults }: Props) => {
+const PlaceTable = ({ places }: Props) => {
 
   return (
     <div className="flex flex-col gap-4 whitespace-break-spaces">
-      {placeResults.map((placeResult) => <PlaceRow key={`${placeResult.place.id}_${placeResult.placeTypes.length}`} placeResult={placeResult}/>)}
+      {places.map((place) => <PlaceRow key={`${place.id}`} place={place} />)}
     </div>
   );
 };

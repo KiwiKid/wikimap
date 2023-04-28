@@ -331,7 +331,7 @@ export const placeTypeRouter = createTRPCRouter({
 
           const places = await ctx.prisma.place.findMany({
             select: {
-              id: true,
+              id: true,              
               wiki_url: true,
               lat: true,
               lng: true,
@@ -339,7 +339,7 @@ export const placeTypeRouter = createTRPCRouter({
               summary: true,
               info:true,
               main_image_url: true,
-              wiki_id: true
+              wiki_id: true,
             },
             where: {
               lat: {
@@ -351,10 +351,10 @@ export const placeTypeRouter = createTRPCRouter({
                 gt: input.topLeftLng
               }
             },
-            take: 200
+            take: 200,
           });
 
-          const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
+         /* const getPlaceTypes = async (wiki_id:string) => ctx.prisma.placeType.findMany({
                       select: defaultPlaceTypeSelect,
                       where: {
                         wiki_id: wiki_id,
@@ -368,7 +368,10 @@ export const placeTypeRouter = createTRPCRouter({
                     place: p,
                     placeTypes
                   }
-                }))
+                }))*/
+                return {
+                  places
+                }
               }),
 
               upvote: publicProcedure
