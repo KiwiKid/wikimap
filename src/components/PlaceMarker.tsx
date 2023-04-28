@@ -154,7 +154,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             onPlaceTypeLoaded(placeResult)
             setPlaceType(placeResult.placeTypes[0])
             //updateRenderedPlaces(placeResult)
-            placeMarkerRef.current?.setIcon(locIcon)
+          //  placeMarkerRef.current?.setIcon(locIcon)
         },
         onError: () => {
             console.error('Could not refresh marker')
