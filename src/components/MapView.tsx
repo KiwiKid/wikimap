@@ -15,9 +15,9 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 }
 
 export interface MapViewProps {
-  setRenderedPlaces:Dispatch<SetStateAction<PlaceResult[]>>
+  setRenderedPlaces:Dispatch<SetStateAction<Place[]>>
   promptType:string,
-  renderedPlaces:PlaceResult[]
+  renderedPlaces:Place[]
 }
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 

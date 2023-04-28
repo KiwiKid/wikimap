@@ -5,6 +5,7 @@ import { type ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import { type PlaceResult } from "~/components/PlaceMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
+import { Place } from "@prisma/client";
 
 const Map = dynamic(() => import('../components/MapView'), {
     ssr: false,
@@ -13,7 +14,7 @@ const Map = dynamic(() => import('../components/MapView'), {
 
 const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
    // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
-   const [renderedPlaces, setRenderedPlaces] = useState<PlaceResult[]>([]);
+   const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
 
     const router = useRouter();
     if (router.isFallback) {
