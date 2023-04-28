@@ -73,7 +73,7 @@ export const placeTypeRouter = createTRPCRouter({
                   placeTypePopulated: true
                 }
               })
-
+  //hmm
               if(!!place){
                 return place;
               }else{
