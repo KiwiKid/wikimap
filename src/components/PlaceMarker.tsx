@@ -72,9 +72,16 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
     const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
+    const contentRef = useRef<HTMLDivElement>(null);
+   // const [existingScrollPosition, setExistingScrollPosition] = useState<number>();
 
+    const setExistingScrollPosition = (pos:number) => {
+        window.localStorage.setItem(`${place.id}`, pos.toString())
+    }
 
-    const [placeType, setPlaceType] = useState<PublicPlaceType>();
+    const existingScrollPosition = window.localStorage.getItem(`${place.id}`)
+
+    const [placeType, setPlaceType] = useState<PublicPlaceType | 'none' | null>(null);
 
     const convertToDots = (num:number) =>
             Array.from({ length: num }, () => '.').join('');
@@ -96,7 +103,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                     loadButtonRef.current.style.backgroundColor = 'gray'
                 }
             }
-   
+
+
+  
     useEffect(() => {
 
         let dotCount = 0
@@ -150,9 +159,18 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         placeId: place.id
     },{
         enabled: false,
+
         onSuccess: (placeResult:PlaceResult) => {
-            onPlaceTypeLoaded(placeResult)
-            setPlaceType(placeResult.placeTypes[0])
+            console.log('refreshMarker onSuccess ')
+            console.log(placeResult.placeTypes)
+
+            if(placeResult.placeTypes.length > 0 && placeResult.placeTypes[0] !== undefined){
+                setPlaceType(placeResult.placeTypes[0])
+            }else{
+                setPlaceType('none')
+            }
+         //   onPlaceTypeLoaded(placeResult)
+            
             //updateRenderedPlaces(placeResult)
           //  placeMarkerRef.current?.setIcon(locIcon)
         },
@@ -162,18 +180,27 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     })
 
     useEffect(() => {
-        if(!placeType){
+        if(placeType != 'none' && placeType == null){
             refreshMarker.refetch().catch((err) => {
                 console.error('Could not refreshMarker', err)
             })   
-        }else{
+        }else if(placeType != 'none'){
+            console.log('GOOD PLACETYPE')
+            console.log(placeType)
             placeMarkerRef.current?.setIcon(redIcon)
+        }
+        if(existingScrollPosition){
+            contentRef.current?.scrollTo({
+                top: +existingScrollPosition
+            })
         }
     }, [placeType, refreshMarker])
 
 
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
+        console.log('saveStory onSuccess')
+
       if(!!newPlace){
         setIcon(loadingIcon)
         refreshMarker.refetch().catch((err) => {
@@ -273,6 +300,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     }
 
     const loadPlace = (evt:React.MouseEvent<HTMLElement>) => {
+        console.log('loadPlace')
         evt.preventDefault();
         console.log('loadPlace')
        // setIsLoadingStory(true)
@@ -284,13 +312,37 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         placeMarkerRef.current?.closePopup()
     }
 
+    if(placeType === 'none' || placeType == null){
+        if(place){
+            return (
+                <Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
+                    <Popup key={`${place.id}`} className='flex text-center align-middle'>
+                <div>
+                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                    {/* @ts-ignore */}
+                    <h1>{place?.info?.name}</h1>
+                    <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
+                </div>
+                <div>
+                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
+                    <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
+                    <div>{JSON.stringify(placeType)}</div>
+                </div>
+            </Popup>
+        </Marker>)
+        }else{
+            return (<div>placeType with No place?</div>)
+        }
+    }
+
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {placeType && <Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {placeType && <div key={placeType.id}>
+            {<div key={placeType.id}>
                 {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
-<div  className="font-ltor text-sm flex">
+<div ref={contentRef} onScroll={() => setExistingScrollPosition(+(contentRef.current?.scrollTop || 0))} className="font-ltor text-sm flex">
 
                 {placeType.content}
                 {/*<button 
@@ -304,20 +356,7 @@ onClick={() => requestStory()}>request story</button>*/}
             [Generated with AI]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>}
-        {place && <Popup key={`${place.id}`} className='flex text-center align-middle'>
-            <div>
-                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                {/* @ts-ignore */}
-                <h1>{place?.info?.name}</h1>
-                <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
-            </div>
-            <div>
-                <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
-                <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
-                <div>{JSON.stringify(placeType)}</div>
-            </div>
-        </Popup>}
+        
 
     </Marker>)
 }

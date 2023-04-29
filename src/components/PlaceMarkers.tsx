@@ -93,10 +93,11 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       click: (e) => {
         console.log('useMapEvents - click')
         console.log(e.sourceTarget)
-        if(e.latlng){
+        if(e.latlng && e.latlng !== undefined){
             console.log('CLICK')
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);
+          //  map.closePopup()
             // L.marker([lat, lng], { icon }).addTo(map);
             setIsLoadingAreas(loadingAreas.concat(newPoint))
             console.log('CLICK-newlatlng')
@@ -211,9 +212,9 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
 
     useEffect(() => {
-      existingPlaces.refetch().catch((err) => {
-        console.error(err)
-      })
+      //existingPlaces.refetch().catch((err) => {
+     //   console.error(err)
+    //  })
     }, [delayedMapPosition])
 
     const removePoint = useCallback((lat:number,lng:number) => {

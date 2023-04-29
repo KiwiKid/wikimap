@@ -9,14 +9,12 @@ export interface PlaceResult {
   placeTypes: PublicPlaceType[]
 }
 interface MapDrawerContainerProps {
-  children:React.ReactElement
   renderedPlaces:Place[]
 }
 
-const MapDrawerContainer = ({children, renderedPlaces}:MapDrawerContainerProps) => {
+const MapDrawerContainer = ({renderedPlaces}:MapDrawerContainerProps) => {
 
   return (<MapDrawer header={<>{renderedPlaces.length}</>}>
-    {children} 
         <PlaceTable places={renderedPlaces || []}/>
          <DeleteButton/>
         </MapDrawer>

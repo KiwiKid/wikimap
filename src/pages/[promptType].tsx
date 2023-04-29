@@ -12,6 +12,11 @@ const Map = dynamic(() => import('../components/MapView'), {
     loading: () => <div>Loading....</div>,
   });
 
+  const DMapDrawerContainer = dynamic(() => import('../components/MapDrawerContainer'), {
+    ssr: false,
+    loading: () => <div>Loading</div>,
+  })
+
 const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
    // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
    const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
@@ -24,9 +29,7 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
 
     return <div>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
-    <MapDrawerContainer renderedPlaces={renderedPlaces}>
-      <>{promptType}</>
-    </MapDrawerContainer>
+    <DMapDrawerContainer renderedPlaces={renderedPlaces}/>
 </div>
 }
 
