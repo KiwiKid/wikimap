@@ -343,7 +343,14 @@ export const placeTypeRouter = createTRPCRouter({
           }
         }),
       getInside: publicProcedure
-        .input(z.object({ topLeftLat: z.number(), topLeftLng: z.number(), bottomRightLat: z.number(), bottomRightLng: z.number(), promptType: z.string() }))
+        .input(z.object({ 
+          topLeftLat: z.number()
+          , topLeftLng: z.number()
+          , bottomRightLat: z.number()
+          , bottomRightLng: z.number()
+          , promptType: z.string() 
+          , ignoreIds: z.string().array().optional()
+        }))
         .query(async ({ ctx, input}) => {
 
           const places = await ctx.prisma.place.findMany({
@@ -367,6 +374,9 @@ export const placeTypeRouter = createTRPCRouter({
               lng: {
                 lt: input.bottomRightLng,
                 gt: input.topLeftLng
+              },
+              id: {
+                notIn: input.ignoreIds || []
               }
             },
             take: 200,

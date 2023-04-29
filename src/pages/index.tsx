@@ -1,21 +1,34 @@
-import Link from "next/link";
+import { type GetStaticPropsContext, type GetStaticPropsResult, type NextPage } from "next"
+import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import { type ParsedUrlQuery } from "querystring";
+import { useState } from "react";
+import { type PlaceResult } from "~/components/PlaceMarkers";
+import MapDrawerContainer from "~/components/MapDrawerContainer";
+import { Place } from "@prisma/client";
 
-export default function Home(): JSX.Element {
-  return (
-    <><div>
-          The website combines the power of Wikipedia and ChatGPT to create unique stories about various locations around the world.
-          You can explore different areas and discover interesting facts and stories associated with each location.
-      </div>
-        <div>
-              The website works by pulling information from Wikipedia articles related to each location and using ChatGPT to generate stories based on local information
-          </div>
-          <div>
-            Every months the stories reset!
-          </div>
-          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/oldLegend'}>
-            Old Legend</Link>
-          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/wizard'}>Wizard</Link>
-          <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={'/lovecraftian'}>Lovecraft</Link>
-    </>
-  );
+const Map = dynamic(() => import('../components/MapView'), {
+    ssr: false,
+    loading: () => <div>Loading....</div>,
+  });
+
+  const DMapDrawerContainer = dynamic(() => import('../components/MapDrawerContainer'), {
+    ssr: false,
+    loading: () => <div>Loading</div>,
+  })
+
+const MapPage:NextPage = () => {
+   // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
+   const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
+
+
+    const router = useRouter();
+
+
+    return <div>
+    <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces}/>
+    {router?.query?.showDrawer && <DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
+</div>
 }
+
+export default MapPage

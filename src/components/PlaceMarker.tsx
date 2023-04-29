@@ -62,19 +62,21 @@ interface PlaceMarkerProps {
     place:Place
     // updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
     onPlaceTypeLoaded:(newPlace:PlaceResult) => void;
+    promptType:string
 }
 
 export default function PlaceMarker(props:PlaceMarkerProps) {
 
-    const {onPlaceTypeLoaded, place} = props;
-    const promptType = 'oldLegend'
+    const {onPlaceTypeLoaded, place, promptType} = props;
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
+    const loadContentRef = useRef<HTMLDivElement>(null);
+
     const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
     const contentRef = useRef<HTMLDivElement>(null);
    // const [existingScrollPosition, setExistingScrollPosition] = useState<number>();
-
+   
     const setExistingScrollPosition = (pos:number) => {
         window.localStorage.setItem(`${place.id}`, pos.toString())
     }
@@ -90,13 +92,18 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 const currentTime = new Date();
                 const diff = currentTime.getTime() - startLoadingTime.getTime();
                 if(loadButtonRef.current){
-                    const extraMessage = diff > 50*1000 ?
-                                `I'm impressed your still waiting`
-                            : diff > 40*1000 ? 
-                                'This is taking ages' :
-                            diff > 33*1000 
-                            ?   'Oh no! Thats too long'
-                             : ''
+                    let extraMessage = ''
+                    if( diff > 50*1000){
+                        extraMessage = `I'm impressed your still waiting`
+                    }else if(diff > 40*1000){
+                        extraMessage = `This is taking ages`
+                    }else if(diff > 33*1000){
+                        extraMessage = 'Oh no! Thats too long'
+                    }else if(diff > 4*1000){
+                        if(loadContentRef.current){
+                            loadContentRef.current.textContent = '(you can close this and come back to it)'
+                        }
+                    }
 
                     loadButtonRef.current.textContent = `(${(diff/1000).toFixed(0)}) Imaginering${convertToDots(dotCount)}\r\n${extraMessage}`
                     loadButtonRef.current.disabled = true
@@ -326,17 +333,17 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             return (
                 <Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={(locIcon)}>
                     <Popup key={`${place.id}`} className='flex text-center align-middle'>
+                    <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
+
                 <div>
                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                     {/* @ts-ignore */}
-                    <h1>{place?.info?.name}</h1>
-                    <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
+                    <span className='text-bold'>{place?.info?.name}</span> - <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
                 </div>
                 <div>
-                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
+                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Tell me a story..'}</button>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
-                    <div>(you can close this and come back)</div>
+                    <div ref={loadContentRef}></div>
                 </div>
             </Popup>
         </Marker>)
@@ -362,7 +369,7 @@ onClick={() => requestStory()}>request story</button>*/}
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
                 </div></div>}
-            [Generated with AI]
+            [Generated with AI @ wikimap.vercel.app]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>}
         

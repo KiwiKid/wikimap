@@ -86,7 +86,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
       renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
     )
-    const [loadededTypePlaceIds, setLoadedTypePlaceIds] = useState<string[]>();
+    const [loadededTypePlaceIds, setLoadedTypePlaceIds] = useState<string[]>([]);
       
     
     const map = useMapEvents({
@@ -193,7 +193,8 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng,
-      promptType: promptType
+      promptType: promptType,
+      ignoreIds: loadededTypePlaceIds,
     },{
       cacheTime: Infinity,     
       onSuccess: (data) => {
@@ -265,6 +266,7 @@ return (<div>
             {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
             key={`${ep.wiki_id}`}  
             place={ep}
+            promptType={promptType}
            // updateRenderedPlaces={updateRenderedPlaces}
             onPlaceTypeLoaded={onPlaceTypeLoaded}
             />)}
