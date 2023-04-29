@@ -341,7 +341,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                     <span className='text-bold'>{place?.info?.name}</span> - <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
                 </div>
                 <div>
-                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Tell me a story..'}</button>
+                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                    {/* @ts-ignore */}
+                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{`Tell me a story about ${place?.info?.name !== undefined ? `'${(place.info.name as string)}'` : 'this place'}..`}</button>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
                     <div ref={loadContentRef}></div>
                 </div>

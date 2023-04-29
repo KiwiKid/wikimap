@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import { type Map as LMap } from 'leaflet'
 import { type LatLngExpression } from 'leaflet';
 import { Place } from '@prisma/client';
