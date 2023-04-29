@@ -9,6 +9,7 @@ import locIconFile from 'src/styles/loc.png';
 import { type Place } from '@prisma/client';
 import PlaceMarker from './PlaceMarker';
 import LoadingCircle from './LoadingCircle';
+import { FoundLocations, getFoundLocations } from '~/utils/getFoundLocations';
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
@@ -78,17 +79,20 @@ interface DebugMarkersProps {
   renderedPlaces:Place[]
   promptType:string
 }
+
+
+
 export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
-    
 
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
       renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
     )
     const [loadededTypePlaceIds, setLoadedTypePlaceIds] = useState<string[]>([]);
       
-    
+    const foundLocations = getFoundLocations();
+
     const map = useMapEvents({
       click: (e) => {
         console.log('useMapEvents - click')
@@ -237,7 +241,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
       console.log(`new page ${wikiPlace?.wiki_url}`)
     }, [])
-
+    
     const onFailure = useCallback((lat:number, lng:number) => {
       console.error(`onFailure lng:'+${lat}+'lng: '+${lng}`)
       removePoint(lat, lng)
@@ -264,7 +268,8 @@ return (<div>
                 onFinished={onFinished}
             />) : null}
             {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
-            key={`${ep.wiki_id}`}  
+            key={`${ep.wiki_id}`}
+            isThisUserFound={foundLocations.map((fl) => fl.placeId).includes((ep.id))}
             place={ep}
             promptType={promptType}
            // updateRenderedPlaces={updateRenderedPlaces}

@@ -21,8 +21,8 @@ const config = {
   },
   /*redirects: async () =>  [
     {
-      source: '/',
-      destination: `/${WELLINGTON_CENTER[0]}/${WELLINGTON_CENTER[1]}`,
+      source: '/-41.2927734753598/174.77461204625592',
+      destination: `/`,
       permanent: true
     }
   ]*/

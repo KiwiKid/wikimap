@@ -2,8 +2,9 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup, MarkerPro
 import { Ref, useEffect, useRef, useState } from "react";
 import { DivIcon, Icon, Marker as MakerType, marker  } from 'leaflet';
 import { wikiInfo, type MappedPage } from "~/utils/mapWikiPage";
-import locIconFile from 'src/styles/loc.png'
-import redIconFile from 'src/styles/bang.png'
+import locIconFile from 'src/styles/book-closed.png'
+import bookOpenRed from 'src/styles/book-open-red.png'
+import bookOpen from 'src/styles/book-open.png'
 import loadingIconFile from 'src/styles/loading.png'
 import errorIconFile from 'src/styles/error.png'
 import { useMutation  } from '@tanstack/react-query';
@@ -17,8 +18,14 @@ const locIcon = new Icon({
     iconAnchor: [12, 41],
   });
 
-  const redIcon = new Icon({
-    iconUrl: redIconFile.src,
+  const bookOpenRedIcon = new Icon({
+    iconUrl: bookOpenRed.src,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  })
+
+  const bookOpenIcon = new Icon({
+    iconUrl: bookOpen.src,
     iconSize: [25, 41],
     iconAnchor: [12, 41],
   })
@@ -42,6 +49,7 @@ import WikiJS from 'wikijs'
 import { type RouterOutputs } from '~/utils/api'
 import { getStory } from '~/utils/getStory';
 import Counter from './Counter';
+import { setFoundLocation } from '~/utils/getFoundLocations';
 const RADIUS = 1000;
 
 export interface PublicPlaceType {
@@ -63,11 +71,12 @@ interface PlaceMarkerProps {
     // updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
     onPlaceTypeLoaded:(newPlace:PlaceResult) => void;
     promptType:string
+    isThisUserFound:boolean
 }
 
 export default function PlaceMarker(props:PlaceMarkerProps) {
 
-    const {onPlaceTypeLoaded, place, promptType} = props;
+    const {onPlaceTypeLoaded, place, promptType, isThisUserFound} = props;
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
@@ -75,7 +84,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     const [hasLoadedStory, setHasLoadedStory] = useState<boolean>(false)
     const contentRef = useRef<HTMLDivElement>(null);
-   // const [existingScrollPosition, setExistingScrollPosition] = useState<number>();
+   
    
     const setExistingScrollPosition = (pos:number) => {
         window.localStorage.setItem(`${place.id}`, pos.toString())
@@ -154,9 +163,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             return locIcon
         }
 
-        if(place.summary == 'populated'){
-            return redIcon
+        if(isThisUserFound){
+            return bookOpenRedIcon
         }
+        if(place.summary == 'populated'){
+            return bookOpenIcon
+        }
+
         return locIcon
     }
 
@@ -182,7 +195,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             }else{
                 setPlaceType('none')
             }
-         //   onPlaceTypeLoaded(placeResult)
+
+            //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
           //  placeMarkerRef.current?.setIcon(locIcon)
@@ -198,9 +212,12 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 console.error('Could not refreshMarker', err)
             })   
         }else if(placeType != 'none'){
-            console.log('GOOD PLACETYPE')
-            console.log(placeType)
-            placeMarkerRef.current?.setIcon(redIcon)
+            if(isThisUserFound){
+                placeMarkerRef.current?.setIcon(bookOpenRedIcon)
+            }else{
+                placeMarkerRef.current?.setIcon(bookOpenIcon)
+            }
+            
         }
         if(existingScrollPosition){
             contentRef.current?.scrollTo({
@@ -338,12 +355,19 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 <div>
                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                     {/* @ts-ignore */}
-                    <span className='text-bold'>{place?.info?.name}</span> - <sub>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</sub>
+                    
                 </div>
                 <div>
                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                     {/* @ts-ignore */}
-                    <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{`Tell me a story about ${place?.info?.name !== undefined ? `'${(place.info.name as string)}'` : 'this place'}..`}</button>
+                    
+                    <div className='text-lg'>{place?.info?.name}</div>
+                    <div>{place.summary.substring(0, 150).replace('SUMMARY:', '')}...</div>
+                    <div className='align-middle items-center'>
+
+                        <button ref={loadButtonRef} className="w-3/5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{`Imagine a Story about here`}</button>
+
+                    </div>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
                     <div ref={loadContentRef}></div>
                 </div>

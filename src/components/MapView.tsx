@@ -34,7 +34,7 @@ export default function MapView({setRenderedPlaces, renderedPlaces}:MapViewProps
   const promptType = process.env.REACT_APP_PROMPT_TYPE || 'oldLegend'
     
   return (
-    <MapContainer center={startingCenter} zoom={15} style={{ height: '100vh' }}>
+    <MapContainer center={startingCenter} zoom={15} style={{ height: '100vh' }} preferCanvas={true}>
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
