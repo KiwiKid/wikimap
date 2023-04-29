@@ -6,7 +6,7 @@ import { useState } from "react";
 import { type PlaceResult } from "~/components/PlaceMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
 import { Place } from "@prisma/client";
-import Toggle from "~/components/Toggle";
+import ToggleBar from "~/components/ToggleBar";
 
 const Map = dynamic(() => import('../components/MapView'), {
     ssr: false,
@@ -25,13 +25,11 @@ const MapPage:NextPage = () => {
    const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
    const [pageMode, setPageMode] = useState<PageMode>('browse')
 
-   const isToggled = pageMode === 'newLocationSearch'
-
     const router = useRouter();
 
 
     return <div>
-    <div className="max-h-6"><Toggle isToggled={isToggled} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/></div>
+    <ToggleBar pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} pageMode={pageMode}/>
     {router?.query?.showDrawer && <DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
 </div>

@@ -98,7 +98,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const map = useMapEvents({
       click: (e) => {
-        if(e.latlng && e.latlng !== undefined ){
+        if(e.latlng && e.latlng !== undefined){
           if(pageMode !== 'newLocationSearch'){
             console.error('new location search is off')
             return;
