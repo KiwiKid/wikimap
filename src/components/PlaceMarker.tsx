@@ -336,6 +336,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                     <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
+                    <div>(you can close this and come back)</div>
                 </div>
             </Popup>
         </Marker>)

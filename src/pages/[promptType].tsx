@@ -21,6 +21,7 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
    // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
    const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
 
+
     const router = useRouter();
     if (router.isFallback) {
       return <div>Loading...{promptType}</div>;
@@ -29,7 +30,7 @@ const MapPage:NextPage<PageProps> = ({promptType}:PageProps) => {
 
     return <div>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
-    <DMapDrawerContainer renderedPlaces={renderedPlaces}/>
+    {router?.query?.showDrawer && <DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
 </div>
 }
 
