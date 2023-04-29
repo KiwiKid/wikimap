@@ -1,6 +1,6 @@
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents, Popup, MarkerProps } from 'react-leaflet';
 import { Ref, useEffect, useRef, useState } from "react";
-import { Icon, Marker as MakerType, marker  } from 'leaflet';
+import { DivIcon, Icon, Marker as MakerType, marker  } from 'leaflet';
 import { wikiInfo, type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/loc.png'
 import redIconFile from 'src/styles/bang.png'
@@ -153,7 +153,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         return locIcon
     }
 
-    const [icon, setIcon] = useState(getInitIcon())
+    // const [icon, setIcon] = useState(getInitIcon())
+
+    const setIcon = (icon:DivIcon) => {
+        if(placeMarkerRef && placeMarkerRef.current){
+            placeMarkerRef.current?.setIcon(icon)
+        }
+    }
 
     const refreshMarker = api.placeType.getSingle.useQuery({
         placeId: place.id
@@ -226,6 +232,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     // TODO: add check for promptType and old record
 
     const requestStory = () => {
+        setIcon(loadingIcon)
         try{
           //  console.log('requestStorys')
             //console.log(markerRef)
@@ -234,7 +241,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
                console.log('setIcon(loadingIcon)')
 
-                setIcon(loadingIcon)
                // markerRef.current?.setIcon()
                 setStartLoadingTime(new Date())
                 getStory(place.wiki_id, place.wiki_url, place.summary, promptType)
@@ -256,6 +262,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                             , promptType: promptType
                             , status: 'complete'
                         })
+                        setIcon(getInitIcon())
                     }else{
                         console.error('GET STORY FAILED', {s})
                  //       if(markerRef && markerRef.current){
@@ -267,6 +274,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                  //       }
                         
                     }
+                    
+
                     setStartLoadingTime(null)
 
                 }).catch((err) => {
@@ -309,13 +318,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         requestStory()
        // setIsLoadingStory(false)
         console.log('loadPlace2')
-        placeMarkerRef.current?.closePopup()
+        //placeMarkerRef.current?.closePopup()
     }
 
     if(placeType === 'none' || placeType == null){
         if(place){
             return (
-                <Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
+                <Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={(locIcon)}>
                     <Popup key={`${place.id}`} className='flex text-center align-middle'>
                 <div>
                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
@@ -327,7 +336,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                     <button ref={loadButtonRef} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={loadPlace}>{'Load this place'}</button>
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
-                    <div>{JSON.stringify(placeType)}</div>
                 </div>
             </Popup>
         </Marker>)
@@ -336,7 +344,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         }
     }
 
-    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={icon}>
+    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getInitIcon()}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
