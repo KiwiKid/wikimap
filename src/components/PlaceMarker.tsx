@@ -6,6 +6,8 @@ import locIconFile from 'src/styles/book-closed.png'
 import bookOpenRed from 'src/styles/book-open-red.png'
 import bookOpen from 'src/styles/book-open.png'
 import loadingIconFile from 'src/styles/loading.png'
+import ideaIconFile from 'src/styles/idea.png'
+//import LoadingIconFile from 'src/styles/loading-2.gif'
 import errorIconFile from 'src/styles/error.png'
 import { useMutation  } from '@tanstack/react-query';
 
@@ -14,26 +16,26 @@ import { PlaceType, type Place } from "@prisma/client";
 
 const locIcon = new Icon({
     iconUrl: locIconFile.src,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconSize: [40, 50],
+    iconAnchor: [20, 41],
   });
 
   const bookOpenRedIcon = new Icon({
     iconUrl: bookOpenRed.src,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconSize: [35, 48],
+    iconAnchor: [0, 41],
   })
 
   const bookOpenIcon = new Icon({
     iconUrl: bookOpen.src,
-    iconSize: [25, 41],
+    iconSize: [35, 48],
     iconAnchor: [12, 41],
   })
 
 
   const loadingIcon = new Icon({
-    iconUrl: loadingIconFile.src,
-    iconSize: [25, 41],
+    iconUrl: ideaIconFile.src,
+    iconSize: [50, 50],
     iconAnchor: [12, 41],
   });
 
