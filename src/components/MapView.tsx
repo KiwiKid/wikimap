@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import PlaceMarkers from './PlaceMarkers'
 import { Dispatch, SetStateAction } from 'react';
 import useWindowSize from '~/utils/useWindowSize';
+import { PageMode } from '~/pages';
 
 export function ChangeView({ coords }:{ coords: LatLngExpression }) {
   const mapp:LMap = useMap();
@@ -17,10 +18,11 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 export interface MapViewProps {
   setRenderedPlaces:Dispatch<SetStateAction<Place[]>>
   renderedPlaces:Place[]
+  pageMode:PageMode
 }
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 
-export default function MapView({setRenderedPlaces, renderedPlaces}:MapViewProps) {
+export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:MapViewProps) {
 
   const router = useRouter()
   const { lat, lng } = router.query;
@@ -39,7 +41,7 @@ export default function MapView({setRenderedPlaces, renderedPlaces}:MapViewProps
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}/>
+      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}  pageMode={pageMode}/>
     </MapContainer>
   );
 }

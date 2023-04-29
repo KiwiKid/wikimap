@@ -10,6 +10,7 @@ import { type Place } from '@prisma/client';
 import PlaceMarker from './PlaceMarker';
 import LoadingCircle from './LoadingCircle';
 import { FoundLocations, getFoundLocations } from '~/utils/getFoundLocations';
+import { PageMode } from '~/pages';
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
@@ -78,11 +79,13 @@ interface DebugMarkersProps {
   setRenderedPlaces:React.Dispatch<React.SetStateAction<Place[]>>
   renderedPlaces:Place[]
   promptType:string
+  pageMode:PageMode
+
 }
 
 
 
-export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType}:DebugMarkersProps) {
+export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
 
@@ -95,9 +98,11 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const map = useMapEvents({
       click: (e) => {
-        console.log('useMapEvents - click')
-        console.log(e.sourceTarget)
-        if(e.latlng && e.latlng !== undefined){
+        if(e.latlng && e.latlng !== undefined ){
+          if(pageMode !== 'newLocationSearch'){
+            console.error('new location search is off')
+            return;
+          }
             console.log('CLICK')
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);

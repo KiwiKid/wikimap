@@ -122,7 +122,11 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 }
             }
 
-
+    const closePopup = () => {
+        if(placeMarkerRef && placeMarkerRef.current){
+            placeMarkerRef.current.closePopup();
+        }
+    }
   
     useEffect(() => {
 
@@ -149,9 +153,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             };
                         
         }else{
-            if(placeMarkerRef && placeMarkerRef.current){
-                placeMarkerRef.current.closePopup();
-            }
+            closePopup()
         }
     }, [startLoadingTime]);
 
@@ -385,7 +387,11 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
                 <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {<div key={placeType.id}>
+            <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
+                <div>
                 {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
+                
+                </div>
 <div ref={contentRef} onScroll={() => setExistingScrollPosition(+(contentRef.current?.scrollTop || 0))} className="font-ltor text-sm flex">
 
                 {placeType.content}
@@ -397,6 +403,7 @@ onClick={() => requestStory()}>request story</button>*/}
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
                 </div></div>}
+                <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
             [Generated with AI @ wikimap.vercel.app]
             <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
         </Popup>}
