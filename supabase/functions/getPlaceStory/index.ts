@@ -63,7 +63,7 @@ serve(async (req) => {
 
     const prompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
-        `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting short story and inlcude a title. Include alot of details from the {place_information} below.
+        `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting, fictional story and inlcude a title and core details from the {place_information} below.
         Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
       )
       //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),

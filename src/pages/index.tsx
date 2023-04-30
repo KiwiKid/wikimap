@@ -29,7 +29,7 @@ const MapPage:NextPage = () => {
 
 
     return <div>
-    <ToggleBar pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
+    <ToggleBar renderedPlaceLength={renderedPlaces.length} pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} pageMode={pageMode}/>
     {router?.query?.showDrawer && <DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
 </div>

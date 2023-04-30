@@ -240,7 +240,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         refreshMarker.refetch().catch((err) => {
             console.error('Could not refreshMarker', err)
         })
-            
+        setFoundLocation(newPlace.id)
+
      //   onPlaceSuccess(newPlace);
       }else{
      //   onFailure(lat, lng);  

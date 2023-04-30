@@ -3,9 +3,9 @@ export interface FoundLocations {
     placeId:string
   }
 
-const setFoundLocation = (pos:string) => {
+const setFoundLocation = (placeId:string) => {
   const newItem = {
-    placeId: pos,
+    placeId: placeId,
     foundDate: new Date().toISOString()
   }
 
@@ -22,10 +22,9 @@ const setFoundLocation = (pos:string) => {
 }
 
   function getFoundLocations ():FoundLocations[] {
-    const existing = window && window.localStorage.getItem(`found_pl`) as unknown as FoundLocations[]
-
+    const existing = window && window.localStorage.getItem(`found_pl`)
     if(existing){
-      return existing;
+      return JSON.parse(existing) as unknown as FoundLocations[]
     }else{
       return []
     }
