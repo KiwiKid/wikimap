@@ -16,7 +16,7 @@ import { PlaceType, type Place } from "@prisma/client";
 
 const locIcon = new Icon({
     iconUrl: locIconFile.src,
-    iconSize: [40, 50],
+    iconSize: [34, 40],
     iconAnchor: [20, 41],
   });
 

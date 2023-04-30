@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PageMode } from "~/pages";
 import locIconFile from 'src/styles/book-closed.png'
 import openBookIconFile from 'src/styles/book-open.png'
+import openBookRedIconFile from 'src/styles/book-open-red.png'
 
 import Image from "next/image";
 
@@ -35,10 +36,13 @@ export default function ToggleBar({pageMode, onToggle, renderedPlaceLength}:Togg
                     </span>
                 </label>
                 {renderedPlaceLength == 0 && isToggled() ? <div>{`Click the map to search find new stories`}</div> : null}
-                {renderedPlaceLength == 0 && !isToggled() ? <div>{`<<<== Turn on FIND and click the map find new stories here`}</div> : null}
-                {renderedPlaceLength > 0 && <div className="align-right">
-                    [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/>New Place]
-                    [<Image className="inline-block" src={openBookIconFile.src} alt="new place" width={20} height={10}/>Existing Story]
+                {renderedPlaceLength == 0 && !isToggled() ? <div>{`<=========== Turn on FIND and click the map find new stories here`}</div> : null}
+                {renderedPlaceLength > 0 && <div className="items-end">
+                        <div>
+                        [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/>New Places]
+                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookIconFile.src} alt="new place" width={20} height={10}/>Existing Stories]
+                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookRedIconFile.src} alt="new place" width={20} height={10}/>Your Stories]
+                        </div>
                     </div>}
                 {/*
                 <span className="flex-right">

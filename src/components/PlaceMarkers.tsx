@@ -256,9 +256,9 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       console.log(`onFinished lng:'+${lat}+'lng: '+${lng}`)
 
       removePoint(lat, lng)
-      existingPlaces.refetch().catch((err) => {
-        console.error(err)
-      })
+     // existingPlaces.refetch().catch((err) => {
+      //  console.error(err)
+     // })
     }, [removePoint])
 
 
