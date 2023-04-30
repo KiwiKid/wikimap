@@ -404,8 +404,8 @@ onClick={() => requestStory()}>request story</button>*/}
                 
                 </div></div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
-            [Generated with AI @ wikimap.vercel.app]
-            <details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>
+            [Generated with AI]
+            {/*<details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>*/}
         </Popup>}
         
 
