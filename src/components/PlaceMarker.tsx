@@ -191,7 +191,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         placeId: place.id
     },{
         enabled: false,
-
         onSuccess: (placeResult:PlaceResult) => {
             console.log('refreshMarker onSuccess ')
             console.log(placeResult.placeTypes)
@@ -402,7 +401,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getInitIcon()}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
-        {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
+        {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-pre-wrap'>
             <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {<div key={placeType.id}>
             <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
