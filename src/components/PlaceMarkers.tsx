@@ -155,15 +155,15 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const onPlaceTypeUpdateTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const onPlaceTypeLoaded = useCallback((placeResult:PlaceResult[]) => {
+    const onPlaceTypeLoaded = useCallback((placeResult:PlaceResult) => {
       if (onPlaceTypeUpdateTimer.current) {
         clearTimeout(onPlaceTypeUpdateTimer.current);
       }
       onPlaceTypeUpdateTimer.current = setTimeout(() => {
-          if(placeResult.length > 0){
-            setLoadedTypePlaceIds(loadededTypePlaceIds?.concat(placeResult.map((p) => p.place.id)));
+          if(!!placeResult){
+       //     setLoadedTypePlaceIds(loadededTypePlaceIds?.concat(placeResult.place.id));
           }
-    }, 3000);
+    }, 500);
       //setRenderedPlaces(renderedPlaces.concat(placeResult))
     }, [])
 
@@ -210,10 +210,14 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       bottomRightLng: bottomRight.lng,
       promptType: promptType,
       ignoreIds: loadededTypePlaceIds,
+      
     },{
+      staleTime: 1000,
       cacheTime: Infinity,
       onSuccess: (data) => {
         console.log('loadededTypePlaceIds')
+        console.log(loadededTypePlaceIds)
+
         console.log('existingPlaces')
         console.log(data)
         updateRenderedPlaces(data.places)

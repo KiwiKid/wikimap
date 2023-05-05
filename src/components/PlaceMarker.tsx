@@ -97,6 +97,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     const existingScrollPosition = window.localStorage.getItem(`${place.id}`)
 
+    const hasPlaceTypePopulated = () => place.placeTypePopulated.length > 0
+                    && place.placeTypePopulated.includes(promptType)
+
     const [placeType, setPlaceType] = useState<PublicPlaceType | 'none' | null>(null);
 
     const convertToDots = (num:number) =>
@@ -163,11 +166,16 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getInitIcon = () => {
+        console.log('getInitIcon')
+        console.log(place)
         if(place && !place.summary) {
             return errorIcon
         }
+        if(hasPlaceTypePopulated()){
+            return bookOpenIcon
+        }
         if(place.status == 'empty'){
-            return locIcon
+            return errorIcon//locIcon
         }
 
         if(isThisUserFound){
@@ -182,9 +190,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     // const [icon, setIcon] = useState(getInitIcon())
 
-    const setIcon = (icon:DivIcon) => {
+    const setIcon = (icon?:DivIcon) => {
         if(placeMarkerRef && placeMarkerRef.current){
-            placeMarkerRef.current?.setIcon(icon)
+            placeMarkerRef.current?.setIcon(getInitIcon())
         }
     }
 
@@ -192,6 +200,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         placeId: place.id
     },{
         enabled: false,
+        staleTime: Infinity,
+        cacheTime: Infinity,
         onSuccess: (placeResult:PlaceResult) => {
             console.log('refreshMarker onSuccess ')
             console.log(placeResult.placeTypes)
@@ -202,13 +212,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 setPlaceType('none')
             }
 
-            placeMarkerRef.current?.addEventListener('popupopen', () =>{
+       /*     placeMarkerRef.current?.addEventListener('popupopen', () =>{
                 history.pushState({}, '', `?open=${placeResult.place.id}&lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
             })
 
             placeMarkerRef.current?.addEventListener('popupclose', () =>{
                 history.pushState({}, '', `?lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
-            })
+            })*/
             if(!placeMarkerRef.current?.isPopupOpen){
                 placeMarkerRef.current?.openPopup()
             }
@@ -216,7 +226,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
-          //  placeMarkerRef.current?.setIcon(locIcon)
+          setIcon()
         },
         onError: () => {
             console.error('Could not refresh marker')
@@ -224,20 +234,40 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     })
 
     useEffect(() => {
-        if(placeType != 'none' && placeType == null){
-            refreshMarker.refetch().catch((err) => {
-                console.error('Could not refreshMarker', err)
+        if(placeMarkerRef.current){
+            console.log('')
+            placeMarkerRef.current.addEventListener('popupopen', () => {
+                console.log(`\n\n\npopupopen\n\n\n`)
+                console.log(hasPlaceTypePopulated())
+                if(hasPlaceTypePopulated()){
+                    refreshMarker.refetch().catch((err) => {
+                        console.error('Could not refreshMarker', err)
+                    })
+                }
+                
             })
+        }
+
+
+        if(place.placeTypePopulated.length > 0 ){
+            setIcon()
+        }
+        if(placeType != 'none' && placeType == null){
+            console.log('refreshMarker useEffect CALLLLLL ')
+          //  refreshMarker.refetch().catch((err) => {
+          //      console.error('Could not refreshMarker', err)
+           // })
         }else if(placeType != 'none'){
-            if(placeType.status)
+
             if(isThisUserFound){
-                placeMarkerRef.current?.setIcon(bookOpenRedIcon)
+                setIcon()
+                //placeMarkerRef.current?.setIcon(bookOpenRedIcon)
                 // TODO: fix this, its not opening 
                 if(isDefaultOpen){
                     placeMarkerRef.current?.openPopup()
                 }
             }else{
-                placeMarkerRef.current?.setIcon(bookOpenIcon)
+                setIcon()
             }
             
         }else if(placeType)
@@ -259,13 +289,14 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     })
 
   const saveStory = api.placeType.saveStory.useMutation({
-    onSuccess: async (newPlace) => {
+    onSuccess: (newPlace) => {
         console.log('saveStory onSuccess')
 
         console.log(newPlace)
 
       if(!!newPlace){
-        setIcon(loadingIcon)
+        setIcon()
+        console.log('refreshMarker useEffect saveStory/!!newPlace ')
         refreshMarker.refetch()
             .catch((err) => {
                 console.error('Could not refreshMarker', err)
@@ -277,7 +308,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
       }else{
      //   onFailure(lat, lng);  
 
-        setIcon(errorIcon)
+        setIcon()
 
       }
     },
@@ -327,7 +358,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                             , status: 'complete'
                         })
                         
-                        setIcon(getInitIcon())
+                        setIcon()
                     }else{
                         console.error('GET STORY FAILED', {s})
                  //       if(markerRef && markerRef.current){
@@ -371,8 +402,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         //placeMarkerRef.current?.closePopup()
     }
 
-    if(placeType === 'none' || placeType == null){
-        if(place){
+    if((!(placeType || placeType === 'none') && !hasPlaceTypePopulated())){
             return (
                 <Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={(locIcon)}>
                     <Popup key={`${place.id}`} className='flex text-center align-middle'>
@@ -396,27 +426,25 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                     </div>
                     <div className='font-bold py-2 px-4 rounded'>[Estimate: 30 seconds]</div>
                     <div ref={loadContentRef}></div>
+                    <details><summary>info</summary><pre>{JSON.stringify(place, undefined, 4)}</pre><pre>{JSON.stringify(placeType, undefined, 4)}</pre></details>
                 </div>
             </Popup>
         </Marker>)
-        }else{
-            return (<div>placeType with No place?</div>)
-        }
     }
 
-    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getInitIcon()}>
+    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-pre-wrap'>
             <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {<div key={placeType.id}>
+            {placeType !== null && placeType != 'none' && <div key={placeType?.id}>
             <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
                 <div>
-                {placeType.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
+                {placeType?.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
                 
                 </div>
 <div ref={contentRef} onScroll={() => setExistingScrollPosition(+(contentRef.current?.scrollTop || 0))} className="font-ltor text-sm flex">
 
-                {placeType.content}
+                {placeType?.content ? placeType.content : null}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
 onClick={() => requestStory()}>request story</button>*/}
