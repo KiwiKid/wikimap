@@ -39,9 +39,9 @@ export default function ToggleBar({pageMode, onToggle, renderedPlaceLength}:Togg
                 {renderedPlaceLength == 0 && !isToggled() ? <div>{`<=========== Turn on FIND and click the map find new stories here`}</div> : null}
                 {renderedPlaceLength > 0 && <div className="items-end">
                         <div>
-                        [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/>New Places]
-                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookIconFile.src} alt="new place" width={20} height={10}/>Existing Stories]
-                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookRedIconFile.src} alt="new place" width={20} height={10}/>Your Stories]
+                        [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/>New]
+                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookIconFile.src} alt="new place" width={20} height={10}/>Existing]
+                        &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookRedIconFile.src} alt="new place" width={20} height={10}/>Yours]
                         </div>
                     </div>}
                 {/*

@@ -188,14 +188,20 @@ export const placeTypeRouter = createTRPCRouter({
             }
           }
           
-          return ctx.prisma.placeType.create({data: {
+          return ctx.prisma.placeType.update({data: {
             wiki_id: place.wiki_id.toString(),
             title: 'Placeholder title',
             content: res.text || 'No content',
             type: input.promptType,
             upvotes: 0,
             downvotes: 0,
-            status: 'success'
+            status: 'success',
+          },
+          where: {
+            LookupUnique: {
+              wiki_id: place.wiki_id,
+              type: input.promptType,
+            }
           }}).then((res) => {
             return {
               placeType: res,

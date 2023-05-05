@@ -42,7 +42,7 @@ model Place {
 model PlaceType {
   id            String   @id @default(cuid())
   title         String?
-  content       String?  
+  content       String?
   type          String
   wiki_id       String
   place         Place    @relation(fields: [wiki_id], references: [wiki_id])
