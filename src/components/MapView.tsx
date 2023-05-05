@@ -25,11 +25,13 @@ const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592
 export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:MapViewProps) {
 
   const router = useRouter()
-  const { lat, lng } = router.query;
+  const { lat, lng, open } = router.query;
 
   const startingCenter = !lat || !lng 
     ? WELLINGTON_CENTER
     : [+lat, +lng] as [number, number]
+
+  const openPlaceId = typeof open == 'string' ? open : null;
 
   const [width, windowHeight] = useWindowSize();
 
@@ -41,7 +43,7 @@ export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:Ma
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} promptType={promptType}  pageMode={pageMode}/>
+      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} openPlaceId={openPlaceId} renderedPlaces={renderedPlaces} promptType={promptType}  pageMode={pageMode}/>
     </MapContainer>
   );
 }

@@ -93,14 +93,17 @@ export default function LoadingCircle({
         processPageName.mutate({
           pageName: pn
         })
-
       })
+
+      if(res.pageNames.length == 0){
+        onFailure(lat, lng)
+      }
       setCircleState('ready-to-gen')
     },
     onError: (err) => {
       onFailure(lat, lng)
       console.error(err)
-    }
+    },
   })
   
  /* {

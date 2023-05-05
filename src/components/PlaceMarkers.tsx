@@ -79,13 +79,14 @@ interface DebugMarkersProps {
   setRenderedPlaces:React.Dispatch<React.SetStateAction<Place[]>>
   renderedPlaces:Place[]
   promptType:string
+  openPlaceId:string | null
   pageMode:PageMode
 
 }
 
 
 
-export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode}:DebugMarkersProps) {
+export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode, openPlaceId}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
 
@@ -103,13 +104,11 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
             console.error('new location search is off')
             return;
           }
-            console.log('CLICK')
             const { lat, lng } = e.latlng;
             const newPoint = new LatLng(lat, lng);
           //  map.closePopup()
             // L.marker([lat, lng], { icon }).addTo(map);
             setIsLoadingAreas(loadingAreas.concat(newPoint))
-            console.log('CLICK-newlatlng')
         }else{
             console.error('e.latlng is nulll')
         }
@@ -117,17 +116,15 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       zoomend: (e) => {
         try{
 
-          console.log('CLICK-zoomend')
-
-        const handler = setTimeout(() => {
-          setDelayedMapPosition(getLoadPoints(map))
-        }, 400)
-        return () => {
-          clearTimeout(handler);
-        };
-      }catch(err){
-        console.error(err)
-      }
+          const handler = setTimeout(() => {
+            setDelayedMapPosition(getLoadPoints(map))
+          }, 400)
+          return () => {
+            clearTimeout(handler);
+          };
+        }catch(err){
+          console.error(err)
+        }
       },
       dragend: (e) => {
         console.log('CLICK-dragend')
@@ -210,6 +207,13 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
         console.log('existingPlaces')
         console.log(data)
         updateRenderedPlaces(data.places)
+        const center = map.getCenter()
+
+        // Only override the open param when we are scrolling the map
+        if(window.location.search.indexOf('open') == -1){
+          history.pushState({}, '', `?lat=${center.lat.toFixed(4)}&lng=${center.lng.toFixed(4)}`);
+        }
+        
         //if(setVisiblePlaces){
           //setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
        // }
@@ -228,6 +232,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     }, [delayedMapPosition])
 
     const removePoint = useCallback((lat:number,lng:number) => {
+      console.log('removePoint')
       try{
         setIsLoadingAreas(loadingAreas.filter((la) => la.lat == lat && la.lng == lng))
       }catch(err){
@@ -277,6 +282,7 @@ return (<div>
             isThisUserFound={foundLocations.map((fl) => fl.placeId).includes((ep.id))}
             place={ep}
             promptType={promptType}
+            isDefaultOpen={ep.id === openPlaceId}
            // updateRenderedPlaces={updateRenderedPlaces}
             onPlaceTypeLoaded={onPlaceTypeLoaded}
             />)}

@@ -74,11 +74,13 @@ interface PlaceMarkerProps {
     onPlaceTypeLoaded:(newPlace:PlaceResult) => void;
     promptType:string
     isThisUserFound:boolean
+    isDefaultOpen:boolean
 }
 
 export default function PlaceMarker(props:PlaceMarkerProps) {
 
-    const {onPlaceTypeLoaded, place, promptType, isThisUserFound} = props;
+    const {onPlaceTypeLoaded, place, promptType, isThisUserFound, isDefaultOpen} = props;
+
     const [startLoadingTime, setStartLoadingTime] = useState<Date|null>(null)
     const [loadedStory, setLoadedStory] = useState<string|null>(null)
     const loadButtonRef = useRef<HTMLButtonElement>(null);
@@ -200,6 +202,17 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 setPlaceType('none')
             }
 
+            placeMarkerRef.current?.addEventListener('popupopen', () =>{
+                history.pushState({}, '', `?open=${placeResult.place.id}&lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
+            })
+
+            placeMarkerRef.current?.addEventListener('popupclose', () =>{
+                history.pushState({}, '', `?lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
+            })
+            if(!placeMarkerRef.current?.isPopupOpen){
+                placeMarkerRef.current?.openPopup()
+            }
+
             //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
@@ -214,10 +227,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         if(placeType != 'none' && placeType == null){
             refreshMarker.refetch().catch((err) => {
                 console.error('Could not refreshMarker', err)
-            })   
+            })
         }else if(placeType != 'none'){
             if(isThisUserFound){
                 placeMarkerRef.current?.setIcon(bookOpenRedIcon)
+                if(isDefaultOpen){
+                    placeMarkerRef.current?.openPopup()
+                }
             }else{
                 placeMarkerRef.current?.setIcon(bookOpenIcon)
             }
@@ -228,7 +244,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 top: +existingScrollPosition
             })
         }
-    }, [placeType, refreshMarker])
+    }, [placeType])
 
 
   const saveStory = api.placeType.saveStory.useMutation({
@@ -345,6 +361,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         console.log('loadPlace1')
        // placeMarkerRef.current?
         requestStory()
+
        // setIsLoadingStory(false)
         console.log('loadPlace2')
         //placeMarkerRef.current?.closePopup()
@@ -386,7 +403,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={getInitIcon()}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-break-spaces'>
-                <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
+            <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
             {<div key={placeType.id}>
             <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
                 <div>
@@ -405,8 +422,8 @@ onClick={() => requestStory()}>request story</button>*/}
                 
                 </div></div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
-            [Generated with AI]
-            {/*<details>{place.id}<summary></summary>{JSON.stringify(place.summary)}</details>*/}
+            
+            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(place.summary)}</details>}
         </Popup>}
         
 
