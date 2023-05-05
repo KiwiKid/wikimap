@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "PlaceType" ALTER COLUMN "title" DROP NOT NULL,
+ALTER COLUMN "content" DROP NOT NULL;

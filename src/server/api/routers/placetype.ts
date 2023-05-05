@@ -19,6 +19,7 @@ export const defaultPlaceTypeSelect = {
   title: true,
   content: true,
   type: true,
+  status: true,
   upvotes: true,
   downvotes: true
 }
@@ -52,79 +53,95 @@ export const placeTypeRouter = createTRPCRouter({
       processPageName: publicProcedure
         .input(z.object({ pageName: z.string()}))
         .mutation(({input, ctx}) => WikiJS().page(input.pageName)
-            .then(mapWikiPage)
-            .then(async (fp:MappedPage) => {
+          .then(mapWikiPage)
+          .then(async (fp:MappedPage) => {
 
-              const place = await ctx.prisma.place.findFirst({
-                where:{
-                  lat: fp.lat,
-                  lng: fp.lng
-                },
-                select: {
-                  id: true,
-                  lat: true,
-                  lng: true,
-                  wiki_id: true,
-                  wiki_url: true,
-                  status: true,
-                  info: true,
-                  summary: true,
-                  main_image_url: true,
-                  placeTypePopulated: true
-                }
-              })
-  //hmm
-              if(!!place){
-                return place;
-              }else{
-                const newItem = {
-                    lat: fp.lat,
-                    lng: fp.lng,
-                    wiki_id: fp.wiki_id.toString(),
-                    wiki_url: fp.url,
-                    info: fp.info !== null ? fp.info.general as Prisma.JsonObject : Prisma.JsonNull,
-                    summary: fp.summary,
-                    status: 'empty',
-
-                    main_image_url: fp.mainImage || '',
-                  }
-                console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lng}`)
-
-                return await ctx.prisma.place.create({data: newItem})
+            const place = await ctx.prisma.place.findFirst({
+              where:{
+                lat: fp.lat,
+                lng: fp.lng
+              },
+              select: {
+                id: true,
+                lat: true,
+                lng: true,
+                wiki_id: true,
+                wiki_url: true,
+                status: true,
+                info: true,
+                summary: true,
+                main_image_url: true,
+                placeTypePopulated: true
               }
             })
-          ),
+//hmm
+            if(!!place){
+              return place;
+            }else{
+              const newItem = {
+                  lat: fp.lat,
+                  lng: fp.lng,
+                  wiki_id: fp.wiki_id.toString(),
+                  wiki_url: fp.url,
+                  info: fp.info !== null ? fp.info.general as Prisma.JsonObject : Prisma.JsonNull,
+                  summary: fp.summary,
+                  status: 'empty',
 
-          saveStory: publicProcedure
-            .input(z.object({ 
-              wiki_id: z.string(),
-              title: z.string(),
-              content: z.string(),
-              promptType: z.string(),
-              status: z.string(),
-            })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({data: {
-              wiki_id: input.wiki_id.toString(),
-              title: input.title,
-              content: input.content,
-              type: input.promptType,
-              upvotes: 0,
-              downvotes: 0,
-              status: 'success',
-            }}).then((pt) => ctx.prisma.place.findFirstOrThrow({
-              where:{
-                wiki_id: pt.wiki_id
-              }
-            }))
-            .then((p) => ctx.prisma.place.update({
-              data: {
-                placeTypePopulated: {
-                  push: input.promptType
+                  main_image_url: fp.mainImage || '',
                 }
-              },
-              where: {
-                wiki_id: input.wiki_id
+              console.log(`Creating ${newItem.wiki_url}  ${newItem?.lat} ${newItem?.lng}`)
+
+              return await ctx.prisma.place.create({data: newItem})
+            }
+          })
+        ),
+
+        saveStory: publicProcedure
+          .input(z.object({ 
+            wiki_id: z.string(),
+            title: z.string(),
+            content: z.string(),
+            promptType: z.string(),
+            status: z.string(),
+          })).mutation(async ({ctx, input}) => ctx.prisma.placeType.update({data: {
+            wiki_id: input.wiki_id.toString(),
+            title: input.title,
+            content: input.content,
+            type: input.promptType,
+            upvotes: 0,
+            downvotes: 0,
+            status: input.status,
+          },
+          where:{
+            LookupUnique: {
+              wiki_id: input.wiki_id.toString(),
+              type: input.promptType
+            } 
+          }
+          }).then((pt) => ctx.prisma.place.findFirstOrThrow({
+            where:{
+              wiki_id: pt.wiki_id
+            }
+          }))
+          .then((p) => ctx.prisma.place.update({
+            data: {
+              placeTypePopulated: {
+                push: input.promptType
               }
-            }))),
+            },
+            where: {
+              wiki_id: input.wiki_id
+            }
+          }))),
+          setStoryLoading: publicProcedure.input(z.object({
+            wiki_id: z.string(),
+            promptType: z.string()
+          })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({
+            data: {
+              wiki_id: input.wiki_id,
+              type: input.promptType
+            }
+          })),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {

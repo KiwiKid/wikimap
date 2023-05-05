@@ -60,6 +60,7 @@ export interface PublicPlaceType {
     content: string
     type: string
     wiki_id: string
+    status:string
 }
 
 
@@ -71,7 +72,7 @@ export interface PlaceResult {
 interface PlaceMarkerProps {
     place:Place
     // updateRenderedPlaces:(newPlace:PlaceResult[]) => void;
-    onPlaceTypeLoaded:(newPlace:PlaceResult) => void;
+    onPlaceTypeLoaded:(newPlaces:PlaceResult) => void;
     promptType:string
     isThisUserFound:boolean
     isDefaultOpen:boolean
@@ -211,7 +212,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             if(!placeMarkerRef.current?.isPopupOpen){
                 placeMarkerRef.current?.openPopup()
             }
-
+            onPlaceTypeLoaded(placeResult)
             //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
@@ -228,8 +229,10 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 console.error('Could not refreshMarker', err)
             })
         }else if(placeType != 'none'){
+            if(placeType.status)
             if(isThisUserFound){
                 placeMarkerRef.current?.setIcon(bookOpenRedIcon)
+                // TODO: fix this, its not opening 
                 if(isDefaultOpen){
                     placeMarkerRef.current?.openPopup()
                 }
@@ -237,7 +240,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 placeMarkerRef.current?.setIcon(bookOpenIcon)
             }
             
-        }
+        }else if(placeType)
         if(existingScrollPosition){
             contentRef.current?.scrollTo({
                 top: +existingScrollPosition
@@ -245,16 +248,29 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         }
     }, [placeType])
 
+    const createStoryShell = api.placeType.setStoryLoading.useMutation({
+        onSuccess: () => {
+            console.log('create story shell')
+        },
+        onError: (err) =>{
+            console.error('failed to create story shell')
+            console.error(err)
+        }
+    })
 
   const saveStory = api.placeType.saveStory.useMutation({
-    onSuccess: (newPlace) => {
+    onSuccess: async (newPlace) => {
         console.log('saveStory onSuccess')
+
+        console.log(newPlace)
 
       if(!!newPlace){
         setIcon(loadingIcon)
-        refreshMarker.refetch().catch((err) => {
-            console.error('Could not refreshMarker', err)
-        })
+        refreshMarker.refetch()
+            .catch((err) => {
+                console.error('Could not refreshMarker', err)
+            })
+        console.log(`setFoundLocation(${newPlace.id})`)
         setFoundLocation(newPlace.id)
 
      //   onPlaceSuccess(newPlace);
@@ -277,6 +293,10 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     const requestStory = () => {
         setIcon(loadingIcon)
+        createStoryShell.mutate({
+            wiki_id: place.wiki_id,
+            promptType: promptType
+        })
         try{
           //  console.log('requestStorys')
             //console.log(markerRef)
@@ -306,6 +326,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                             , promptType: promptType
                             , status: 'complete'
                         })
+                        
                         setIcon(getInitIcon())
                     }else{
                         console.error('GET STORY FAILED', {s})
@@ -331,23 +352,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             console.error(err)
         }
     }
-/*
-    useEffect(() => {
-        if(!hasStory && data && data.place.wiki_id && data.placeTypes.length == 0 && !isError){
-            getStory(place.wiki_id, place.wiki_url, place.summary, promptType).then(function() {
-                refetch().catch((err) =>{
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    console.error('Could not refetch single', {err})
-                })
-            }).catch((err) => {
-                console.error(err)
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                console.error('Could not get story', {err})
-            })
-    
-        }
-    }, [])
-  */  
+
     if(!place){
         return (<div>No place?</div>)
     }

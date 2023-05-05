@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css';
 import { Icon, LatLng, Map as LMap } from 'leaflet';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png';
@@ -153,8 +153,17 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
     const buffer = 1
 
-    const onPlaceTypeLoaded = useCallback((placeResult:PlaceResult) => {
-      setLoadedTypePlaceIds(loadededTypePlaceIds?.concat([placeResult.place.id]))
+    const onPlaceTypeUpdateTimer = useRef<NodeJS.Timeout | null>(null);
+
+    const onPlaceTypeLoaded = useCallback((placeResult:PlaceResult[]) => {
+      if (onPlaceTypeUpdateTimer.current) {
+        clearTimeout(onPlaceTypeUpdateTimer.current);
+      }
+      onPlaceTypeUpdateTimer.current = setTimeout(() => {
+          if(placeResult.length > 0){
+            setLoadedTypePlaceIds(loadededTypePlaceIds?.concat(placeResult.map((p) => p.place.id)));
+          }
+    }, 3000);
       //setRenderedPlaces(renderedPlaces.concat(placeResult))
     }, [])
 
@@ -167,7 +176,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
       // const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
 
-      const toLoad = onScreen.filter((s) => !loadededTypePlaceIds?.includes(s.id))
+     // const toLoad = onScreen.filter((s) => !loadededTypePlaceIds?.includes(s.id))
 
       setRenderedPlaces(onScreen)
 
@@ -202,8 +211,9 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       promptType: promptType,
       ignoreIds: loadededTypePlaceIds,
     },{
-      cacheTime: Infinity,     
+      cacheTime: Infinity,
       onSuccess: (data) => {
+        console.log('loadededTypePlaceIds')
         console.log('existingPlaces')
         console.log(data)
         updateRenderedPlaces(data.places)
