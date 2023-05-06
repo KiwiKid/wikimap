@@ -194,7 +194,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
     const setIcon = (icon?:DivIcon) => {
         if(placeMarkerRef && placeMarkerRef.current){
-            placeMarkerRef.current?.setIcon(getInitIcon())
+            placeMarkerRef.current?.setIcon(icon ?? getInitIcon())
         }
     }
 
@@ -292,6 +292,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
   const saveStory = api.placeType.saveStory.useMutation({
     onSuccess: (newPlace) => {
         console.log('saveStory onSuccess')
+        console.log('saveStory onSuccess bookOpenRedIcon')
+
+        setIcon(bookOpenRedIcon)
 
         console.log(newPlace)
 
@@ -302,18 +305,23 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             .catch((err) => {
                 console.error('Could not refreshMarker', err)
             })
+            console.log('saveStory onSuccess bookOpenRedIcon')
+
             setIcon(bookOpenRedIcon)
 
         console.log(`setFoundLocation(${newPlace.id})`)
         setFoundLocation(newPlace.id)
 
       }else{
+        console.log('saveStory onSuccess setIcon')
 
         setIcon()
 
       }
     },
     onError: (err) => {
+        console.log('saveStory onError bookOpenRedIcon')
+
       console.error(err)
    //   onFailure(lat, lng);
     }
