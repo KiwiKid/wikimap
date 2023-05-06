@@ -28,11 +28,12 @@ const MapPage:NextPage = () => {
 
    const [pageMode, setPageMode] = useState<PageMode>('newLocationSearch')
    const router = useRouter();
+   const [isAnyLoading, setAnyLoading] = useState<string>('')
 
 
     return <div>
-    <ToggleBar renderedPlaceLength={renderedPlaces.length} pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
-    <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} pageMode={pageMode}/>
+    <ToggleBar isAnyLoading={isAnyLoading} renderedPlaceLength={renderedPlaces.length} pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
+    <Map setAnyLoading={setAnyLoading} setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} pageMode={pageMode}/>
     {/*<DMapDrawerContainer renderedPlaces={renderedPlaces}/>*/}
 </div>
 }

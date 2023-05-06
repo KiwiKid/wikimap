@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css';
 import { Icon, LatLng, Map as LMap } from 'leaflet';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png';
@@ -78,7 +78,8 @@ interface Dictionary {
 }
 
 interface DebugMarkersProps {
-  setRenderedPlaces:React.Dispatch<React.SetStateAction<Place[]>>
+  setRenderedPlaces:Dispatch<SetStateAction<Place[]>>
+  setAnyLoading:Dispatch<SetStateAction<string>>
   renderedPlaces:Place[]
   promptType:string
   openPlaceId:string | null
@@ -87,10 +88,9 @@ interface DebugMarkersProps {
 
 
 
-export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode, openPlaceId}:DebugMarkersProps) {
+export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode, openPlaceId, setAnyLoading}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
-    const [isAnyLoading, setAnyLoading] = useState<boolean>(true)
 
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
       renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
@@ -170,7 +170,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     }, [])
 
     const updateRenderedPlaces = async (rawPlaces:Place[]) => {
-
+      setAnyLoading('Loading places...')
       console.log('updateRenderedPlaces')
       const client = new IndexedDBClient('wiki_map', 'places');
       client
@@ -211,6 +211,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       console.log('combined')
       console.log(combined)
       setRenderedPlaces(combined)
+      setAnyLoading('')
 
    //   setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
 
@@ -272,13 +273,6 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
         console.error(err)
       }
     })
-
-
-    useEffect(() => {
-      //existingPlaces.refetch().catch((err) => {
-     //   console.error(err)
-    //  })
-    }, [delayedMapPosition])
 
     const removePoint = useCallback((lat:number,lng:number) => {
       console.log('removePoint')

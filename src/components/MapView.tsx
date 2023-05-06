@@ -17,12 +17,13 @@ export function ChangeView({ coords }:{ coords: LatLngExpression }) {
 
 export interface MapViewProps {
   setRenderedPlaces:Dispatch<SetStateAction<Place[]>>
+  setAnyLoading:Dispatch<SetStateAction<string>>
   renderedPlaces:Place[]
   pageMode:PageMode
 }
 const WELLINGTON_CENTER:[number,number] = [-41.2927734753598, 174.77461204625592]
 
-export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:MapViewProps) {
+export default function MapView({setRenderedPlaces, renderedPlaces, pageMode, setAnyLoading}:MapViewProps) {
 
   const router = useRouter()
   const { lat, lng, open } = router.query;
@@ -44,7 +45,7 @@ export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:Ma
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <PlaceMarkers setRenderedPlaces={setRenderedPlaces} openPlaceId={openPlaceId} renderedPlaces={renderedPlaces} promptType={promptType}  pageMode={pageMode}/>
+      <PlaceMarkers setAnyLoading={setAnyLoading} setRenderedPlaces={setRenderedPlaces} openPlaceId={openPlaceId} renderedPlaces={renderedPlaces} promptType={promptType}  pageMode={pageMode}/>
     </MapContainer>
   );
 }
