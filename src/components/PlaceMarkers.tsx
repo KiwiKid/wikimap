@@ -117,10 +117,11 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       },
       zoomend: (e) => {
         try{
+          setAnyLoading('Loading places...')
 
           const handler = setTimeout(() => {
             setDelayedMapPosition(getLoadPoints(map))
-          }, 400)
+          }, 200)
           return () => {
             clearTimeout(handler);
           };
@@ -132,10 +133,11 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
         console.log('CLICK-dragend')
         map.closePopup();
         try{
+          setAnyLoading('Loading places...')
 
           const handler = setTimeout(() => {
             setDelayedMapPosition(getLoadPoints(map))
-          }, 400)
+          }, 200)
           return () => {
             clearTimeout(handler);
           };
@@ -170,7 +172,6 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     }, [])
 
     const updateRenderedPlaces = async (rawPlaces:Place[]) => {
-      setAnyLoading('Loading places...')
       console.log('updateRenderedPlaces')
       const client = new IndexedDBClient('wiki_map', 'places');
       client
