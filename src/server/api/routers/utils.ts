@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { defaultPlaceSelect } from "./placetype";
 
 export const utilsRouter = createTRPCRouter({
     /*search: publicProcedure

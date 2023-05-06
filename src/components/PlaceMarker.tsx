@@ -169,6 +169,9 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         //if(place && !place.summary) {
         //    return errorIcon
        // }
+       if(isThisUserFound && hasPlaceTypePopulated()){
+            return bookOpenRedIcon
+        }
         if(hasPlaceTypePopulated()){
             return bookOpenIcon
         }
@@ -179,9 +182,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
       //      return errorIcon//locIcon
     //    }
 
-        if(isThisUserFound){
-            return bookOpenRedIcon
-        }
+
         if(place.summary == 'populated'){
             return bookOpenIcon
         }
@@ -442,7 +443,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 </div>
 <div ref={contentRef} onScroll={() => setExistingScrollPosition(+(contentRef.current?.scrollTop || 0))} className="font-ltor text-sm flex">
 
-                {placeType?.content ? placeType.content : null}
+                {placeType?.content ? placeType.content : <div><h1>Loading....</h1></div>}
                 {/*<button 
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
 onClick={() => requestStory()}>request story</button>*/}

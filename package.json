@@ -21,6 +21,7 @@
     "@supabase/postgrest-js": "github:supabase/postgrest-js",
     "@supabase/supabase-js": "^2.21.0",
     "@tanstack/react-query": "^4.28.0",
+    
     "@trpc/client": "^10.18.0",
     "@trpc/next": "^10.18.0",
     "@trpc/react-query": "^10.18.0",
