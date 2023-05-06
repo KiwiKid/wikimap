@@ -211,7 +211,6 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       console.log('combined')
       console.log(combined)
       setRenderedPlaces(combined)
-      setAnyLoading('')
 
    //   setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
 
@@ -255,6 +254,8 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
         console.log(data)
         updateRenderedPlaces(data.places).catch((e)=>{
           console.error(e)
+        }).finally(() => {
+          setAnyLoading('')
         })
         const center = map.getCenter()
 
