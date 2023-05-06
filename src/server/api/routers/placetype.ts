@@ -141,7 +141,8 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: input.wiki_id,
               type: input.promptType,
               title: '',
-              content: ''
+              content: '',
+              status: 'loading'
             }
           })),
     getAndPopulateStory: publicProcedure
