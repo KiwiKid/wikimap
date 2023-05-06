@@ -302,6 +302,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             .catch((err) => {
                 console.error('Could not refreshMarker', err)
             })
+            setIcon(bookOpenRedIcon)
+
         console.log(`setFoundLocation(${newPlace.id})`)
         setFoundLocation(newPlace.id)
 
@@ -357,7 +359,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                             , status: 'complete'
                         })
                         
-                        setIcon()
+                        setIcon(bookOpenRedIcon)
                     }else{
                         console.error('GET STORY FAILED', {s})
                  //       if(markerRef && markerRef.current){
@@ -435,7 +437,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-pre-wrap'>
             <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
-            {placeType !== null && placeType != 'none' && <div key={placeType?.id}>
+            {placeType !== null && placeType != 'none' ? <div key={placeType?.id}>
             <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
                 <div>
                 {placeType?.title && <h1 className="text-xl font-bold underline text-center p-2">{placeType.title}</h1>}
@@ -451,7 +453,7 @@ onClick={() => requestStory()}>request story</button>*/}
             className="px-4 py-3 bg-blue-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform mx-5 flex"
         onClick={() => onDeletePlaceType(g.id)}>[delete]</button>*/}
                 
-                </div></div>}
+                </div></div> : <div>Loading...</div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
             
             {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(place.summary)}</details>}

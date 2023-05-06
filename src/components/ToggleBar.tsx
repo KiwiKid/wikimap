@@ -35,7 +35,9 @@ export default function ToggleBar({pageMode, onToggle, renderedPlaceLength}:Togg
                          <div>[FIND <Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/>]</div>
                     </span>
                 </label>
-                {renderedPlaceLength == 0 && isToggled() ? <div>{`Click the map to search find new stories`}</div> : null}
+
+
+                {renderedPlaceLength == 0 && isToggled() ? <div>{`Click the map to place 🔵 and find new stories`}</div> : null}
                 {renderedPlaceLength == 0 && !isToggled() ? <div>{`<=========== Turn on FIND and click the map find new stories here`}</div> : null}
                 {renderedPlaceLength > 0 && <div className="items-end">
                         <div>

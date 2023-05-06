@@ -207,7 +207,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       // const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
 
      // const toLoad = onScreen.filter((s) => !loadededTypePlaceIds?.includes(s.id))
-      const combined = mergePlaces(cachedOnScreen, newOnScreen);
+      const combined = mergePlaces(newOnScreen, cachedOnScreen);
       console.log('combined')
       console.log(combined)
       setRenderedPlaces(combined)

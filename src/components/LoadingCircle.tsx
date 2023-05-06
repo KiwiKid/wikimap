@@ -30,8 +30,8 @@ const getStatusPathOptions = (circleStatus:CircleState) => {
   switch(circleStatus){
     case 'loading': 
     return {
-      color: 'red',
-      fillColor: 'red',
+      color: 'blue',
+      fillColor: 'blue',
       fillOpacity: 0.2,
     };
     // TODO: should not display...
