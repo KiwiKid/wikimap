@@ -54,7 +54,7 @@ export default function ToggleBar({pageMode, onToggle, renderedPlaceLength, isAn
                         </div>
 
                     </div>}
-                    <div>{isAnyLoading.length > 0 ?
+                    <div>{isAnyLoading == null || isAnyLoading.length > 0 ?
                         <Image style={{marginTop: '-30px'}} width={120} height={50} src={loadingSpinner.src} alt="loading"/>
                          : <div style={{width: '120px'}}></div>
                         }</div>
