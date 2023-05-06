@@ -57,19 +57,41 @@ serve(async (req) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     } = await req.json() as Request
 
-   // const data = {
-   //   message: `Hello ${wiki_id} ${wiki_url} ${summary}!`,
-   // }
+const prompts = [
+  {
+    prompt_type: 'oldLegend',
+    prompt: `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting, fictional story and inlcude a title and core details from the {place_information} below.
+    Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
+  },
+  {
+    prompt_type: "galaxyExplore",
+    prompt: `Craft a captivating Star Wars-inspired short story set on the lush and mysterious planet of Onduara, a recently discovered world that holds ancient secrets from a long-lost civilization. As our protagonists, a Jedi Knight, a skilled pilot, and a native Onduarian guide, explore the hidden depths of the planet, they encounter both unexpected allies and formidable enemies. Incorporate themes of trust, the Force, and the ongoing battle between the light and dark sides as the characters uncover Onduara's secrets, and reveal how this discovery could change the fate of the galaxy forever
+    Incorporate the details of the {place_information} below.
+    Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
+  }
+]
+
+    const matchingPrompt = prompts.filter((p) => p.prompt_type == prompt_type)
+
+    if(matchingPrompt.length == 0){
+      return new Response(
+        JSON.stringify({error: {
+          message: 'No matching prompt'
+        }}),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      )
+    }
 
     const prompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
-        `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting, fictional story and inlcude a title and core details from the {place_information} below.
-        Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
+        matchingPrompt[0].prompt
+       // `In the style of J.R.R. Tolkien's \"Lord of the Rings,\" write an exciting, fictional story and inlcude a title and core details from the {place_information} below.
+       // Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
       )
       //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
     ]);
     const promptSettings = {
-      temperature: 1.5
+      temperature: 2
     }
 
     const llm = new ChatOpenAI();

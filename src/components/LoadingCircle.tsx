@@ -147,5 +147,5 @@ export default function LoadingCircle({
           }
         }}
     ><Popup ref={popupRef}
-        >(Looking for new stories here)</Popup></Circle>)
+        >Looking for unexplored places here (You can do more than one)</Popup></Circle>)
 }
