@@ -15,9 +15,9 @@ interface ToggleProps {
 export default function ToggleBar({pageMode, onToggle, renderedPlaceLength}:ToggleProps) {
     const isToggled = () => pageMode === 'newLocationSearch'
     return (
-        <div className="relative flex flex-col overflow-hidden">
+        <div style={{zIndex: 99999}} className="fixed top-0 right-0 overflow-hidden h-8 bg-white">
             <div className="flex">
-                <label htmlFor="pageMode" className="inline-flex relative mr-5 cursor-pointer">
+                <label htmlFor="pageMode" className="inline-flex float-right relative mr-5 cursor-pointer">
                     <input
                         id="pageMode"
                         type="checkbox"

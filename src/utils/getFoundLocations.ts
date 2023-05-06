@@ -11,6 +11,8 @@ const setFoundLocation = (placeId:string) => {
 
   if(!!window){
     const foundAlreadyString = window.localStorage.getItem(`found_pl`);
+    console.log('foundAlreadyString')
+    console.log(foundAlreadyString)
     if(foundAlreadyString){
       const existing = JSON.parse(foundAlreadyString) as unknown as FoundLocations[]
 

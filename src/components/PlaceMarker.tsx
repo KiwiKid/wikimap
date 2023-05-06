@@ -166,8 +166,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getInitIcon = () => {
-        console.log('getInitIcon')
-        console.log(place)
         //if(place && !place.summary) {
         //    return errorIcon
        // }
@@ -219,6 +217,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
                 history.pushState({}, '', `?open=${placeResult.place.id}&lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
             })
 */
+
             placeMarkerRef.current?.addEventListener('popupclose', () =>{
                 history.pushState({}, '', `?lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
             })
@@ -240,8 +239,6 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         if(placeMarkerRef.current){
             console.log('')
             placeMarkerRef.current.addEventListener('popupopen', () => {
-                console.log(`\n\n\npopupopen\n\n\n`)
-                console.log(hasPlaceTypePopulated())
                 if(hasPlaceTypePopulated()){
                     refreshMarker.refetch().catch((err) => {
                         console.error('Could not refreshMarker', err)
@@ -256,7 +253,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             setIcon()
         }
         if(placeType != 'none' && placeType == null){
-            console.log('refreshMarker useEffect CALLLLLL ')
+          //  console.log('refreshMarker useEffect CALLLLLL ')
           //  refreshMarker.refetch().catch((err) => {
           //      console.error('Could not refreshMarker', err)
            // })
@@ -298,7 +295,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         console.log(newPlace)
 
       if(!!newPlace){
-        setIcon()
+        
         console.log('refreshMarker useEffect saveStory/!!newPlace ')
         refreshMarker.refetch()
             .catch((err) => {
@@ -307,9 +304,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         console.log(`setFoundLocation(${newPlace.id})`)
         setFoundLocation(newPlace.id)
 
-     //   onPlaceSuccess(newPlace);
       }else{
-     //   onFailure(lat, lng);  
 
         setIcon()
 
@@ -435,7 +430,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         </Marker>)
     }
 
-    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={locIcon}>
+    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={bookOpenRedIcon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-pre-wrap'>
             <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>

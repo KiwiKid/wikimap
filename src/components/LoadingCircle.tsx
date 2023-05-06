@@ -1,9 +1,12 @@
-import { MapContainer, Marker, TileLayer, Circle, useMapEvents, Popup } from 'react-leaflet';
-import { useEffect, useState } from "react";
+import { MapContainer, Marker, TileLayer, Circle, useMapEvents, Popup, PopupProps, MarkerProps } from 'react-leaflet';
+import { Ref, RefObject, useEffect, useRef, useState } from "react";
 import { type MappedPage } from "~/utils/mapWikiPage";
 import { api } from "../utils/api"
 import WikiJS from 'wikijs'
 import { type Place } from "@prisma/client";
+import { CircleMarker, Popup as LPopup } from 'leaflet';
+import { Marker as MakerType, marker  } from 'leaflet';
+
 const RADIUS = 1000;
 
 
@@ -20,7 +23,7 @@ interface LoadingCircleProps {
   , onPageNames:((lat:number, lng: number, pageNames:string[])=>void)
   , onFailure:((lat:number, lng: number)=>void)
   , onPlaceSuccess:((wikiPlace:Place)=>void)
-  , onFinished:((lat:number, lng:number)=>void)
+  , onAllFinished:((lat:number, lng:number)=>void)
 }
 
 const getStatusPathOptions = (circleStatus:CircleState) => {
@@ -56,7 +59,7 @@ export default function LoadingCircle({
   , onPageNames
   , onFailure
   , onPlaceSuccess
-  , onFinished
+  , onAllFinished
 }:LoadingCircleProps) {
 
   const [circleState, setCircleState] = useState<CircleState>('loading')
@@ -79,7 +82,7 @@ export default function LoadingCircle({
     onSettled: () => {
       setPageProcessCount(pageProcessCount+1)
       if(pageFoundCount === pageProcessCount){
-        onFinished(lat, lng)
+        onAllFinished(lat, lng)
       }
     }
   })
@@ -117,10 +120,16 @@ export default function LoadingCircle({
     onError: (data) => console.error('Failed to latLng.process here ', {res: data})
   });*/
 
-    useEffect(() => {
-        getPageNames.mutate({ lat, lng})
-    }, [lat, lng])
+  const popupRef = useRef<LPopup>(null);
 
+    useEffect(() => {
+      console.log('useEffect')
+      if(popupRef.current){
+        popupRef.current.openPopup();
+      }
+        getPageNames.mutate({ lat, lng})
+
+    }, [lat, lng, popupRef])
 
  //   if(circleState == 'ready-to-gen'){
  //     return null;
@@ -130,5 +139,13 @@ export default function LoadingCircle({
         center={[lat, lng]}
         pathOptions={getStatusPathOptions(circleState)}
         radius={RADIUS}
-    />)
+        eventHandlers={{
+          layeradd: () => {
+            if(popupRef.current){
+              popupRef.current.openPopup();
+            }
+          }
+        }}
+    ><Popup ref={popupRef}
+        >(Looking for new stories here)</Popup></Circle>)
 }

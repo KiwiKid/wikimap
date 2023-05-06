@@ -26,8 +26,9 @@ export default function MapView({setRenderedPlaces, renderedPlaces, pageMode}:Ma
 
   const router = useRouter()
   const { lat, lng, open } = router.query;
-
-  const startingCenter = !lat || !lng 
+//  console.log(`${lat?.toString()}, ${lng?.toString()}, ${open?.toString()}`)
+  console.log(router.query)
+  const startingCenter = typeof lat !== 'string' || typeof lng !== 'string'
     ? WELLINGTON_CENTER
     : [+lat, +lng] as [number, number]
 

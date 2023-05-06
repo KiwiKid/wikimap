@@ -81,7 +81,6 @@ interface DebugMarkersProps {
   promptType:string
   openPlaceId:string | null
   pageMode:PageMode
-
 }
 
 
@@ -89,6 +88,7 @@ interface DebugMarkersProps {
 export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode, openPlaceId}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
+    const [isAnyLoading, setAnyLoading] = useState<boolean>(true)
 
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
       renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
@@ -268,16 +268,16 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     
     const onFailure = useCallback((lat:number, lng:number) => {
       console.error(`onFailure lng:'+${lat}+'lng: '+${lng}`)
-      removePoint(lat, lng)
+      //removePoint(lat, lng)
     }, [removePoint])
     
-    const onFinished = useCallback((lat:number, lng:number) => {
+    const onAllFinished = useCallback((lat:number, lng:number) => {
       console.log(`onFinished lng:'+${lat}+'lng: '+${lng}`)
 
       removePoint(lat, lng)
-     // existingPlaces.refetch().catch((err) => {
-      //  console.error(err)
-     // })
+      existingPlaces.refetch().catch((err) => {
+        console.error(err)
+      })
     }, [removePoint])
 
 
@@ -289,16 +289,16 @@ return (<div>
                 onPageNames={onPageNames} 
                 onFailure={onFailure}
                 onPlaceSuccess={onPlaceSuccess}
-                onFinished={onFinished}
+                onAllFinished={onAllFinished}
             />) : null}
             {renderedPlaces && renderedPlaces.map((ep) => <PlaceMarker 
-            key={`${ep.wiki_id}`}
-            isThisUserFound={foundLocations.map((fl) => fl.placeId).includes((ep.id))}
-            place={ep}
-            promptType={promptType}
-            isDefaultOpen={ep.id === openPlaceId}
-           // updateRenderedPlaces={updateRenderedPlaces}
-            onPlaceTypeLoaded={onPlaceTypeLoaded}
+              key={`${ep.wiki_id}`}
+              isThisUserFound={foundLocations.map((fl) => fl.placeId).includes((ep.id))}
+              place={ep}
+              promptType={promptType}
+              isDefaultOpen={ep.id === openPlaceId}
+            // updateRenderedPlaces={updateRenderedPlaces}
+              onPlaceTypeLoaded={onPlaceTypeLoaded}
             />)}
             {/*existingPlaces.isError || !existingPlaces.data ? <div>Error {JSON.stringify(existingPlaces?.data)}</div>            
               : !existingPlaces.isFetched ? <div>Loading..</div> 

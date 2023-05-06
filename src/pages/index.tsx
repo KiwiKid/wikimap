@@ -23,7 +23,7 @@ const Map = dynamic(() => import('../components/MapView'), {
 const MapPage:NextPage = () => {
    // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
    const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
-   const [pageMode, setPageMode] = useState<PageMode>('browse')
+   const [pageMode, setPageMode] = useState<PageMode>('newLocationSearch')
 
     const router = useRouter();
 
