@@ -7,6 +7,7 @@ import { type PlaceResult } from "~/components/PlaceMarkers";
 import MapDrawerContainer from "~/components/MapDrawerContainer";
 import { Place } from "@prisma/client";
 import ToggleBar from "~/components/ToggleBar";
+import { IndexedDBClient } from "~/utils/client-db";
 
 const Map = dynamic(() => import('../components/MapView'), {
     ssr: false,
@@ -22,16 +23,17 @@ const Map = dynamic(() => import('../components/MapView'), {
   export type PageMode = 'browse'| 'newLocationSearch'
 const MapPage:NextPage = () => {
    // const [visiblePlaces, setVisiblePlaces] = useState<PlaceResult[]>([])
-   const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
-   const [pageMode, setPageMode] = useState<PageMode>('newLocationSearch')
 
-    const router = useRouter();
+   const [renderedPlaces, setRenderedPlaces] = useState<Place[]>([]);
+
+   const [pageMode, setPageMode] = useState<PageMode>('newLocationSearch')
+   const router = useRouter();
 
 
     return <div>
     <ToggleBar renderedPlaceLength={renderedPlaces.length} pageMode={pageMode} onToggle={() => setPageMode(pageMode == 'browse' ? 'newLocationSearch' : 'browse')}/>
     <Map setRenderedPlaces={setRenderedPlaces} renderedPlaces={renderedPlaces} pageMode={pageMode}/>
-    {router?.query?.showDrawer && <DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
+    {<DMapDrawerContainer renderedPlaces={renderedPlaces}/>}
 </div>
 }
 

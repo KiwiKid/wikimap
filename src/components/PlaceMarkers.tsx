@@ -11,6 +11,8 @@ import PlaceMarker from './PlaceMarker';
 import LoadingCircle from './LoadingCircle';
 import { FoundLocations, getFoundLocations } from '~/utils/getFoundLocations';
 import { PageMode } from '~/pages';
+import { IndexedDBClient } from '~/utils/client-db';
+import { mergePlaces } from '~/utils/mergePlaces';
 
 const customIcon = new Icon({
   iconUrl: iconFile.src,
@@ -128,7 +130,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       },
       dragend: (e) => {
         console.log('CLICK-dragend')
-
+        map.closePopup();
         try{
 
           const handler = setTimeout(() => {
@@ -167,18 +169,48 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       //setRenderedPlaces(renderedPlaces.concat(placeResult))
     }, [])
 
-    const updateRenderedPlaces = (rawPlaces:Place[]) => {
+    const updateRenderedPlaces = async (rawPlaces:Place[]) => {
+
+      console.log('updateRenderedPlaces')
+      const client = new IndexedDBClient('wiki_map', 'places');
+      client
+      console.log('updateRenderedPlaces - client')
+      const cachedPlaces = await client.getPlaces().catch((e) => {
+        console.error('client db get error', cachedPlaces)
+      })
+      console.log('updateRenderedPlaces - cachedPlaces')
+      rawPlaces.forEach((rp) => {
+        client.saveObject(rp).catch((e) =>{
+          console.error('client db save error', e)
+        })
+      })
+
+
       console.log('updateRenderedPlaces'+JSON.stringify(rawPlaces))
-      const onScreen = rawPlaces.filter((place:Place) => {
+      // Get new items on the screen
+      const newOnScreen = rawPlaces.filter((place:Place) => {
         return place.lat < (topLeft.lat + buffer) && place.lat > (bottomRight.lat - buffer) &&
         place.lng > (topLeft.lng - buffer) && place.lng < (bottomRight.lng + buffer)
       })
 
+      console.log('newOnScreen')
+      console.log(newOnScreen)
+
+      const cachedOnScreen = !!cachedPlaces ? cachedPlaces.filter((place:Place) => {
+        return place.lat < (topLeft.lat + buffer) && place.lat > (bottomRight.lat - buffer) &&
+        place.lng > (topLeft.lng - buffer) && place.lng < (bottomRight.lng + buffer)
+      }) : []
+
+      console.log('cachedOnScreen')
+      console.log(cachedOnScreen)
+
       // const offScreen = placeResults.filter((pl) => onScreen.includes((pl)))
 
      // const toLoad = onScreen.filter((s) => !loadededTypePlaceIds?.includes(s.id))
-
-      setRenderedPlaces(onScreen)
+      const combined = mergePlaces(cachedOnScreen, newOnScreen);
+      console.log('combined')
+      console.log(combined)
+      setRenderedPlaces(combined)
 
    //   setRenderedPlaceIds(onScreen.reduce((map, rp) => map.set(rp.place.id, rp.placeTypes?.length), new Map()))
 
@@ -203,14 +235,14 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
           }
         })*/
     }
+    // TODO: Limit this to only look at newly discovered map areas
     const existingPlaces = api.placeType.getInside.useQuery({
       topLeftLat: topLeft.lat,
       topLeftLng: topLeft.lng,
       bottomRightLat: bottomRight.lat,
       bottomRightLng: bottomRight.lng,
       promptType: promptType,
-      ignoreIds: loadededTypePlaceIds,
-      
+      ignoreIds: [] // renderedPlaces.map((rp) => rp.id),
     },{
       staleTime: 1000,
       cacheTime: Infinity,
@@ -220,7 +252,9 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
 
         console.log('existingPlaces')
         console.log(data)
-        updateRenderedPlaces(data.places)
+        updateRenderedPlaces(data.places).catch((e)=>{
+          console.error(e)
+        })
         const center = map.getCenter()
 
         // Only override the open param when we are scrolling the map
@@ -231,6 +265,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
         //if(setVisiblePlaces){
           //setVisiblePlaces(existingPlaces && existingPlaces.data ? existingPlaces.data : [])
        // }
+       return;
       },
       onError: (err) => {
         console.error('Could not get existing places')
