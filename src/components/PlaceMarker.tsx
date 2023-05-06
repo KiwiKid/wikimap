@@ -168,15 +168,18 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const getInitIcon = () => {
         console.log('getInitIcon')
         console.log(place)
-        if(place && !place.summary) {
-            return errorIcon
-        }
+        //if(place && !place.summary) {
+        //    return errorIcon
+       // }
         if(hasPlaceTypePopulated()){
             return bookOpenIcon
         }
-        if(place.status == 'empty'){
-            return errorIcon//locIcon
+        if(loadButtonRef.current){
+            return loadingIcon
         }
+     //   if(place.status == 'empty'){
+      //      return errorIcon//locIcon
+    //    }
 
         if(isThisUserFound){
             return bookOpenRedIcon
@@ -215,10 +218,10 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
        /*     placeMarkerRef.current?.addEventListener('popupopen', () =>{
                 history.pushState({}, '', `?open=${placeResult.place.id}&lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
             })
-
+*/
             placeMarkerRef.current?.addEventListener('popupclose', () =>{
                 history.pushState({}, '', `?lat=${placeResult.place.lat}&lng=${placeResult.place.lng}`);
-            })*/
+            })
             if(!placeMarkerRef.current?.isPopupOpen){
                 placeMarkerRef.current?.openPopup()
             }
