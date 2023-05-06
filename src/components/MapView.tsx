@@ -37,7 +37,7 @@ export default function MapView({setRenderedPlaces, renderedPlaces, pageMode, se
 
   const [width, windowHeight] = useWindowSize();
 
-  const promptType = process.env.REACT_APP_PROMPT_TYPE || 'galaxyExplore'
+  const promptType =  'galaxyExplore' //process.env.REACT_APP_PROMPT_TYPE ||
     
   return (
     <MapContainer center={startingCenter} zoom={15} style={{ height: '100vh' }} preferCanvas={true}>
