@@ -139,7 +139,9 @@ export const placeTypeRouter = createTRPCRouter({
           })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({
             data: {
               wiki_id: input.wiki_id,
-              type: input.promptType
+              type: input.promptType,
+              title: '',
+              content: ''
             }
           })),
     getAndPopulateStory: publicProcedure
