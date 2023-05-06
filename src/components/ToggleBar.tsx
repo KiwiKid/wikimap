@@ -17,12 +17,12 @@ interface ToggleProps {
 
 export default function ToggleBar({pageMode, onToggle, renderedPlaceLength, isAnyLoading}:ToggleProps) {
     const isToggled = () => pageMode === 'newLocationSearch'
+
     return (
         <div style={{zIndex: 99999}} className="fixed top-0 right-0 overflow-hidden h-8 bg-white">
             <div className="flex">
-            
-
-                <label htmlFor="pageMode" className="inline-flex float-right relative mr-5 cursor-pointer">
+        
+                {isAnyLoading !== null && <label htmlFor="pageMode" className="inline-flex float-right relative mr-5 cursor-pointer">
                     <input
                         id="pageMode"
                         type="checkbox"
@@ -39,15 +39,15 @@ export default function ToggleBar({pageMode, onToggle, renderedPlaceLength, isAn
                     <span className="ml-2 text-sm font-medium text-gray-900">
                          <div>{isToggled() ? `[FIND 🔵]` :`[MOVE 🤚]`}</div>
                     </span>
-                </label>
+                </label>}
 
 
 
-                {renderedPlaceLength == 0 && isToggled() ? <div>{`Click the map to place 🔵 and find new stories`}</div> : null}
-                {renderedPlaceLength == 0 && !isToggled() ? <div>{`<=========== Turn on FIND and click the map find new stories here`}</div> : null}
-                {renderedPlaceLength > 0 && <div className="items-end">
+                {isAnyLoading !== null && renderedPlaceLength == 0 && isToggled() ? <div>{`Click the map to place 🔵 and find new stories`}</div> : null}
+                {isAnyLoading !== null && renderedPlaceLength == 0 && !isToggled() ? <div>{`<=========== Turn on FIND and click the map find new stories here`}</div> : null}
+                {isAnyLoading !== null && renderedPlaceLength > 0 && <div className="items-end">
                         <div>
-                        [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/> unexplored]
+                        [<Image className="inline-block" src={locIconFile.src} alt="new place" width={20} height={10}/> unimagined]
                         &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookIconFile.src} alt="new place" width={20} height={10}/> existing]
                         &nbsp;&nbsp;&nbsp;&nbsp;[<Image className="inline-block" src={openBookRedIconFile.src} alt="new place" width={20} height={10}/> your finds]
 
