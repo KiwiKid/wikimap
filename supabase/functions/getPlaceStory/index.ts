@@ -65,8 +65,7 @@ const prompts = [
   },
   {
     prompt_type: "galaxyExplore",
-    prompt: `Craft a captivating Star Wars-inspired short story set on the lush and mysterious planet of Onduara, a recently discovered world that holds ancient secrets from a long-lost civilization. As our protagonists, a Jedi Knight, a skilled pilot, and a native Onduarian guide, explore the hidden depths of the planet, they encounter both unexpected allies and formidable enemies. Incorporate themes of trust, the Force, and the ongoing battle between the light and dark sides as the characters uncover Onduara's secrets, and reveal how this discovery could change the fate of the galaxy forever
-    Incorporate the details of the {place_information} below.
+    prompt: `Craft a captivating Star Wars-like short story with characters and places from the {place_information} below. Try generate a unique story or plot.
     Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
   }
 ]
