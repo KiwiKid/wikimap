@@ -28,7 +28,7 @@ const MapPage:NextPage = () => {
 
    const [pageMode, setPageMode] = useState<PageMode>('newLocationSearch')
    const router = useRouter();
-   const [isAnyLoading, setAnyLoading] = useState<string>('')
+   const [isAnyLoading, setAnyLoading] = useState<string>('inital')
 
 
     return <div>
