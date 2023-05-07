@@ -136,14 +136,8 @@ export const placeTypeRouter = createTRPCRouter({
           createStoryShell: publicProcedure.input(z.object({
             wiki_id: z.string(),
             promptType: z.string(),
-            userId: z.string(),
+            userId: z.string().optional(),
           })).mutation(async ({ctx, input}) => {
-
-            const place = await ctx.prisma.place.findFirst({
-              where: {
-                wiki_id: input.wiki_id
-              }
-            })
 
             let user = await ctx.prisma.user.findFirst({
               where: {
@@ -155,24 +149,32 @@ export const placeTypeRouter = createTRPCRouter({
               }
             })
 
-            if(!user){
+            console.log('existing users: ')
+            console.log(user)
+
+            if(!!user){
               const newUser = await ctx.prisma.user.create({
-                data: {},
+                data:{
+                  id: randomUUID()
+                },
                 select: {
                   id: true,
                   displayName: true
                 }
               })
+              console.log('new users: ')
+            console.log(newUser)
 
               if(!newUser){
                 return {error: 'Failed to create a new user'};
               }
 
-              user = (newUser as User)
-
-
+              user = newUser
             }
-            
+
+            if(!user || !Object.hasOwn(user, 'id')){
+              return {error: 'Failed to create a new user'};
+            }
 
             const createPlaceTypeAndUser = Promise.allSettled([
               ctx.prisma.placeType.create({
@@ -182,6 +184,7 @@ export const placeTypeRouter = createTRPCRouter({
                   title: '',
                   content: '',
                   status: 'loading',
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                   creator_id: user.id
                 }
               }),
@@ -195,6 +198,8 @@ export const placeTypeRouter = createTRPCRouter({
               })
 
             ])
+            console.log('createPlaceTypeAndUser')
+            console.log(createPlaceTypeAndUser)
           return createPlaceTypeAndUser;
         }),
     getAndPopulateStory: publicProcedure
