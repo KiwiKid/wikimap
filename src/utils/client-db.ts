@@ -41,21 +41,16 @@ import { PlaceResult } from "~/components/PlaceMarker";
     }
   
     private async openDatabase(): Promise<IDBDatabase> {
-      console.log('openDatabase')
       return new Promise<IDBDatabase>((resolve, reject) => {
-        console.log('openDatabase running')
 
         const request = window.indexedDB.open(this.dbName);
         request.onerror = () => {
-          console.log('openDatabase - error')
           reject(new Error(`Failed to open database ${this.dbName}`));
         };
         request.onsuccess = () => {
-          console.log('openDatabase - success')
           resolve(request.result);
         };
         request.onupgradeneeded = () => {
-          console.log('openDatabase - onupgradeneeded')
           const db = request.result;
           const store = db.createObjectStore(this.objectStoreName, { keyPath: 'id' });
           // ... define any indexes or other options for the object store here
