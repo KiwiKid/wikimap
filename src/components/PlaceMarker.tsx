@@ -166,6 +166,12 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getInitIcon = () => {
+        console.log('\nICON UPDATE\n\n')
+        console.log(place)
+        if(isThisUserFound){
+            return bookOpenRedIcon
+        }
+        
         if(place && place.status === 'loading'){
             return loadingIcon
         }
@@ -233,7 +239,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
-          setIcon()
+            setIcon()
         },
         onError: () => {
             console.error('Could not refresh marker')
