@@ -16,7 +16,7 @@ const setFoundLocation = (placeId:string) => {
     if(foundAlreadyString){
       const existing = JSON.parse(foundAlreadyString) as unknown as FoundLocations[]
 
-      window.localStorage.setItem(`found_pl`, JSON.stringify([...existing, newItem]))
+      window.localStorage.setItem(`found_pl`, JSON.stringify(existing.concat(newItem)))
     }else{
       window.localStorage.setItem(`found_pl`, JSON.stringify([newItem]))
     }

@@ -23,17 +23,17 @@ model LatLngToProcess {
 }
 
 model Place {
-  id             String      @id @default(cuid())
+  id                 String      @id @default(cuid())
   /// 'pending'
-  status         String
-  wiki_url       String
-  wiki_id        String      @unique
-  lat            Float
-  lng            Float
-  summary        String
-  info           Json
-  main_image_url String
-  PlaceType      PlaceType[]
+  status             String
+  wiki_url           String
+  wiki_id            String      @unique
+  lat                Float
+  lng                Float
+  summary            String
+  info               Json
+  main_image_url     String
+  PlaceType          PlaceType[]
   placeTypePopulated String[]
 
   @@unique([lat, lng], name: "OnlyUniquePlaces")
@@ -52,6 +52,8 @@ model PlaceType {
   downvotes     Int      @default(0)
   failed_ai_res String?
   status        String   @default("active")
+  creator_id    String
+  creator       User     @relation(name: "UserCreatedPlaces", fields: [creator_id], references: [id])
 
   @@unique([wiki_id, type], name: "LookupUnique")
 }
@@ -61,4 +63,10 @@ model Prompt {
   text   String
   type   String
   active String
+}
+
+model User {
+  id            String      @id @default(cuid())
+  displayName   String?     @unique
+  createdPlaces PlaceType[] @relation("UserCreatedPlaces")
 }

@@ -166,9 +166,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     const placeMarkerRef = useRef<MakerType<MarkerProps>>(null);
 
     const getInitIcon = () => {
-        //if(place && !place.summary) {
-        //    return errorIcon
-       // }
+        if(place && place.status === 'loading'){
+            return loadingIcon
+        }
+
+        if(place && !place.summary) {
+            return errorIcon
+        }
        if(isThisUserFound && hasPlaceTypePopulated()){
             return bookOpenRedIcon
         }
@@ -279,7 +283,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         }
     }, [placeType])
 
-    const createStoryShell = api.placeType.setStoryLoading.useMutation({
+    const createStoryShell = api.placeType.createStoryShell.useMutation({
         onSuccess: () => {
             console.log('create story shell')
         },
@@ -335,7 +339,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         setIcon(loadingIcon)
         createStoryShell.mutate({
             wiki_id: place.wiki_id,
-            promptType: promptType
+            promptType: promptType,
         })
         try{
           //  console.log('requestStorys')
@@ -464,7 +468,7 @@ onClick={() => requestStory()}>request story</button>*/}
                 </div></div> : <div>Loading...</div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
             
-            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(place.summary)}</details>}
+            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(place.summary)} {JSON.stringify(place)}</details>}
         </Popup>}
         
 

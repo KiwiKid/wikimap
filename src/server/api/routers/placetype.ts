@@ -4,13 +4,13 @@ import WikiJS from "wikijs";
 import mapWikiPage, { type MappedPage} from "~/utils/mapWikiPage";
 //import { Configuration, OpenAIApi } from "openai";
 //import { prisma } from "~/server/db";
-
+import { randomUUID } from 'crypto';
 import * as openaiChat from "langchain/chat_models/openai";
 import * as chains from "langchain/chains";
 //import { CallbackManager } from "langchain/callbacks";
 import * as prompts from "langchain/prompts";
 import { type PrismaClientValidationError } from "@prisma/client/runtime";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 
 export const defaultPlaceTypeSelect = {
@@ -133,18 +133,70 @@ export const placeTypeRouter = createTRPCRouter({
               wiki_id: input.wiki_id
             }
           }))),
-          setStoryLoading: publicProcedure.input(z.object({
+          createStoryShell: publicProcedure.input(z.object({
             wiki_id: z.string(),
-            promptType: z.string()
-          })).mutation(async ({ctx, input}) => ctx.prisma.placeType.create({
-            data: {
-              wiki_id: input.wiki_id,
-              type: input.promptType,
-              title: '',
-              content: '',
-              status: 'loading'
+            promptType: z.string(),
+            userId: z.string(),
+          })).mutation(async ({ctx, input}) => {
+
+            const place = await ctx.prisma.place.findFirst({
+              where: {
+                wiki_id: input.wiki_id
+              }
+            })
+
+            let user = await ctx.prisma.user.findFirst({
+              where: {
+                id: input.userId
+              },
+              select: {
+                id: true,
+                displayName: true
+              }
+            })
+
+            if(!user){
+              const newUser = await ctx.prisma.user.create({
+                data: {},
+                select: {
+                  id: true,
+                  displayName: true
+                }
+              })
+
+              if(!newUser){
+                return {error: 'Failed to create a new user'};
+              }
+
+              user = (newUser as User)
+
+
             }
-          })),
+            
+
+            const createPlaceTypeAndUser = Promise.allSettled([
+              ctx.prisma.placeType.create({
+                data: {
+                  wiki_id: input.wiki_id,
+                  type: input.promptType,
+                  title: '',
+                  content: '',
+                  status: 'loading',
+                  creator_id: user.id
+                }
+              }),
+              ctx.prisma.place.update({
+                data: {
+                  status: 'loading'
+                },
+                where: {
+                  wiki_id: input.wiki_id
+                }
+              })
+
+            ])
+          return createPlaceTypeAndUser;
+        }),
     getAndPopulateStory: publicProcedure
       .input(z.object({ wiki_id: z.string(), promptType: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -190,6 +242,18 @@ export const placeTypeRouter = createTRPCRouter({
               text: response.text,
             }
           }
+
+          ctx.prisma.place.update({
+            data: {
+              wiki_id: place.wiki_id.toString(),
+              status: 'success'
+            },
+            where: {
+              wiki_id: place.wiki_id.toString()
+            }
+          }).catch((e) => {
+            console.error(e)
+          })
           
           return ctx.prisma.placeType.update({data: {
             wiki_id: place.wiki_id.toString(),
