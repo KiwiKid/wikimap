@@ -152,7 +152,7 @@ export const placeTypeRouter = createTRPCRouter({
             console.log('existing users: ')
             console.log(user)
 
-            if(!!user){
+            if(user == null){
               const newUser = await ctx.prisma.user.create({
                 data:{
                   id: randomUUID()
@@ -171,12 +171,13 @@ export const placeTypeRouter = createTRPCRouter({
 
               user = newUser
             }
+            console.log('after create')
 
             if(!user || !Object.hasOwn(user, 'id')){
               return {error: 'Failed to create a new user'};
             }
 
-            const createPlaceTypeAndUser = Promise.allSettled([
+            const createPlaceTypeAndUser = await Promise.allSettled([
               ctx.prisma.placeType.create({
                 data: {
                   wiki_id: input.wiki_id,
