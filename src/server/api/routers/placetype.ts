@@ -9,8 +9,7 @@ import * as openaiChat from "langchain/chat_models/openai";
 import * as chains from "langchain/chains";
 //import { CallbackManager } from "langchain/callbacks";
 import * as prompts from "langchain/prompts";
-import { type PrismaClientValidationError } from "@prisma/client/runtime";
-import { Prisma, User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 
 export const defaultPlaceTypeSelect = {
