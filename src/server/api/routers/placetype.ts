@@ -138,7 +138,7 @@ export const placeTypeRouter = createTRPCRouter({
             userId: z.string().optional(),
           })).mutation(async ({ctx, input}) => {
 
-            let user = await ctx.prisma.user.findFirst({
+           /* let user = await ctx.prisma.user.findFirst({
               where: {
                 id: input.userId
               },
@@ -174,7 +174,7 @@ export const placeTypeRouter = createTRPCRouter({
 
             if(!user || !Object.hasOwn(user, 'id')){
               return {error: 'Failed to create a new user'};
-            }
+            }*/
 
             const createPlaceTypeAndUser = await Promise.allSettled([
               ctx.prisma.placeType.create({
@@ -185,7 +185,7 @@ export const placeTypeRouter = createTRPCRouter({
                   content: '',
                   status: 'loading',
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                  creator_id: user.id
+                  // creator_id: user.id
                 }
               }),
               ctx.prisma.place.update({
