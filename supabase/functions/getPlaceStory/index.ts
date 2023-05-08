@@ -90,7 +90,7 @@ const prompts = [
       //prompts.HumanMessagePromptTemplate.fromTemplate("{input}"),
     ]);
     const promptSettings = {
-      temperature: 2
+      temperature: 1
     }
 
     const llm = new ChatOpenAI();
