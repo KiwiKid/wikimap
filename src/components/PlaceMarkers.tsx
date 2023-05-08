@@ -4,7 +4,6 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } fr
 import { useMapEvents } from 'react-leaflet';
 import { api } from '~/utils/api';
 import iconFile from 'src/styles/bang.png';
-import loadingIconFile from 'src/styles/loading.gif';
 import locIconFile from 'src/styles/loc.png';
 import { type Place } from '@prisma/client';
 import PlaceMarker from './PlaceMarker';
@@ -21,11 +20,6 @@ const customIcon = new Icon({
 });
 
 
-const loadingIcon = new Icon({
-  iconUrl: loadingIconFile.src,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
 
 const locIcon = new Icon({
   iconUrl: locIconFile.src,
@@ -91,13 +85,13 @@ interface DebugMarkersProps {
 export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptType, pageMode, openPlaceId, setAnyLoading}:DebugMarkersProps) {
 
     const [loadingAreas, setIsLoadingAreas] = useState<Loading[]>([])
+    const [loadingMarkers, setLoadingMarkers] = useState<string[]>()
 
     const [renderedPlaceIds, setRenderedPlaceIds] = useState<Map<string, number>>(
       renderedPlaces.reduce((map, place) => map.set(place.id, place.status), new Map())
     )
     const [loadededTypePlaceIds, setLoadedTypePlaceIds] = useState<string[]>([]);
-      
-    const foundLocations = getFoundLocations();
+    const [foundLocations, setFoundLocations] = useState<FoundLocations[]>(getFoundLocations())
 
     const map = useMapEvents({
       click: (e) => {
@@ -165,6 +159,10 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
       }
       onPlaceTypeUpdateTimer.current = setTimeout(() => {
           if(!!placeResult){
+            setFoundLocations(foundLocations.concat({
+              placeId: placeResult.place.id,
+              foundDate: new Date().toISOString(),
+            }))
        //     setLoadedTypePlaceIds(loadededTypePlaceIds?.concat(placeResult.place.id));
           }
     }, 500);

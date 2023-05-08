@@ -129,7 +129,7 @@ export const placeTypeRouter = createTRPCRouter({
               }
             },
             where: {
-              wiki_id: input.wiki_id
+              wiki_id: p.wiki_id
             }
           }))),
           createStoryShell: publicProcedure.input(z.object({

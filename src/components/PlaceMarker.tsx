@@ -5,7 +5,7 @@ import { wikiInfo, type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/book-closed.png'
 import bookOpenRed from 'src/styles/book-open-red.png'
 import bookOpen from 'src/styles/book-open.png'
-import ideaIconFile from 'src/styles/icons8-square-loader.gif'
+import squareLoaderFile from 'src/styles/icons8-square-loader.gif'
 //import ideaIconFile from 'src/styles/idea.png'
 //import LoadingIconFile from 'src/styles/loading-2.gif'
 import errorIconFile from 'src/styles/error.png'
@@ -34,7 +34,7 @@ const locIcon = new Icon({
 
 
   const loadingIcon = new Icon({
-    iconUrl: ideaIconFile.src,
+    iconUrl: squareLoaderFile.src,
     iconSize: [50, 50],
     iconAnchor: [12, 41],
     className: "border-2 border-black"
@@ -170,18 +170,23 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         console.log('\nICON UPDATE\n\n')
         console.log(place)
         if(isThisUserFound){
+            console.log('\nhasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated\n\n')
+            return bookOpenRedIcon
+        }
+
+        if(!!placeType && placeType !== 'none' && placeType.status === 'complete'){
             return bookOpenRedIcon
         }
         
         if(place && place.status === 'loading'){
             return loadingIcon
         }
-
         if(place && !place.summary) {
             return errorIcon
         }
 
         if(hasPlaceTypePopulated()){
+            console.log('\nhasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated\n\n')
             return bookOpenIcon
         }
         //if(loadButtonRef.current){
@@ -238,7 +243,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             //onPlaceTypeLoaded(placeResult)
             
             //updateRenderedPlaces(placeResult)
-            setIcon()
+            setIcon(bookOpenRedIcon)
         },
         onError: () => {
             console.error('Could not refresh marker')
@@ -263,6 +268,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
           //  setIcon()
         }
         if(placeType != 'none' && placeType == null){
+            setIcon()
           //  console.log('refreshMarker useEffect CALLLLLL ')
           //  refreshMarker.refetch().catch((err) => {
           //      console.error('Could not refreshMarker', err)
@@ -341,7 +347,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     // TODO: add check for promptType and old record
 
     const requestStory = () => {
-        setIcon(loadingIcon)
+       setIcon(loadingIcon)
         createStoryShell.mutate({
             wiki_id: place.wiki_id,
             promptType: promptType,
@@ -469,7 +475,7 @@ onClick={() => requestStory()}>request story</button>*/}
                 </div></div> : <div>Loading...</div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
             
-            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(placeType, undefined, 4)} {JSON.stringify(place, undefined, 4)}</details>}
+            {<details><summary>[Generated with AI]</summary><pre>{JSON.stringify(placeType, undefined, 4)}</pre><pre> {JSON.stringify(place, undefined, 4)}</pre></details>}
         </Popup>}
         
 
