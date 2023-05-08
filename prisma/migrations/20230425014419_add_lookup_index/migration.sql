@@ -5,6 +5,8 @@
   - Added the required column `promptType` to the `PlaceType` table without a default value. This is not possible if the table is not empty.
 
 */
+
+TRUNCATE TABLE "PlaceType";
 -- AlterTable
 ALTER TABLE "PlaceType" ADD COLUMN     "promptType" TEXT NOT NULL;
 

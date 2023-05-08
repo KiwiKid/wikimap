@@ -5,8 +5,8 @@ import { wikiInfo, type MappedPage } from "~/utils/mapWikiPage";
 import locIconFile from 'src/styles/book-closed.png'
 import bookOpenRed from 'src/styles/book-open-red.png'
 import bookOpen from 'src/styles/book-open.png'
-import loadingIconFile from 'src/styles/loading.png'
-import ideaIconFile from 'src/styles/idea.png'
+import ideaIconFile from 'src/styles/icons8-square-loader.gif'
+//import ideaIconFile from 'src/styles/idea.png'
 //import LoadingIconFile from 'src/styles/loading-2.gif'
 import errorIconFile from 'src/styles/error.png'
 import { useMutation  } from '@tanstack/react-query';
@@ -37,6 +37,7 @@ const locIcon = new Icon({
     iconUrl: ideaIconFile.src,
     iconSize: [50, 50],
     iconAnchor: [12, 41],
+    className: "border-2 border-black"
   });
 
 
@@ -179,15 +180,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         if(place && !place.summary) {
             return errorIcon
         }
-       if(isThisUserFound && hasPlaceTypePopulated()){
-            return bookOpenRedIcon
-        }
+
         if(hasPlaceTypePopulated()){
             return bookOpenIcon
         }
-        if(loadButtonRef.current){
-            return loadingIcon
-        }
+        //if(loadButtonRef.current){
+        //    return loadingIcon
+       // }
      //   if(place.status == 'empty'){
       //      return errorIcon//locIcon
     //    }
@@ -261,7 +260,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
 
         if(place.placeTypePopulated.length > 0 ){
-            setIcon()
+          //  setIcon()
         }
         if(placeType != 'none' && placeType == null){
           //  console.log('refreshMarker useEffect CALLLLLL ')
@@ -408,17 +407,13 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
     }
 
     const loadPlace = (evt:React.MouseEvent<HTMLElement>) => {
-        console.log('loadPlace')
         evt.preventDefault();
-        console.log('loadPlace')
-       // setIsLoadingStory(true)
-        console.log('loadPlace1')
-       // placeMarkerRef.current?
-        requestStory()
 
-       // setIsLoadingStory(false)
-        console.log('loadPlace2')
-        //placeMarkerRef.current?.closePopup()
+        if(placeMarkerRef.current){
+            placeMarkerRef.current?.closePopup()
+        }
+        
+        requestStory()
     }
 
     if((!(placeType || placeType === 'none') && !hasPlaceTypePopulated())){
@@ -451,7 +446,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         </Marker>)
     }
 
-    return (<Marker ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={bookOpenRedIcon}>
+    return (<Marker  ref={placeMarkerRef} key={`${place.id} ${place.wiki_url}`} position={[place.lat, place.lng]} icon={bookOpenRedIcon}>
         {startLoadingTime ? <Counter startDate={startLoadingTime} /> : null}
         {<Popup maxHeight={500} className='bg-brown-100 rounded-lg p-4 whitespace-pre-wrap'>
             <img className='rounded-lg mr-2' src={`${place.main_image_url}`} alt={place.wiki_url}/>
@@ -474,7 +469,7 @@ onClick={() => requestStory()}>request story</button>*/}
                 </div></div> : <div>Loading...</div>}
                 <button className="float-right bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded" onClick={() => placeMarkerRef.current?.closePopup()}>{'Close'}</button>
             
-            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(place.summary)} {JSON.stringify(place)}</details>}
+            {<details><summary>[Generated with AI]</summary>{place.id} {JSON.stringify(placeType, undefined, 4)} {JSON.stringify(place, undefined, 4)}</details>}
         </Popup>}
         
 
