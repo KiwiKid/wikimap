@@ -65,7 +65,7 @@ const prompts = [
   },
   {
     prompt_type: "galaxyExplore",
-    prompt: `Craft a captivating Star Wars-like short story with characters and places from the {place_information} below. Try generate a unique story or plot.
+    prompt: `In the style of \"Star Wars\", write an exciting, fictional story and include a title and core details from the {place_information} below. Try generate a unique story or plot.
     Respond with the format TITLE:[InsertStoryTitle] CONTENT:[InsertExcitingStory]`
   }
 ]

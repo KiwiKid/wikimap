@@ -35,7 +35,7 @@ const locIcon = new Icon({
 
   const loadingIcon = new Icon({
     iconUrl: squareLoaderFile.src,
-    iconSize: [50, 50],
+    iconSize: [35, 35],
     iconAnchor: [12, 41],
     className: "border-2 border-black"
   });
@@ -177,7 +177,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
         if(!!placeType && placeType !== 'none' && placeType.status === 'complete'){
             return bookOpenRedIcon
         }
-        
+
         if(place && place.status === 'loading'){
             return loadingIcon
         }
