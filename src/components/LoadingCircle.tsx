@@ -1,4 +1,4 @@
-import { MapContainer, Marker, TileLayer, Circle, useMapEvents, Popup, PopupProps, MarkerProps } from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, Circle, useMapEvents, Popup, PopupProps, MarkerProps, Rectangle, Polygon } from 'react-leaflet';
 import { Ref, RefObject, useEffect, useRef, useState } from "react";
 import { type MappedPage } from "~/utils/mapWikiPage";
 import { api } from "../utils/api"
@@ -134,7 +134,19 @@ export default function LoadingCircle({
  //   if(circleState == 'ready-to-gen'){
  //     return null;
  //   }
-    return (<Circle
+ const multiPolygon:[[[number, number],[number, number], [number, number], [number, number]]] = [
+  [
+    [lat-0.015, lng+0.023], // btoom
+    [lat-0.0063, lng+0.0087], // Left
+    [lat-0.005, lng+0.0102], // TOP
+    [lat-0.014, lng+0.0242], // Right
+  ],
+]
+ const boxBounds:[[number, number],[number, number]] = [
+  [lat, lng+0.02],
+  [lat-0.001, lng],
+] 
+    return (<><Circle
         key={`${lat}_${lng}`} 
         center={[lat, lng]}
         pathOptions={getStatusPathOptions(circleState)}
@@ -147,5 +159,7 @@ export default function LoadingCircle({
           }
         }}
     ><Popup ref={popupRef}
-        >Looking for unexplored places here (You can do more than one)</Popup></Circle>)
+        ><div className='text-center'><div>Looking for unexplored places here</div><div> (You place more than one)</div></div></Popup></Circle>
+        <Polygon positions={multiPolygon} color='black' fill={true} opacity={1}/>
+        </>)
 }

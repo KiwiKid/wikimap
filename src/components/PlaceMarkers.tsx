@@ -297,7 +297,7 @@ export default function PlaceMarkers({setRenderedPlaces, renderedPlaces, promptT
     
     const onFailure = useCallback((lat:number, lng:number) => {
       console.error(`onFailure lng:'+${lat}+'lng: '+${lng}`)
-      //removePoint(lat, lng)
+      removePoint(lat, lng)
     }, [removePoint])
     
     const onAllFinished = useCallback((lat:number, lng:number) => {
