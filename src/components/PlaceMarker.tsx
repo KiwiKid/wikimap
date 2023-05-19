@@ -178,9 +178,7 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             return bookOpenRedIcon
         }
 
-        if(place && place.status === 'loading'){
-            return loadingIcon
-        }
+
         if(place && !place.summary) {
             return errorIcon
         }
@@ -189,6 +187,8 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
             console.log('\nhasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated hasPlaceTypePopulated\n\n')
             return bookOpenIcon
         }
+
+
         //if(loadButtonRef.current){
         //    return loadingIcon
        // }
@@ -199,6 +199,10 @@ export default function PlaceMarker(props:PlaceMarkerProps) {
 
         if(place.summary == 'populated'){
             return bookOpenIcon
+        }
+
+        if(place && place.status === 'loading'){
+            return loadingIcon
         }
 
         return locIcon
